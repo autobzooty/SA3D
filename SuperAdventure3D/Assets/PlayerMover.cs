@@ -182,6 +182,8 @@ public class PlayerMover : MonoBehaviour
       if(this.Grounded)
       {
         this.Grounded = false;
+        float yRot = transform.rotation.eulerAngles.y;
+        this.Graphicals.transform.rotation = Quaternion.Euler(0, yRot, 0);
       }
     }
   }

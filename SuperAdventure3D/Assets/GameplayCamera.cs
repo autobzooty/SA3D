@@ -7,7 +7,8 @@ public class GameplayCamera : MonoBehaviour
 {
   private Gamepad Gamepad1;
 
-  public float Speed = 10.0f;
+  public float Speed = 20.0f;
+  public float MaxCameraDistance = 10.0f;
   public GameObject FocusTarget;
 
   void Start()
@@ -26,7 +27,14 @@ public class GameplayCamera : MonoBehaviour
 
   void Move()
   {
-    transform.Rotate(this.FocusTarget.transform.up, this.Speed, Space.Self);
+    transform.position += transform.TransformDirection(new Vector3(GetRightStick().x * Time.deltaTime * this.Speed, 0, 0));
+    Vector3 differenceVector = transform.position - this.FocusTarget.transform.position;
+    if(differenceVector.magnitude > this.MaxCameraDistance)
+    {
+      Vector3 newPosition = this.FocusTarget.transform.position + differenceVector.normalized * this.MaxCameraDistance;
+      newPosition.y = transform.position.y;
+      transform.position = newPosition;
+    }
   }
 
   void Look()
