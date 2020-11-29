@@ -763,13 +763,14 @@ MonoBehaviour:
   TurnSpeed: 900
   GroundAcceleration: 12
   GroundDeceleration: 24
-  BaseMaxGroundSpeed: 6
+  BaseMaxGroundSpeed: 8
   JumpStrengthInitial: 3
   JumpStrengthAdditive: 160
   AirControl: 9
   JumpTime: 0.08
   JumpHeightScalar: 0.65
   StepHeight: 0.25
+  WallStopAngle: 25
   Graphicals: {fileID: 1410026773}
 --- !u!54 &1079645585
 Rigidbody:

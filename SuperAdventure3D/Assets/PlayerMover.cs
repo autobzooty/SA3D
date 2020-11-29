@@ -16,6 +16,7 @@ public class PlayerMover : MonoBehaviour
   public float JumpTime = 0.1f;
   public float JumpHeightScalar = 0.1f;
   public float StepHeight = 0.5f;
+  public float WallStopAngle = 10.0f;
   public GameObject Graphicals;
 
   private Vector3 RequestedMoveDirection = new Vector3();
@@ -94,7 +95,10 @@ public class PlayerMover : MonoBehaviour
   void SnapToGroundNormal(Vector3 groundNormal)
   {
     Vector3 newForward = Vector3.Cross(transform.right, groundNormal);
-    this.Graphicals.transform.rotation = Quaternion.LookRotation(newForward, groundNormal);
+    if(Vector3.Angle(newForward, transform.forward) < 60)
+    {
+      this.Graphicals.transform.rotation = Quaternion.LookRotation(newForward, groundNormal);
+    }
   }
 
   void UpdateSpeed(Vector2 leftStick)
@@ -199,7 +203,7 @@ public class PlayerMover : MonoBehaviour
     foreach(ContactPoint contact in collision.contacts)
     {
       Vector3 localContactPoint = transform.InverseTransformPoint(contact.point);
-      if(localContactPoint.y < 0.3f)
+      if(localContactPoint.y < 0.2f)
       {
         if(localContactPoint.y < lowestContactPoint.y)
         {
@@ -207,6 +211,15 @@ public class PlayerMover : MonoBehaviour
           lowestContactPointNormal = contact.normal;
         }
         feetOnGround = true;
+      }
+      else
+      {
+        float relativeAngle = Vector3.Angle(this.Graphicals.transform.forward, contact.normal);
+        //print(relativeAngle);
+        if(180 - this.WallStopAngle < relativeAngle && relativeAngle < 180 + this.WallStopAngle)
+        {
+          this.HSpeed = 0;
+        }
       }
     }
     if(feetOnGround)
