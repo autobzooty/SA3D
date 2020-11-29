@@ -173,9 +173,9 @@ public class PlayerMover : MonoBehaviour
       return;
     }
     RaycastHit hitInfo;
-    if(GetComponent<Rigidbody>().SweepTest(Vector3.down, out hitInfo, this.StepHeight))
+    if(GetComponent<Rigidbody>().SweepTest(-this.Graphicals.transform.up, out hitInfo, this.StepHeight))
     {
-      //transform.position += Vector3.down * hitInfo.distance;
+      transform.position += Vector3.down * hitInfo.distance;
     }
   }
 
@@ -186,8 +186,11 @@ public class PlayerMover : MonoBehaviour
       if(this.Grounded)
       {
         this.Grounded = false;
-        float yRot = transform.rotation.eulerAngles.y;
-        this.Graphicals.transform.rotation = Quaternion.Euler(0, yRot, 0);
+        if(this.Jumping)
+        {
+          float yRot = transform.rotation.eulerAngles.y;
+          this.Graphicals.transform.rotation = Quaternion.Euler(0, yRot, 0);
+        }
       }
     }
   }
