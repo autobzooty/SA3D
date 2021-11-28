@@ -12,6 +12,10 @@ public class GameCamera : MonoBehaviour
   void Start()
   {
     IL = GetComponent<InputListener>();
+    if(!Target)
+    {
+      Target = GameObject.Find("Player");
+    }
   }
 
   void Update()
