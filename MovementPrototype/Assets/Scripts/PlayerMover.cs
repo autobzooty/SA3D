@@ -20,6 +20,8 @@ public class PlayerMover : MonoBehaviour
   public float AdditiveJumpStrength = 1.0f;
   public float JumpLaunchTime = 5f/60f;
   public Transform VelocityFacer;
+  public float MinimumJumpLaunchTime = 5/60;
+  public float JumpStrengthSpeedScalar = 1.8f;
 
   //Components
   private InputListener IL;
@@ -30,6 +32,7 @@ public class PlayerMover : MonoBehaviour
   private float VSpeed = 0.0f;
   private bool OnGround = true;
   private bool Sliding = true;
+  private bool Diving = false;
   private bool PreviousOnGround = true;
   private float Deceleration;
   private ContactPoint[] Contacts = new ContactPoint[0];
@@ -38,9 +41,7 @@ public class PlayerMover : MonoBehaviour
   private float CeilingDotValue;
   private Vector3 MovementDirection;
   private float JumpLaunchStopwatch = 0.0f;
-  public float MinimumJumpLaunchTime = 5/60;
   private bool JumpLaunching = false;
-  public float JumpStrengthSpeedScalar = 1.8f;
 
   void Start()
   {
@@ -304,7 +305,6 @@ public class PlayerMover : MonoBehaviour
         if(Vector3.Dot(Vector3.up, hit.normal) >= GroundDotValue)
         {
           OnGround = true;
-          print(hit.collider.gameObject.name);
           if(Vector3.Dot(Vector3.up, hit.normal) >= StandableGroundDotValue)
           {
             Sliding = false;
@@ -322,7 +322,7 @@ public class PlayerMover : MonoBehaviour
     {
       OnGround = false;
     }
-
+    AttemptDive();
   }
 
   void AttemptJump()
@@ -330,6 +330,16 @@ public class PlayerMover : MonoBehaviour
     if(IL.GetBottomButtonDown() && OnGround)
     {
       JumpLaunching = true;
+    }
+  }
+
+  void AttemptDive()
+  {
+    //print("ATTEMPT DIVE");
+    if(IL.GetLeftButtonDown() && !Diving)
+    {
+      //print("DIVE");
+      Diving = true;
     }
   }
 

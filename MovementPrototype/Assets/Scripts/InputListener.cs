@@ -7,6 +7,7 @@ public class InputListener : MonoBehaviour
   private Vector2 LeftStick;
   private Vector2 RightStick;
   private bool BottomButton;
+  private bool LeftButton;
   
   void Start()
   {
@@ -18,6 +19,7 @@ public class InputListener : MonoBehaviour
     LeftStick = new Vector2(Input.GetAxisRaw("LHorizontal"), Input.GetAxisRaw("LVertical"));
     RightStick = new Vector2(Input.GetAxisRaw("RHorizontal"), Input.GetAxisRaw("RVertical"));
     BottomButton = Input.GetButton("BottomButton");
+    LeftButton = Input.GetButton("LeftButton");
   }
 
   public Vector2 GetLeftStickVector()
@@ -53,11 +55,26 @@ public class InputListener : MonoBehaviour
 
   public bool GetBottomButtonDown()
   {
-    return Input.GetButtonDown("BottomButton");
+    return Input.GetButtonDown("LeftButton");
   }
 
   public bool GetBottomButtonUp()
   {
-    return Input.GetButtonUp("BottomButton");
+    return Input.GetButtonUp("LeftButton");
+  }
+
+  public bool GetLeftButton()
+  {
+    return LeftButton;
+  }
+
+  public bool GetLeftButtonDown()
+  {
+    return Input.GetButtonDown("LeftButton");
+  }
+
+  public bool GetLeftButtonUp()
+  {
+    return Input.GetButtonUp("LeftButton");
   }
 }
