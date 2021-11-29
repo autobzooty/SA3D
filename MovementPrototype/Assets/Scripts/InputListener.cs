@@ -28,7 +28,14 @@ public class InputListener : MonoBehaviour
     float downHeld = Input.GetKey(KeyCode.S) ? -1f : 0f;
 
     Vector2 keyboardVector = new Vector2(rightHeld + leftHeld, upHeld + downHeld);
-    return keyboardVector;
+
+    Vector2 leftStickVector = new Vector2(Input.GetAxisRaw("LHorizontal"), Input.GetAxisRaw("LVertical"));
+    if(leftStickVector.magnitude <= 0.1)
+    {
+      leftStickVector = Vector2.zero;
+    }
+
+    return leftStickVector;
   }
 
   public Vector2 GetRightStickVector()
