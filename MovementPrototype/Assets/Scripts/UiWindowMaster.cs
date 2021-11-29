@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class UiWindowMaster : MonoBehaviour
 {
-  public RectTransform m_WindowRoot;
+  public RectTransform m_Root;
   public DialogueWindow m_DialogueWindowPrefab;
   public float m_DefaultTypingDelay = 2.0f / 60.0f;
   [Multiline]
@@ -21,6 +21,8 @@ public class UiWindowMaster : MonoBehaviour
   [HideInInspector]
   public List<string> m_HandledTags = new List<string> { "D", "F", "R" };
 
+  private Stack<UiWindow> m_Windows = new Stack<UiWindow>();
+
 
   void Start()
   {
@@ -34,7 +36,7 @@ public class UiWindowMaster : MonoBehaviour
 
   private void Update()
   {
-    if (Input.GetKeyDown(KeyCode.Space))
+    if (Input.GetKeyDown(KeyCode.Space) && m_Windows.Count <= 0)
       DialogueWindow(m_TestMessage);
   }
 
@@ -51,7 +53,14 @@ public class UiWindowMaster : MonoBehaviour
 
     // Create the window and attach it to the window root
     // The window takes care of its own positioning and sizing
-    var window = Instantiate(m_DialogueWindowPrefab, m_WindowRoot);
+    var window = Instantiate(m_DialogueWindowPrefab, m_Root);
     window.OpenWithText(text);
+    AddWindow(window);
+  }
+
+
+  void AddWindow(UiWindow window)
+  {
+    m_Windows.Push(window);
   }
 }

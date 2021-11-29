@@ -5,7 +5,7 @@ using TMPro;
 using Pixelplacement;
 
 
-public class DialogueWindow : MonoBehaviour
+public class DialogueWindow : UiWindow
 {
   public TextMeshProUGUI m_TextMesh;
   [HideInInspector]
@@ -17,6 +17,7 @@ public class DialogueWindow : MonoBehaviour
   private bool m_Typing = false;
   private float m_TypingDelay;
   private float m_TypingTimer = float.MaxValue;
+  private float m_OpenDuration = 1f / 4f;
 
 
   private void Awake()
@@ -49,7 +50,7 @@ public class DialogueWindow : MonoBehaviour
   {
     m_Text = text;
 
-    Tween.Size(m_RectTransform, m_TargetSize, 0.25f, 0, Tween.EaseInOut, completeCallback: OnWindowFinishedOpening);
+    Tween.Size(m_RectTransform, m_TargetSize, m_OpenDuration, 0.1f, Tween.EaseInOut, completeCallback: OnWindowFinishedOpening);
   }
 
 
