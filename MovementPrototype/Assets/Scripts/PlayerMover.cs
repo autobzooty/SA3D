@@ -304,7 +304,7 @@ public class PlayerMover : MonoBehaviour
         if(Vector3.Dot(Vector3.up, hit.normal) >= GroundDotValue)
         {
           OnGround = true;
-          print(hit.collider.gameObject.name);
+          //print(hit.collider.gameObject.name);
           if(Vector3.Dot(Vector3.up, hit.normal) >= StandableGroundDotValue)
           {
             Sliding = false;
