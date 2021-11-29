@@ -22,6 +22,8 @@ public class PlayerMover : MonoBehaviour
   public Transform VelocityFacer;
   public float MinimumJumpLaunchTime = 5/60;
   public float JumpStrengthSpeedScalar = 1.8f;
+  public float DiveForwardStrength = 2.0f;
+  public float DiveDownwardStrength = 1.0f;
 
   //Components
   private InputListener IL;
@@ -131,15 +133,21 @@ public class PlayerMover : MonoBehaviour
           HSpeed += Acceleration * localTargetLookDirection * Time.deltaTime;
         }
       }
+      else if(Diving)
+      {
+        if(HSpeed.magnitude < Deceleration * Time.deltaTime)
+        {
+          HSpeed = Vector3.zero;
+        }
+        else
+        {
+          HSpeed += -HSpeed.normalized * Deceleration * 0.25f * Time.deltaTime;
+        }
+      }
       else
       {
         HSpeed.y = 0;
         HSpeed.x = 0;
-        //Zero out the magnitude if we're close enough to zero
-        if(leftStickMagnitude < 0.1)
-        {
-          leftStickMagnitude = 0;
-        }
 
         if(leftStickMagnitude > 0)
         {
@@ -198,6 +206,8 @@ public class PlayerMover : MonoBehaviour
   void VSpeedUpdate()
   {
     UpdateOnGround();
+    AttemptDive();
+    UpdateGraphicals();
 
     if(JumpLaunching)
     {
@@ -322,12 +332,11 @@ public class PlayerMover : MonoBehaviour
     {
       OnGround = false;
     }
-    AttemptDive();
   }
 
   void AttemptJump()
   {
-    if(IL.GetBottomButtonDown() && OnGround)
+    if(IL.GetBottomButtonDown() && OnGround && !Diving)
     {
       JumpLaunching = true;
     }
@@ -335,11 +344,41 @@ public class PlayerMover : MonoBehaviour
 
   void AttemptDive()
   {
-    //print("ATTEMPT DIVE");
     if(IL.GetLeftButtonDown() && !Diving)
     {
-      //print("DIVE");
       Diving = true;
+      HSpeed.z += DiveForwardStrength;
+      if(OnGround)
+      {
+        VSpeed += InitialJumpStrength;
+        OnGround = false;
+        Diving = true;
+      }
+      else
+      {
+        VSpeed -= DiveDownwardStrength;
+      }
+    }
+    else if((IL.GetLeftButtonDown() || IL.GetBottomButtonDown()) && Diving && OnGround)
+    {
+      VSpeed += InitialJumpStrength;
+      OnGround = false;
+      Diving = false;
+    }
+  }
+
+  void UpdateGraphicals()
+  {
+    Transform graphicals = transform.Find("Graphicals").transform;
+    if(Diving)
+    {
+      graphicals.localPosition = new Vector3(0, 0, -0.4f);
+      graphicals.localEulerAngles = new Vector3(90, 0, 0);
+    }
+    else
+    {
+      graphicals.localPosition = Vector3.zero;
+      graphicals.localEulerAngles = Vector3.zero;
     }
   }
 

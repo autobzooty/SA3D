@@ -55,12 +55,13 @@ public class InputListener : MonoBehaviour
 
   public bool GetBottomButtonDown()
   {
-    return Input.GetButtonDown("LeftButton");
+    return Input.GetButtonDown("BottomButton");
   }
 
   public bool GetBottomButtonUp()
   {
-    return Input.GetButtonUp("LeftButton");
+    return Input.GetButtonUp("BottomButton");
+    
   }
 
   public bool GetLeftButton()
