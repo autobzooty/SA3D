@@ -18,7 +18,7 @@ public class PlayerMover : MonoBehaviour
   public float StepHeight = 0.2f;
   public float InitialJumpStrength = 5.0f;
   public float AdditiveJumpStrength = 1.0f;
-  public float JumpLaunchTime = 5/60;
+  public float JumpLaunchTime = 5f/60f;
   public Transform VelocityFacer;
 
   //Components
@@ -38,7 +38,9 @@ public class PlayerMover : MonoBehaviour
   private float CeilingDotValue;
   private Vector3 MovementDirection;
   private float JumpLaunchStopwatch = 0.0f;
+  public float MinimumJumpLaunchTime = 5/60;
   private bool JumpLaunching = false;
+  public float JumpStrengthSpeedScalar = 1.8f;
 
   void Start()
   {
@@ -200,14 +202,20 @@ public class PlayerMover : MonoBehaviour
     {
       if(JumpLaunchStopwatch == 0.0f)
       {
-        VSpeed += InitialJumpStrength;
+        float t = HSpeed.magnitude / MaxRunSpeed;
+        VSpeed += Mathf.LerpUnclamped(InitialJumpStrength, InitialJumpStrength * JumpStrengthSpeedScalar, t);
       }
+
       VSpeed += AdditiveJumpStrength * Time.deltaTime;
       JumpLaunchStopwatch += Time.deltaTime;
-      if(IL.GetBottomButtonUp() || JumpLaunchStopwatch >= JumpLaunchTime)
+
+      if(JumpLaunchStopwatch >= MinimumJumpLaunchTime)
       {
-        JumpLaunching = false;
-        JumpLaunchStopwatch = 0.0f;
+        if(!IL.GetBottomButton() || JumpLaunchStopwatch >= JumpLaunchTime)
+        {
+          JumpLaunching = false;
+          JumpLaunchStopwatch = 0.0f;
+        }
       }
     }
 
@@ -248,7 +256,7 @@ public class PlayerMover : MonoBehaviour
 
     foreach(Ray ray in ceilingCheckRays)
     {
-      Debug.DrawRay(ray.origin, ray.direction, Color.blue);
+      //Debug.DrawRay(ray.origin, ray.direction, Color.blue);
 
       float castLength = 1 - StepHeight + VSpeed * Time.deltaTime;
 
@@ -270,31 +278,33 @@ public class PlayerMover : MonoBehaviour
     OnGround = false;
 
     Ray[] groundCheckRays = new Ray[5];
-    groundCheckRays[0] = new Ray(transform.position + transform.up * 0.05f, -transform.up);
-    groundCheckRays[1] = new Ray(transform.position + transform.up * 0.05f + transform.right * 0.14f, -transform.up);
-    groundCheckRays[2] = new Ray(transform.position + transform.up * 0.05f + -transform.right * 0.14f, -transform.up);
-    groundCheckRays[3] = new Ray(transform.position + transform.up * 0.05f + transform.forward * 0.14f, -transform.up);
-    groundCheckRays[4] = new Ray(transform.position + transform.up * 0.05f + -transform.forward * 0.14f, -transform.up);
+    groundCheckRays[0] = new Ray(transform.position + transform.up, -transform.up);
+    groundCheckRays[1] = new Ray(transform.position + transform.up + transform.right * 0.14f, -transform.up);
+    groundCheckRays[2] = new Ray(transform.position + transform.up + -transform.right * 0.14f, -transform.up);
+    groundCheckRays[3] = new Ray(transform.position + transform.up + transform.forward * 0.14f, -transform.up);
+    groundCheckRays[4] = new Ray(transform.position + transform.up + -transform.forward * 0.14f, -transform.up);
 
     foreach(Ray ray in groundCheckRays)
     {
       float castLength = 0;
       if(VSpeed == 0)
       {
-        castLength = StepHeight + 0.05f;
+        castLength = StepHeight + 1;
       }
       else
       {
         if(VSpeed < 0)
         {
-          castLength = -VSpeed * Time.deltaTime + 0.05f;
+          castLength = -VSpeed * Time.deltaTime + 1;
         }
       }
-      if(Physics.Raycast(ray, out RaycastHit hit, castLength))
+      int layerMask = LayerMask.GetMask("Default");
+      if(Physics.Raycast(ray, out RaycastHit hit, castLength, layerMask))
       {
         if(Vector3.Dot(Vector3.up, hit.normal) >= GroundDotValue)
         {
           OnGround = true;
+          print(hit.collider.gameObject.name);
           if(Vector3.Dot(Vector3.up, hit.normal) >= StandableGroundDotValue)
           {
             Sliding = false;
@@ -305,7 +315,7 @@ public class PlayerMover : MonoBehaviour
           }
         }
       }
-      //Debug.DrawLine(ray.origin, ray.origin + ray.direction, Color.blue);
+      Debug.DrawLine(ray.origin, ray.origin + ray.direction, Color.blue);
     }
     AttemptJump();
     if(JumpLaunching)
@@ -339,16 +349,16 @@ public class PlayerMover : MonoBehaviour
     //TO-DO: Currently we are casting in the forward direction, but we ultimately should cast in our HSpeed direction
     //Also, the source position of each ray should be oriented around the HSpeed direction as well
     movementCheckRays[0] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * StepHeight + Vector3.forward * 0.15f + Vector3.forward * -0.05f), rayDirection);
-    movementCheckRays[1] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * StepHeight + -Vector3.right * 0.15f + Vector3.forward * -0.05f), rayDirection);
-    movementCheckRays[2] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * StepHeight + Vector3.right *  0.15f + Vector3.forward * -0.05f), rayDirection);
+    movementCheckRays[1] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * StepHeight + -Vector3.right * 0.1f + Vector3.forward * -0.05f), rayDirection);
+    movementCheckRays[2] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * StepHeight + Vector3.right *  0.1f + Vector3.forward * -0.05f), rayDirection);
 
     movementCheckRays[3] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.forward * 0.15f + Vector3.up * 0.5f + Vector3.forward * -0.05f), rayDirection);
-    movementCheckRays[4] = new Ray(transform.position + VelocityFacer.TransformVector(-Vector3.right * 0.15f + Vector3.up * 0.5f + Vector3.forward * -0.05f), rayDirection);
-    movementCheckRays[5] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.right *  0.15f + Vector3.up * 0.5f + Vector3.forward * -0.05f), rayDirection);
+    movementCheckRays[4] = new Ray(transform.position + VelocityFacer.TransformVector(-Vector3.right * 0.1f + Vector3.up * 0.5f + Vector3.forward * -0.05f), rayDirection);
+    movementCheckRays[5] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.right *  0.1f + Vector3.up * 0.5f + Vector3.forward * -0.05f), rayDirection);
 
     movementCheckRays[6] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.forward * 0.15f + Vector3.up + Vector3.forward * -0.05f), rayDirection);
-    movementCheckRays[7] = new Ray(transform.position + VelocityFacer.TransformVector(-Vector3.right * 0.15f + Vector3.up + Vector3.forward * -0.05f), rayDirection);
-    movementCheckRays[8] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.right *  0.15f + Vector3.up + Vector3.forward * -0.05f), rayDirection);
+    movementCheckRays[7] = new Ray(transform.position + VelocityFacer.TransformVector(-Vector3.right * 0.1f + Vector3.up + Vector3.forward * -0.05f), rayDirection);
+    movementCheckRays[8] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.right *  0.1f + Vector3.up + Vector3.forward * -0.05f), rayDirection);
 
     //Physics raycast and debug draw each ray
     for(int i = 0; i < 9; ++i)
@@ -364,7 +374,7 @@ public class PlayerMover : MonoBehaviour
         }
         wallHitInfos.Add(hit);
       }
-      //Debug.DrawRay(ray.origin, ray.direction, Color.blue);
+      Debug.DrawRay(ray.origin, ray.direction, Color.blue);
     }
 
     float smallestDistance = float.MaxValue;
@@ -419,7 +429,15 @@ public class PlayerMover : MonoBehaviour
                                   out Vector3 direction,
                                   out float distance);
       transform.position += direction * distance;
+      Vector3 newPosition = transform.position;
+      Vector3 diffVector = (previousPosition - newPosition);
+      diffVector.y = 0;
+      float diffVectorDistance = diffVector.magnitude;
+      float adjustedHSpeedMagnitude = diffVectorDistance / Time.deltaTime;
+      float hSpeedMagnitude = HSpeed.magnitude;
+      HSpeed = HSpeed.normalized * Mathf.Min(hSpeedMagnitude, adjustedHSpeedMagnitude);
     }
+
     //Move Vertical
     transform.position += Vector3.up * VSpeed * Time.deltaTime;
 

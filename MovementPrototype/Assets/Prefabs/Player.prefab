@@ -1,5 +1,35 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1543425590
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1543425591}
+  m_Layer: 3
+  m_Name: VelocityFacer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1543425591
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1543425590}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1775132148156881315}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1775132147811835408
 GameObject:
   m_ObjectHideFlags: 0
@@ -92,6 +122,7 @@ GameObject:
   - component: {fileID: 1775132148156881315}
   - component: {fileID: 1775132148156881325}
   - component: {fileID: 1775132148156881324}
+  - component: {fileID: -7111339994410137894}
   m_Layer: 3
   m_Name: Player
   m_TagString: Untagged
@@ -112,6 +143,7 @@ Transform:
   m_Children:
   - {fileID: 1775132148819867020}
   - {fileID: 1775132149624530591}
+  - {fileID: 1543425591}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -142,14 +174,30 @@ MonoBehaviour:
   TurnSpeed: 15
   Acceleration: 5
   MaxRunSpeed: 3
-  Gravity: 10
+  Gravity: 20
   StandableGroundAngle: 50
   GroundAngle: 89
+  CeilingAngle: 50
   MovementCollider: {fileID: 1775132148819867021}
   StepHeight: 0.11
-  InitialJumpStrength: 3
-  AdditiveJumpStrength: 50
-  JumpLaunchTime: 0.075
+  InitialJumpStrength: 2
+  AdditiveJumpStrength: 25
+  JumpLaunchTime: 0.4
+  VelocityFacer: {fileID: 1543425591}
+  MinimumJumpLaunchTime: 0.05
+  JumpStrengthSpeedScalar: 1.8
+--- !u!114 &-7111339994410137894
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1775132148156881321}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e821b3e9fabafe4f88515edc32b7c3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1775132148635374120
 GameObject:
   m_ObjectHideFlags: 0
