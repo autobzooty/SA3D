@@ -165,8 +165,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68c13e4410ef47546957757f9f0e154c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mRectTransform: {fileID: 8083473149413740045}
-  mTextMesh: {fileID: 8083473149646520582}
+  m_TextMesh: {fileID: 8083473149646520582}
+  m_RectTransform: {fileID: 0}
 --- !u!1 &8083473149646520580
 GameObject:
   m_ObjectHideFlags: 0
@@ -232,8 +232,15 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: <color=#fe4>Lorem ipsum</color> dolor sit amet, consectetur adipiscing
-    elit, sed do eiusmod <color=#f45>tempor incididunt</color> ut labore et dolore.
+  m_text: '<color=#fe4>Lorem ipsum</color> dolor sit amet,
+
+    consectetur adipiscing
+    elit,
+
+    sed do eiusmod <color=#f45>tempor
+
+    incididunt</color> ut labore
+    et dolore.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -276,7 +283,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 1
+  m_enableWordWrapping: 0
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
