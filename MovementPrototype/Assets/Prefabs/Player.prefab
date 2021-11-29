@@ -122,6 +122,7 @@ GameObject:
   - component: {fileID: 1775132148156881315}
   - component: {fileID: 1775132148156881325}
   - component: {fileID: 1775132148156881324}
+  - component: {fileID: -7111339994410137894}
   m_Layer: 3
   m_Name: Player
   m_TagString: Untagged
@@ -185,6 +186,18 @@ MonoBehaviour:
   VelocityFacer: {fileID: 1543425591}
   MinimumJumpLaunchTime: 0.05
   JumpStrengthSpeedScalar: 1.8
+--- !u!114 &-7111339994410137894
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1775132148156881321}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e821b3e9fabafe4f88515edc32b7c3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1775132148635374120
 GameObject:
   m_ObjectHideFlags: 0

@@ -9093,13 +9093,17 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -7111339994410137894, guid: 96ce700496121f643bca3782756b65b3, type: 3}
+      propertyPath: DropShadowPrefab
+      value: 
+      objectReference: {fileID: 8244871137023028197, guid: 24b11d915c68c5842b31e7ef5af5f9f2, type: 3}
     - target: {fileID: 1775132148156881315, guid: 96ce700496121f643bca3782756b65b3, type: 3}
       propertyPath: m_RootOrder
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1775132148156881315, guid: 96ce700496121f643bca3782756b65b3, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -4.4000006
+      value: -4
       objectReference: {fileID: 0}
     - target: {fileID: 1775132148156881315, guid: 96ce700496121f643bca3782756b65b3, type: 3}
       propertyPath: m_LocalPosition.y
@@ -9107,7 +9111,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1775132148156881315, guid: 96ce700496121f643bca3782756b65b3, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -3.3
+      value: -3
       objectReference: {fileID: 0}
     - target: {fileID: 1775132148156881315, guid: 96ce700496121f643bca3782756b65b3, type: 3}
       propertyPath: m_LocalRotation.w
@@ -9140,26 +9144,6 @@ PrefabInstance:
     - target: {fileID: 1775132148156881321, guid: 96ce700496121f643bca3782756b65b3, type: 3}
       propertyPath: m_Name
       value: Player
-      objectReference: {fileID: 0}
-    - target: {fileID: 1775132148156881324, guid: 96ce700496121f643bca3782756b65b3, type: 3}
-      propertyPath: Gravity
-      value: 20
-      objectReference: {fileID: 0}
-    - target: {fileID: 1775132148156881324, guid: 96ce700496121f643bca3782756b65b3, type: 3}
-      propertyPath: JumpLaunchTime
-      value: 0.4
-      objectReference: {fileID: 0}
-    - target: {fileID: 1775132148156881324, guid: 96ce700496121f643bca3782756b65b3, type: 3}
-      propertyPath: InitialJumpStrength
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 1775132148156881324, guid: 96ce700496121f643bca3782756b65b3, type: 3}
-      propertyPath: AdditiveJumpStrength
-      value: 25
-      objectReference: {fileID: 0}
-    - target: {fileID: 1775132148156881324, guid: 96ce700496121f643bca3782756b65b3, type: 3}
-      propertyPath: MinimumJumpLaunchTime
-      value: 0.05
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 96ce700496121f643bca3782756b65b3, type: 3}
