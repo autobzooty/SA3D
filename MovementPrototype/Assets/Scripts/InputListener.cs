@@ -15,8 +15,8 @@ public class InputListener : MonoBehaviour
 
   void Update()
   {
-    LeftStick = new Vector2(Input.GetAxis("LHorizontal"), Input.GetAxis("LVertical"));
-    RightStick = new Vector2(Input.GetAxis("RHorizontal"), Input.GetAxis("RVertical"));
+    LeftStick = new Vector2(Input.GetAxisRaw("LHorizontal"), Input.GetAxisRaw("LVertical"));
+    RightStick = new Vector2(Input.GetAxisRaw("RHorizontal"), Input.GetAxisRaw("RVertical"));
     BottomButton = Input.GetButton("BottomButton");
   }
 
@@ -29,17 +29,20 @@ public class InputListener : MonoBehaviour
 
     Vector2 keyboardVector = new Vector2(rightHeld + leftHeld, upHeld + downHeld);
 
-    Vector2 leftStickVector = new Vector2(Input.GetAxisRaw("LHorizontal"), Input.GetAxisRaw("LVertical"));
-    if(leftStickVector.magnitude <= 0.1)
+    if(LeftStick.magnitude <= 0.1)
     {
-      leftStickVector = Vector2.zero;
+      LeftStick = Vector2.zero;
     }
 
-    return leftStickVector;
+    return LeftStick;
   }
 
   public Vector2 GetRightStickVector()
   {
+    if(RightStick.magnitude <= 0.1)
+    {
+      RightStick = Vector2.zero;
+    }
     return RightStick;
   }
 
