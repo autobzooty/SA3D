@@ -179,10 +179,12 @@ MonoBehaviour:
   CeilingAngle: 50
   MovementCollider: {fileID: 1775132148819867021}
   StepHeight: 0.11
-  InitialJumpStrength: 3
-  AdditiveJumpStrength: 50
-  JumpLaunchTime: 0.075
+  InitialJumpStrength: 2
+  AdditiveJumpStrength: 25
+  JumpLaunchTime: 0.4
   VelocityFacer: {fileID: 1543425591}
+  MinimumJumpLaunchTime: 0.05
+  JumpStrengthSpeedScalar: 1.8
 --- !u!1 &1775132148635374120
 GameObject:
   m_ObjectHideFlags: 0

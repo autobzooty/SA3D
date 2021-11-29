@@ -22,7 +22,13 @@ public class InputListener : MonoBehaviour
 
   public Vector2 GetLeftStickVector()
   {
-    return LeftStick;
+    float rightHeld = Input.GetKey(KeyCode.D) ? 1f : 0f;
+    float leftHeld = Input.GetKey(KeyCode.A) ? -1f : 0f;
+    float upHeld = Input.GetKey(KeyCode.W) ? 1f : 0f;
+    float downHeld = Input.GetKey(KeyCode.S) ? -1f : 0f;
+
+    Vector2 keyboardVector = new Vector2(rightHeld + leftHeld, upHeld + downHeld);
+    return keyboardVector;
   }
 
   public Vector2 GetRightStickVector()
