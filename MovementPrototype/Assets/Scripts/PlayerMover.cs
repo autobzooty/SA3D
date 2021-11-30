@@ -447,10 +447,13 @@ public class PlayerMover : MonoBehaviour
       hSpeed = hSpeed * (1 - Vector3.Dot(nearestHit.normal, -transform.forward));
     }
 
-    Vector3 deFactoSlope = Vector3.Cross(Vector3.Cross(GetGroundNormal(), transform.forward), GetGroundNormal());
-    if(Vector3.Dot(GetGroundNormal(), transform.forward) < 0)
+    if(OnGround)
     {
-      hSpeed *= Vector3.Dot(deFactoSlope, transform.forward);
+      Vector3 deFactoSlope = Vector3.Cross(Vector3.Cross(GetGroundNormal(), transform.forward), GetGroundNormal());
+      if(Vector3.Dot(GetGroundNormal(), transform.forward) < 0)
+      {
+        hSpeed *= Vector3.Dot(deFactoSlope, transform.forward);
+      }
     }
 
     Vector3 previousPosition = transform.position;
