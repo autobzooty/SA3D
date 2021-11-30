@@ -315,6 +315,8 @@ public class PlayerMover : MonoBehaviour
         if(Vector3.Dot(Vector3.up, hit.normal) >= GroundDotValue)
         {
           OnGround = true;
+          SnapToGround();
+
           if(Vector3.Dot(Vector3.up, hit.normal) >= StandableGroundDotValue)
           {
             Sliding = false;
@@ -514,7 +516,8 @@ public class PlayerMover : MonoBehaviour
     }
     int layerMask = LayerMask.GetMask("Default");
     Ray ray = new Ray(transform.position + transform.up, -transform.up);
-    if(Physics.Raycast(ray, out RaycastHit hit, 1 + StepHeight, layerMask))
+    //The "2" here is kind of a magic number
+    if(Physics.Raycast(ray, out RaycastHit hit, 2, layerMask))
     {
       transform.position = hit.point;
     }
