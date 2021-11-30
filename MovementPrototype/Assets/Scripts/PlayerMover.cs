@@ -135,11 +135,7 @@ public class PlayerMover : MonoBehaviour
       }
       else if(Diving)
       {
-        if(HSpeed.magnitude < Deceleration * Time.deltaTime)
-        {
-          HSpeed = Vector3.zero;
-        }
-        else
+        if(HSpeed.magnitude >= Deceleration * Time.deltaTime)
         {
           HSpeed += -HSpeed.normalized * Deceleration * 0.25f * Time.deltaTime;
         }
@@ -259,11 +255,11 @@ public class PlayerMover : MonoBehaviour
   bool CeilingCheck()
   {
     Ray[] ceilingCheckRays = new Ray[5];
-    ceilingCheckRays[0] = new Ray(transform.position + transform.up * StepHeight, transform.up);
-    ceilingCheckRays[1] = new Ray(transform.position + transform.up * StepHeight + transform.right * 0.14f, transform.up);
-    ceilingCheckRays[2] = new Ray(transform.position + transform.up * StepHeight + -transform.right * 0.14f, transform.up);
-    ceilingCheckRays[3] = new Ray(transform.position + transform.up * StepHeight + transform.forward * 0.14f, transform.up);
-    ceilingCheckRays[4] = new Ray(transform.position + transform.up * StepHeight + -transform.forward * 0.14f, transform.up);
+    ceilingCheckRays[0] = new Ray(transform.position + transform.up * 0.5f, transform.up);
+    ceilingCheckRays[1] = new Ray(transform.position + transform.up * 0.5f + transform.right * 0.14f, transform.up);
+    ceilingCheckRays[2] = new Ray(transform.position + transform.up * 0.5f + -transform.right * 0.14f, transform.up);
+    ceilingCheckRays[3] = new Ray(transform.position + transform.up * 0.5f + transform.forward * 0.14f, transform.up);
+    ceilingCheckRays[4] = new Ray(transform.position + transform.up * 0.5f + -transform.forward * 0.14f, transform.up);
 
     foreach(Ray ray in ceilingCheckRays)
     {
