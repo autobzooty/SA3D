@@ -176,16 +176,18 @@ MonoBehaviour:
   MaxRunSpeed: 3
   Gravity: 20
   StandableGroundAngle: 50
-  GroundAngle: 89
+  GroundAngle: 80
   CeilingAngle: 50
   MovementCollider: {fileID: 1775132148819867021}
   StepHeight: 0.11
-  InitialJumpStrength: 2
-  AdditiveJumpStrength: 25
+  InitialJumpStrength: 3
+  AdditiveJumpStrength: 18
   JumpLaunchTime: 0.4
   VelocityFacer: {fileID: 1543425591}
-  MinimumJumpLaunchTime: 0.05
-  JumpStrengthSpeedScalar: 1.8
+  MinimumJumpLaunchTime: 0.083333336
+  JumpStrengthSpeedScalar: 1.6
+  DiveForwardStrength: 2
+  DiveDownwardStrength: 1
 --- !u!114 &-7111339994410137894
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -198,6 +200,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e821b3e9fabafe4f88515edc32b7c3f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DropShadowPrefab: {fileID: 8244871137023028197, guid: 24b11d915c68c5842b31e7ef5af5f9f2, type: 3}
 --- !u!1 &1775132148635374120
 GameObject:
   m_ObjectHideFlags: 0
