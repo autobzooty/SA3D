@@ -317,7 +317,16 @@ public class PlayerMover : MonoBehaviour
           OnGround = true;
           SnapToGround();
 
-          if(Vector3.Dot(Vector3.up, hit.normal) >= StandableGroundDotValue)
+          float currentStandableGroundDotValue;
+          if(hit.collider.gameObject.GetComponent<SurfaceProperties>())
+          {
+            currentStandableGroundDotValue = Mathf.Cos(Mathf.Deg2Rad * hit.collider.gameObject.GetComponent<SurfaceProperties>().GetStandableGroundAngle());
+          }
+          else
+          {
+            currentStandableGroundDotValue = StandableGroundDotValue;
+          }
+          if(Vector3.Dot(Vector3.up, hit.normal) >= currentStandableGroundDotValue)
           {
             Sliding = false;
           }
