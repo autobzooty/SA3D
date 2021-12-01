@@ -175,8 +175,8 @@ MonoBehaviour:
   Acceleration: 5
   MaxRunSpeed: 3
   Gravity: 20
-  StandableGroundAngle: 50
-  GroundAngle: 80
+  StandableGroundAngle: 45
+  GroundAngle: 75
   CeilingAngle: 50
   MovementCollider: {fileID: 1775132148819867021}
   StepHeight: 0.11
@@ -188,6 +188,7 @@ MonoBehaviour:
   JumpStrengthSpeedScalar: 1.6
   DiveForwardStrength: 2
   DiveDownwardStrength: 1
+  SlidingInfluenceScalar: 5
 --- !u!114 &-7111339994410137894
 MonoBehaviour:
   m_ObjectHideFlags: 0

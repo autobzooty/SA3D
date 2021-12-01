@@ -24,6 +24,7 @@ public class PlayerMover : MonoBehaviour
   public float JumpStrengthSpeedScalar = 1.8f;
   public float DiveForwardStrength = 2.0f;
   public float DiveDownwardStrength = 1.0f;
+  public float SlidingInfluenceScalar = 5.0f;
 
   //Components
   private InputListener IL;
@@ -86,15 +87,7 @@ public class PlayerMover : MonoBehaviour
           targetLookDirection.y = 0;
           targetLookDirection.Normalize();
 
-          Vector3 newDirection;
-          if(Vector3.Dot(transform.forward, targetLookDirection) >= 0)
-          {
-            newDirection = Vector3.RotateTowards(transform.forward, targetLookDirection, TurnSpeed * 0.05f * Time.deltaTime, 0.0f);
-          }
-          else
-          {
-            newDirection = Vector3.RotateTowards(transform.forward, -targetLookDirection, TurnSpeed * 0.05f * Time.deltaTime, 0.0f);
-          }
+          Vector3 newDirection = Vector3.RotateTowards(transform.forward, targetLookDirection, TurnSpeed * 0.5f * Time.deltaTime, 0.0f);
           transform.rotation = Quaternion.LookRotation(newDirection);
         }
       }
@@ -125,12 +118,23 @@ public class PlayerMover : MonoBehaviour
         Ray ray = new Ray(transform.position + transform.up, -transform.up);
         if(Physics.Raycast(ray, out RaycastHit hit, 2, layerMask))
         {
-          Vector3 targetLookDirection = hit.normal;
-          targetLookDirection.y = 0;
-          targetLookDirection.Normalize();
+          Vector3 targetSlideDirection = hit.normal;
+          targetSlideDirection.y = 0;
+          targetSlideDirection.Normalize();
 
-          Vector3 localTargetLookDirection = transform.InverseTransformDirection(targetLookDirection);
-          HSpeed += Acceleration * localTargetLookDirection * Time.deltaTime;
+          Vector3 localTargetLookDirection = transform.InverseTransformDirection(targetSlideDirection);
+          float slidingAcceleration = Mathf.Lerp(Gravity, 0, (Vector3.Dot(hit.normal, Vector3.up)));
+
+          //Put the left stick input into camera space
+          Vector3 leftStickWorldDirection = GameCamera.transform.TransformDirection(new Vector3(IL.GetLeftStickVector().x, 0, IL.GetLeftStickVector().y));
+          //We never want the character to look up or down, so 0 this value out
+          leftStickWorldDirection.y = 0;
+          //Normalize the vector for good measure since we modified the Y value, though this probably doesn't matter
+          leftStickWorldDirection.Normalize();
+          //Put the vector into local player space
+          leftStickWorldDirection = transform.InverseTransformDirection(leftStickWorldDirection);
+
+          HSpeed += (localTargetLookDirection * slidingAcceleration * Time.deltaTime) + (leftStickWorldDirection * SlidingInfluenceScalar * Time.deltaTime);
         }
       }
       else if(Diving)
@@ -334,7 +338,7 @@ public class PlayerMover : MonoBehaviour
 
   void AttemptJump()
   {
-    if(IL.GetBottomButtonDown() && OnGround && !Diving)
+    if(IL.GetBottomButtonDown() && OnGround && !Diving && !Sliding)
     {
       JumpLaunching = true;
     }
@@ -395,15 +399,15 @@ public class PlayerMover : MonoBehaviour
     //Ray definitions
     //TO-DO: Currently we are casting in the forward direction, but we ultimately should cast in our HSpeed direction
     //Also, the source position of each ray should be oriented around the HSpeed direction as well
-    movementCheckRays[0] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * StepHeight + Vector3.forward * 0.15f + Vector3.forward * -0.05f), rayDirection);
+    movementCheckRays[0] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * StepHeight + -Vector3.forward * 0.15f + Vector3.forward * -0.05f), rayDirection);
     movementCheckRays[1] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * StepHeight + -Vector3.right * 0.1f + Vector3.forward * -0.05f), rayDirection);
     movementCheckRays[2] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * StepHeight + Vector3.right *  0.1f + Vector3.forward * -0.05f), rayDirection);
 
-    movementCheckRays[3] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.forward * 0.15f + Vector3.up * 0.5f + Vector3.forward * -0.05f), rayDirection);
+    movementCheckRays[3] = new Ray(transform.position + VelocityFacer.TransformVector(-Vector3.forward * 0.15f + Vector3.up * 0.5f + Vector3.forward * -0.05f), rayDirection);
     movementCheckRays[4] = new Ray(transform.position + VelocityFacer.TransformVector(-Vector3.right * 0.1f + Vector3.up * 0.5f + Vector3.forward * -0.05f), rayDirection);
     movementCheckRays[5] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.right *  0.1f + Vector3.up * 0.5f + Vector3.forward * -0.05f), rayDirection);
 
-    movementCheckRays[6] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.forward * 0.15f + Vector3.up + Vector3.forward * -0.05f), rayDirection);
+    movementCheckRays[6] = new Ray(transform.position + VelocityFacer.TransformVector(-Vector3.forward * 0.15f + Vector3.up + Vector3.forward * -0.05f), rayDirection);
     movementCheckRays[7] = new Ray(transform.position + VelocityFacer.TransformVector(-Vector3.right * 0.1f + Vector3.up + Vector3.forward * -0.05f), rayDirection);
     movementCheckRays[8] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.right *  0.1f + Vector3.up + Vector3.forward * -0.05f), rayDirection);
 
