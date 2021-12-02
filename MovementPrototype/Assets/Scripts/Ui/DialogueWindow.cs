@@ -54,6 +54,12 @@ public class DialogueWindow : UiWindow
   }
 
 
+  public void OpenWithDialogue()
+  {
+
+  }
+
+
   private void OnWindowFinishedOpening()
   {
     BeginTyping();

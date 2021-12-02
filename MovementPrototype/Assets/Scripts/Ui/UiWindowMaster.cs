@@ -9,6 +9,7 @@ public class UiWindowMaster : MonoBehaviour
   public RectTransform m_Root;
   public DialogueWindow m_DialogueWindowPrefab;
   public float m_DefaultTypingDelay = 2.0f / 60.0f;
+  public bool m_NoisySequenceEventErrors = true;
   [Multiline]
   public string m_TestMessage =
     "<color=#fe4>So it Begins:</color><d=0.8>" + Environment.NewLine + "<r>" +
