@@ -1,14 +1,17 @@
 using UnityEngine;
 using UnityEngine.Events;
 
+
 [RequireComponent(typeof(Collider))]
 public class CollisionForwarder : MonoBehaviour
 {
   [System.Serializable]
   public class Events
   {
-    public ColliderEvent Enter;
-    public ColliderEvent Exit;
+    public CollisionEvent CollisionEnter;
+    public CollisionEvent CollisionExit;
+    public ColliderEvent TriggerEnter;
+    public ColliderEvent TriggerExit;
   }
 
   public Events m_Events;
@@ -16,39 +19,30 @@ public class CollisionForwarder : MonoBehaviour
 
   private void OnCollisionEnter(Collision collision)
   {
-    Enter(collision.collider);
-  }
-
-
-  private void OnTriggerEnter(Collider collision)
-  {
-    Enter(collision);
+    m_Events.CollisionEnter.Invoke(collision);
   }
 
 
   private void OnCollisionExit(Collision collision)
   {
-    Exit(collision.collider);
+    m_Events.CollisionExit.Invoke(collision);
   }
 
 
-  private void OnTriggerExit(Collider collision)
+  private void OnTriggerEnter(Collider collider)
   {
-    Exit(collision);
+    m_Events.TriggerEnter.Invoke(collider);
   }
 
 
-  void Enter(Collider collider)
+  private void OnTriggerExit(Collider collider)
   {
-    m_Events.Enter.Invoke(collider);
-  }
-
-
-  void Exit(Collider collider)
-  {
-    m_Events.Exit.Invoke(collider);
+    m_Events.TriggerExit.Invoke(collider);
   }
 }
 
+
 [System.Serializable]
 public class ColliderEvent : UnityEvent<Collider> { }
+[System.Serializable]
+public class CollisionEvent : UnityEvent<Collision> { }

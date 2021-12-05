@@ -47,7 +47,7 @@ public class GameCamera : MonoBehaviour
   {
     Ray snapRay = new Ray(Target.transform.position, transform.position - Target.transform.position);
     int layerMask = LayerMask.GetMask("Default");
-    if(Physics.Raycast(snapRay, out RaycastHit hitInfo, TargetDistance, layerMask))
+    if(Physics.Raycast(snapRay, out RaycastHit hitInfo, TargetDistance, layerMask, QueryTriggerInteraction.Ignore))
     {
       transform.position = hitInfo.point;
     }

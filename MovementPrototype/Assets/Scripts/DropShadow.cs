@@ -17,7 +17,7 @@ public class DropShadow : MonoBehaviour
     float maxDistance = 20.0f;
     int layerMask = LayerMask.GetMask("Default");
 
-    Physics.Raycast(ray, out RaycastHit hit, maxDistance, layerMask);
+    Physics.Raycast(ray, out RaycastHit hit, maxDistance, layerMask, QueryTriggerInteraction.Ignore);
     MyDropShadow.transform.position = hit.point + (Vector3.up * 0.01f);
   }
 

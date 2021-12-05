@@ -81,7 +81,7 @@ public class PlayerMover : MonoBehaviour
       {
         int layerMask = LayerMask.GetMask("Default");
         Ray ray = new Ray(transform.position + transform.up, -transform.up);
-        if(Physics.Raycast(ray, out RaycastHit hit, 2, layerMask))
+        if(Physics.Raycast(ray, out RaycastHit hit, 2, layerMask, QueryTriggerInteraction.Ignore))
         {
           Vector3 targetLookDirection = hit.normal;
           targetLookDirection.y = 0;
@@ -116,7 +116,7 @@ public class PlayerMover : MonoBehaviour
       {
         int layerMask = LayerMask.GetMask("Default");
         Ray ray = new Ray(transform.position + transform.up, -transform.up);
-        if(Physics.Raycast(ray, out RaycastHit hit, 2, layerMask))
+        if(Physics.Raycast(ray, out RaycastHit hit, 2, layerMask, QueryTriggerInteraction.Ignore))
         {
           Vector3 targetSlideDirection = hit.normal;
           targetSlideDirection.y = 0;
@@ -271,7 +271,8 @@ public class PlayerMover : MonoBehaviour
 
       float castLength = 1 - StepHeight + VSpeed * Time.deltaTime;
 
-      if(Physics.Raycast(ray, out RaycastHit hit, castLength))
+      int layerMask = LayerMask.GetMask("Default");
+      if (Physics.Raycast(ray, out RaycastHit hit, castLength, layerMask, QueryTriggerInteraction.Ignore))
       {
         if(Vector3.Dot(Vector3.down, hit.normal) >= CeilingDotValue)
         {
@@ -310,7 +311,7 @@ public class PlayerMover : MonoBehaviour
         }
       }
       int layerMask = LayerMask.GetMask("Default");
-      if(Physics.Raycast(ray, out RaycastHit hit, castLength, layerMask))
+      if(Physics.Raycast(ray, out RaycastHit hit, castLength, layerMask, QueryTriggerInteraction.Ignore))
       {
         if(Vector3.Dot(Vector3.up, hit.normal) >= GroundDotValue)
         {
@@ -426,7 +427,7 @@ public class PlayerMover : MonoBehaviour
       Ray ray = movementCheckRays[i];
       RaycastHit hit;
       int layerMask = LayerMask.GetMask("Default");      
-      if(Physics.Raycast(ray, out hit, HSpeed.magnitude * Time.deltaTime + 0.05f, layerMask))
+      if(Physics.Raycast(ray, out hit, HSpeed.magnitude * Time.deltaTime + 0.05f, layerMask, QueryTriggerInteraction.Ignore))
       {
         if(Vector3.Dot(Vector3.up, hit.normal) >= GroundDotValue)
         {
@@ -513,7 +514,7 @@ public class PlayerMover : MonoBehaviour
     Vector3 groundNormal = new Vector3();
     int layerMask = LayerMask.GetMask("Default");
     Ray ray = new Ray(transform.position + transform.up, -transform.up);
-    if(Physics.Raycast(ray, out RaycastHit hit, 2, layerMask))
+    if(Physics.Raycast(ray, out RaycastHit hit, 2, layerMask, QueryTriggerInteraction.Ignore))
     {
       groundNormal = hit.normal;
     }
@@ -529,7 +530,7 @@ public class PlayerMover : MonoBehaviour
     int layerMask = LayerMask.GetMask("Default");
     Ray ray = new Ray(transform.position + transform.up, -transform.up);
     //The "2" here is kind of a magic number
-    if(Physics.Raycast(ray, out RaycastHit hit, 2, layerMask))
+    if(Physics.Raycast(ray, out RaycastHit hit, 2, layerMask, QueryTriggerInteraction.Ignore))
     {
       transform.position = hit.point;
     }

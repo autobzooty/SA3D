@@ -5,14 +5,5 @@ using UnityEngine;
 
 public class Interactive : MonoBehaviour
 {
-  public void CollisionEnter(Collider collider)
-  {
-    
-  }
-
-
-  public void CollisionExit(Collider collider)
-  {
-
-  }
+  public string m_InteractionText = "Read";
 }
