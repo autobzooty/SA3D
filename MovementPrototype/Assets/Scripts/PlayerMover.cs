@@ -87,7 +87,7 @@ public class PlayerMover : MonoBehaviour
           targetLookDirection.y = 0;
           targetLookDirection.Normalize();
 
-          Vector3 newDirection = Vector3.RotateTowards(transform.forward, targetLookDirection, TurnSpeed * 0.5f * Time.deltaTime, 0.0f);
+          Vector3 newDirection = Vector3.RotateTowards(transform.forward, targetLookDirection, TurnSpeed * 0.25f * Time.deltaTime, 0.0f);
           transform.rotation = Quaternion.LookRotation(newDirection);
         }
       }
@@ -409,15 +409,15 @@ public class PlayerMover : MonoBehaviour
     //Ray definitions
     //TO-DO: Currently we are casting in the forward direction, but we ultimately should cast in our HSpeed direction
     //Also, the source position of each ray should be oriented around the HSpeed direction as well
-    movementCheckRays[0] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * StepHeight + -Vector3.forward * 0.15f + Vector3.forward * -0.05f), rayDirection);
+    movementCheckRays[0] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * StepHeight + Vector3.forward * 0.15f + Vector3.forward * -0.05f), rayDirection);
     movementCheckRays[1] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * StepHeight + -Vector3.right * 0.1f + Vector3.forward * -0.05f), rayDirection);
     movementCheckRays[2] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * StepHeight + Vector3.right *  0.1f + Vector3.forward * -0.05f), rayDirection);
 
-    movementCheckRays[3] = new Ray(transform.position + VelocityFacer.TransformVector(-Vector3.forward * 0.15f + Vector3.up * 0.5f + Vector3.forward * -0.05f), rayDirection);
+    movementCheckRays[3] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.forward * 0.15f + Vector3.up * 0.5f + Vector3.forward * -0.05f), rayDirection);
     movementCheckRays[4] = new Ray(transform.position + VelocityFacer.TransformVector(-Vector3.right * 0.1f + Vector3.up * 0.5f + Vector3.forward * -0.05f), rayDirection);
     movementCheckRays[5] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.right *  0.1f + Vector3.up * 0.5f + Vector3.forward * -0.05f), rayDirection);
 
-    movementCheckRays[6] = new Ray(transform.position + VelocityFacer.TransformVector(-Vector3.forward * 0.15f + Vector3.up + Vector3.forward * -0.05f), rayDirection);
+    movementCheckRays[6] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.forward * 0.15f + Vector3.up + Vector3.forward * -0.05f), rayDirection);
     movementCheckRays[7] = new Ray(transform.position + VelocityFacer.TransformVector(-Vector3.right * 0.1f + Vector3.up + Vector3.forward * -0.05f), rayDirection);
     movementCheckRays[8] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.right *  0.1f + Vector3.up + Vector3.forward * -0.05f), rayDirection);
 
