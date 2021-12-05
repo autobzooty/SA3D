@@ -406,28 +406,36 @@ public class PlayerMover : MonoBehaviour
     Ray[] movementCheckRays = new Ray[9];
     List<RaycastHit> wallHitInfos = new List<RaycastHit>();
 
+    float sideDepth = 0.05f;
+    float radius = 0.15f;
+
     //Ray definitions
     //TO-DO: Currently we are casting in the forward direction, but we ultimately should cast in our HSpeed direction
     //Also, the source position of each ray should be oriented around the HSpeed direction as well
-    movementCheckRays[0] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * StepHeight + Vector3.forward * 0.15f + Vector3.forward * -0.05f), rayDirection);
-    movementCheckRays[1] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * StepHeight + -Vector3.right * 0.1f + Vector3.forward * -0.05f), rayDirection);
-    movementCheckRays[2] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * StepHeight + Vector3.right *  0.1f + Vector3.forward * -0.05f), rayDirection);
+    movementCheckRays[0] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * StepHeight), rayDirection);
+    movementCheckRays[1] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * StepHeight + -Vector3.right * (radius - sideDepth)), rayDirection);
+    movementCheckRays[2] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * StepHeight + Vector3.right *  (radius - sideDepth)), rayDirection);
 
-    movementCheckRays[3] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.forward * 0.15f + Vector3.up * 0.5f + Vector3.forward * -0.05f), rayDirection);
-    movementCheckRays[4] = new Ray(transform.position + VelocityFacer.TransformVector(-Vector3.right * 0.1f + Vector3.up * 0.5f + Vector3.forward * -0.05f), rayDirection);
-    movementCheckRays[5] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.right *  0.1f + Vector3.up * 0.5f + Vector3.forward * -0.05f), rayDirection);
+    movementCheckRays[3] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * 0.5f), rayDirection);
+    movementCheckRays[4] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * 0.5f + -Vector3.right * (radius - sideDepth)), rayDirection);
+    movementCheckRays[5] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * 0.5f + Vector3.right *  (radius - sideDepth)), rayDirection);
 
-    movementCheckRays[6] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.forward * 0.15f + Vector3.up + Vector3.forward * -0.05f), rayDirection);
-    movementCheckRays[7] = new Ray(transform.position + VelocityFacer.TransformVector(-Vector3.right * 0.1f + Vector3.up + Vector3.forward * -0.05f), rayDirection);
-    movementCheckRays[8] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.right *  0.1f + Vector3.up + Vector3.forward * -0.05f), rayDirection);
+    movementCheckRays[6] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up), rayDirection);
+    movementCheckRays[7] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up + -Vector3.right * (radius - sideDepth)), rayDirection);
+    movementCheckRays[8] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up + Vector3.right *  (radius - sideDepth)), rayDirection);
+
+    //The side rays inset from the player's collider slightly, so we need to modify their distance based on where the ray EXITS the player's collider
+    float sideCastDistanceModifier = Mathf.Sqrt(radius * radius - (radius - sideDepth) * (radius - sideDepth));
 
     //Physics raycast and debug draw each ray
     for(int i = 0; i < 9; ++i)
     {
+      //Cast distance will be a little extra on our middle rays to simulate the shape of our cylinder collider
+      float castDistance = ((i % 3 == 0) ? radius : sideCastDistanceModifier) + HSpeed.magnitude * Time.deltaTime;
       Ray ray = movementCheckRays[i];
       RaycastHit hit;
       int layerMask = LayerMask.GetMask("Default");      
-      if(Physics.Raycast(ray, out hit, HSpeed.magnitude * Time.deltaTime + 0.05f, layerMask, QueryTriggerInteraction.Ignore))
+      if(Physics.Raycast(ray, out hit, castDistance, layerMask, QueryTriggerInteraction.Ignore))
       {
         if(Vector3.Dot(Vector3.up, hit.normal) >= GroundDotValue)
         {
@@ -435,7 +443,7 @@ public class PlayerMover : MonoBehaviour
         }
         wallHitInfos.Add(hit);
       }
-      Debug.DrawRay(ray.origin, ray.direction, Color.blue);
+      Debug.DrawLine(ray.origin, ray.direction * castDistance + ray.origin, Color.blue);
     }
 
     float smallestDistance = float.MaxValue;
