@@ -245,40 +245,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 269602120}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6c0e9e55061c1164783e1791539e30e9, type: 3}
+  m_Script: {fileID: 11500000, guid: 0c2c1afd754f3ee4b9260d10aa3e2f50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Events:
-    Enter:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 1254769075}
-          m_TargetAssemblyTypeName: Interactive, Assembly-CSharp
-          m_MethodName: CollisionEnter
-          m_Mode: 0
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-    Exit:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 1254769075}
-          m_TargetAssemblyTypeName: Interactive, Assembly-CSharp
-          m_MethodName: CollisionExit
-          m_Mode: 0
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
 --- !u!136 &269602123
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -417,11 +386,6 @@ MonoBehaviour:
   - D
   - F
   - R
---- !u!1 &346639967 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1775132148156881321, guid: 96ce700496121f643bca3782756b65b3, type: 3}
-  m_PrefabInstance: {fileID: 1519106451}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &418162556
 GameObject:
   m_ObjectHideFlags: 0
@@ -725,7 +689,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1254769076}
-  - component: {fileID: 1254769075}
   m_Layer: 0
   m_Name: Sign
   m_TagString: Untagged
@@ -733,18 +696,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1254769075
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1254769074}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0c2c1afd754f3ee4b9260d10aa3e2f50, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &1254769076
 Transform:
   m_ObjectHideFlags: 0
@@ -753,29 +704,25 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1254769074}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1, y: 0, z: 0}
+  m_LocalPosition: {x: 1, y: 0, z: -2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 418162557}
   - {fileID: 693722837}
   - {fileID: 269602121}
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &1519106451
+--- !u!1001 &1590037293
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: -7111339994410137894, guid: 96ce700496121f643bca3782756b65b3, type: 3}
-      propertyPath: DropShadowPrefab
-      value: 
-      objectReference: {fileID: 8244871137023028197, guid: 24b11d915c68c5842b31e7ef5af5f9f2, type: 3}
     - target: {fileID: 1775132148156881315, guid: 96ce700496121f643bca3782756b65b3, type: 3}
       propertyPath: m_RootOrder
-      value: 5
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 1775132148156881315, guid: 96ce700496121f643bca3782756b65b3, type: 3}
       propertyPath: m_LocalPosition.x
@@ -823,6 +770,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 96ce700496121f643bca3782756b65b3, type: 3}
+--- !u!1 &1590037294 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1775132148156881321, guid: 96ce700496121f643bca3782756b65b3, type: 3}
+  m_PrefabInstance: {fileID: 1590037293}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1714125642
 GameObject:
   m_ObjectHideFlags: 0
@@ -1028,7 +980,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bbb849fd16cd7c0498561060860539a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Target: {fileID: 346639967}
+  Target: {fileID: 1590037294}
   SpeedScalar: 7
   TargetDistance: 5
 --- !u!81 &1846019777

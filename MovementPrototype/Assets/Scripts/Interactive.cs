@@ -7,7 +7,7 @@ public class Interactive : MonoBehaviour
 {
   public void CollisionEnter(Collider collider)
   {
-
+    
   }
 
 
