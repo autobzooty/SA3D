@@ -4,6 +4,21 @@ using Pixelplacement;
 
 namespace SequenceEvents
 {
+  public class TweenWorldPosRotProvider : SequenceEventProvider
+  {
+    public TweenWorldPosRot m_Event;
+    
+    
+    public override SequenceEvent GetEvent()
+    {
+      
+      
+      return m_Event;
+    }
+  }
+  
+  
+  [System.Serializable]
   public class TweenWorldPosRot : SequenceEvent
   {
     public Transform m_Transform;
@@ -25,8 +40,8 @@ namespace SequenceEvents
       m_Duration = duration;
       m_Curve = curve ?? Tween.EaseInOut;
     }
-    
-    
+
+
     public override void Execute()
     {
       if (m_Transform == null)

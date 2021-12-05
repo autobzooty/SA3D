@@ -3,6 +3,12 @@
 
 namespace SequenceEvents
 {
+  public class SequenceEventProvider : MonoBehaviour
+  {
+    public virtual SequenceEvent GetEvent() { return null; }
+  }
+
+
   public abstract class SequenceEvent
   {
     virtual public void Execute() { }

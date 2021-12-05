@@ -1,8 +1,23 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 
 namespace SequenceEvents
 {
+  public class SetWorldPosRotProvider : SequenceEventProvider
+  {
+    public SetWorldPosRot m_Event;
+    
+    
+    public override SequenceEvent GetEvent()
+    {
+      
+      
+      return m_Event;
+    }
+  }
+  
+  
+  [System.Serializable]
   public class SetWorldPosRot : SequenceEvent
   {
     public Transform m_Transform;
