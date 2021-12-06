@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class Interactor : MonoBehaviour
 {
+  public Interactive.Events m_Events;
+
   private Transform m_Transform;
   private List<Interactive> m_Interactives = new List<Interactive>();
 
@@ -93,13 +95,31 @@ public class Interactor : MonoBehaviour
   {
     if (m_Interactives.Count == 0) return;
 
-    
+    Interact();
   }
 
 
   void Interact()
   {
+    var interactive = PrimaryInteractive;
 
+    // First, we prepare an InteractionEventData to pass around
+    var ieData = new InteractionEventData()
+    {
+      m_Interactive = interactive,
+      m_Interactor = this,
+    };
+
+    // Next, we invoke our own InteractionStarted event
+    m_Events.InteractionStarted.Invoke(ieData);
+    // Now we request interaction with the interactive
+    interactive.RequestInteraction(ieData);
+  }
+
+
+  public void RequestEndInteraction(InteractionEventData ieData)
+  {
+    m_Events.InteractionEnded.Invoke(ieData);
   }
 
 

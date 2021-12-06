@@ -5,13 +5,9 @@ using UnityEngine;
 
 public class UiWindow : MonoBehaviour
 {
-  void Start()
-  {
-    
-  }
+  public bool m_Blocking = true;
 
-  void Update()
-  {
-    
-  }
+
+  virtual public void HandleSubmit() { }
+  virtual public void HandleCancel() { }
 }

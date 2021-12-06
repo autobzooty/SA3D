@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,11 +14,15 @@ public class DialogueWindow : UiWindow
 
   private Vector2 m_TargetSize;
   private string m_Text;
+  private string m_WorkingString = "";
   private int m_TypingIndex = 0;
   private bool m_Typing = false;
   private float m_TypingDelay;
+  private float m_Pause = 0;
   private float m_TypingTimer = float.MaxValue;
   private float m_OpenDuration = 1f / 4f;
+  private int m_GroupSize = 1;
+  private int m_RemainingLines;
 
 
   private void Awake()
@@ -35,13 +40,23 @@ public class DialogueWindow : UiWindow
   {
     if (m_Typing)
     {
-      if (m_TypingTimer >= m_TypingDelay)
+      var dt = Time.deltaTime;
+      var delay =
+        Input.GetButton("Text Advance") && UiWindowMaster.TextAdvanceAvailable ?
+        UiWindowMaster.Instance.m_FastTypingDelay : m_TypingDelay + m_Pause;
+
+      // Make sure that the delay isn't too small so that this
+      // algorithm doesn't suffer some problems I have foreseen
+      delay = Mathf.Max(dt, delay);
+
+      if (m_TypingTimer >= delay)
       {
-        m_TypingTimer -= m_TypingDelay;
+        m_TypingTimer -= delay;
+        m_Pause = 0;
         Type();
       }
 
-      m_TypingTimer += Time.deltaTime;
+      m_TypingTimer += dt;
     }
   }
 
@@ -49,7 +64,7 @@ public class DialogueWindow : UiWindow
   public void OpenWithText(string text)
   {
     m_Text = text;
-
+    CountLines(text);
     Tween.Size(m_RectTransform, m_TargetSize, m_OpenDuration, 0.1f, Tween.EaseInOut, completeCallback: OnWindowFinishedOpening);
   }
 
@@ -141,7 +156,18 @@ public class DialogueWindow : UiWindow
 
   void AddText(string text)
   {
-    m_TextMesh.text += text;
+    if (text == "\n")
+      --m_RemainingLines;
+
+    m_WorkingString += text;
+    var output = m_WorkingString;
+    for (var i = 0; i < m_RemainingLines; ++i)
+      output += Environment.NewLine;
+
+    if (m_WorkingString != m_Text)
+      output += " ";
+
+    m_TextMesh.text = output;
   }
 
 
@@ -162,34 +188,54 @@ public class DialogueWindow : UiWindow
     var tagStr = m_Text.Substring(startIndex, tagLength);
     var tagSplit = tagStr.Split('=');
     var tagName = tagSplit[0].ToUpper();
+    string tagValueStr;
 
-    if (!UiWindowMaster.Instance.m_HandledTags.Contains(tagName))
+    switch (tagName)
     {
-      var fullTagStr = $"<{tagStr}>";
-
-      AddText(fullTagStr);
-    }
-    else if (tagName == "D")
-    {
-      var tagValueStr = tagSplit[1];
+    case "A": // Toggle the availability of text advance
+      UiWindowMaster.ToggleTextAdvance();
+      break;
+    case "D": // Delay (in s)
+      tagValueStr = tagSplit[1];
 
       if (!float.TryParse(tagValueStr, out var delay))
         return currentIndex;
 
       SetDelay(delay);
-    }
-    else if (tagName == "F")
-    {
-      var tagValueStr = tagSplit[1];
+      break;
+    case "E": // Execute sequence event
+      break;
+    case "F": // Delay (in frames @ 60 fps)
+      tagValueStr = tagSplit[1];
 
       if (!int.TryParse(tagValueStr, out var frames))
         return currentIndex;
 
       SetDelayFrames(frames);
-    }
-    else if (tagName == "R")
-    {
-      ResetDelay();
+      break;
+    case "G": // Group text into clusters
+      tagValueStr = tagSplit[1];
+
+      if (!int.TryParse(tagValueStr, out var groupSize))
+        return currentIndex;
+
+      SetGroupSize(groupSize);
+      break;
+    case "P": // Pause (in s)
+      tagValueStr = tagSplit[1];
+
+      if (!float.TryParse(tagValueStr, out var pause))
+        return currentIndex;
+
+      SetPause(pause);
+      break;
+    case "R": // Reset
+      ResetTags();
+      break;
+    default:
+      var fullTagStr = $"<{tagStr}>";
+      AddText(fullTagStr);
+      break;
     }
 
     return currentIndex + tagLength + 2;
@@ -208,8 +254,28 @@ public class DialogueWindow : UiWindow
   }
 
 
-  void ResetDelay()
+  void SetPause(float pause)
+  {
+    m_Pause = pause;
+  }
+
+
+  void SetGroupSize(int groupSize)
+  {
+    m_GroupSize = groupSize;
+  }
+
+
+  void ResetTags()
   {
     SetDelay(UiWindowMaster.Instance.m_DefaultTypingDelay);
+    SetPause(0);
+    SetGroupSize(0);
+  }
+
+
+  void CountLines(string page)
+  {
+    m_RemainingLines = page.Split('\n').Length - 1;
   }
 }

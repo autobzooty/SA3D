@@ -9,20 +9,24 @@ public class UiWindowMaster : MonoBehaviour
   public RectTransform m_Root;
   public DialogueWindow m_DialogueWindowPrefab;
   public float m_DefaultTypingDelay = 2.0f / 60.0f;
+  public float m_FastTypingDelay = 1.0f / 60.0f;
   public bool m_NoisySequenceEventErrors = true;
   [Multiline]
   public string m_TestMessage =
-    "<color=#fe4>So it Begins:</color><d=0.8>" + Environment.NewLine + "<r>" +
+    "<color=#fe4>So it Begins:</color><p=0.8>" + Environment.NewLine +
     "  Our hero has <color=#3c8>ventured forth</color>" + Environment.NewLine +
-    "  into the <color=#38c>cold</color><d=0.3> <r>(at times)<d=0.3> <r>and" + Environment.NewLine +
-    "  <color=#f45>frightening</color><d=0.3> <r>(usually)<d=0.3> <r>world.";
+    "  into the <color=#38c>cold</color><p=0.3> (at times)<p=0.3> and" + Environment.NewLine +
+    "  <color=#f45>frightening</color><p=0.3> (usually)<p=0.3> world.";
 
   static public UiWindowMaster Instance { get; private set; }
-
-  [HideInInspector]
-  public List<string> m_HandledTags = new List<string> { "D", "F", "R" };
+  static public bool TextAdvanceAvailable
+  {
+    get { return Instance.m_TextAdvanceAvailable; }
+    set { Instance.m_TextAdvanceAvailable = value; }
+  }
 
   private Stack<UiWindow> m_Windows = new Stack<UiWindow>();
+  private bool m_TextAdvanceAvailable = true;
 
 
   void Start()
@@ -39,6 +43,29 @@ public class UiWindowMaster : MonoBehaviour
   {
     if (Input.GetKeyDown(KeyCode.Space) && m_Windows.Count <= 0)
       DialogueWindow(m_TestMessage);
+
+    ProcessInput();
+  }
+
+
+  void ProcessInput()
+  {
+    foreach (var uiWindow in m_Windows)
+    {
+      SendInputToWindow(uiWindow);
+
+      if (uiWindow.m_Blocking)
+        break;
+    }
+  }
+
+
+  void SendInputToWindow(UiWindow uiWindow)
+  {
+    if (Input.GetButtonDown("Submit"))
+    {
+
+    }
   }
 
 
@@ -50,6 +77,9 @@ public class UiWindowMaster : MonoBehaviour
 
   private void DoDialogueWindow(string text)
   {
+    if (m_Windows.Count > 0)
+      return;
+
     // The game should pause here
 
     // Create the window and attach it to the window root
@@ -63,5 +93,11 @@ public class UiWindowMaster : MonoBehaviour
   void AddWindow(UiWindow window)
   {
     m_Windows.Push(window);
+  }
+
+
+  public static void ToggleTextAdvance()
+  {
+    Instance.m_TextAdvanceAvailable = !Instance.m_TextAdvanceAvailable;
   }
 }
