@@ -106,15 +106,28 @@ public class UiWindowMaster : MonoBehaviour
   }
 
 
+  public static void DialogueWindow(Dialogue dialogue)
+  {
+    Instance.DoDialogueWindow(dialogue);
+  }
+
+
   private void DoDialogueWindow(List<string> pages)
   {
-    if (m_Windows.Count > 0)
-      return;
-
     // Create the window and attach it to the window root
     // The window takes care of its own positioning and sizing
     var window = Instantiate(m_DialogueWindowPrefab, m_Root);
     window.OpenWithPages(pages);
+    AddWindow(window);
+  }
+
+
+  private void DoDialogueWindow(Dialogue dialogue)
+  {
+    // Create the window and attach it to the window root
+    // The window takes care of its own positioning and sizing
+    var window = Instantiate(m_DialogueWindowPrefab, m_Root);
+    window.OpenWithDialogue(dialogue);
     AddWindow(window);
   }
 

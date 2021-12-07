@@ -314,6 +314,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa527ff8023e3dd4b9bcd78a0b9c5978, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_PlayerInputHoldHandle: {fileID: 11400000, guid: 0fec886890221f449be05c1e168c1aed, type: 2}
   m_Events:
     InteractionStarted:
       m_PersistentCalls:

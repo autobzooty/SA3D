@@ -775,11 +775,20 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 1470852838, guid: 063681d5ad532444e9f53c4eb0ce8b2f, type: 3}
+      propertyPath: m_Dialogue
+      value: 
+      objectReference: {fileID: 11400000, guid: a34bd7ea69176ff44974cb4830f9536e, type: 2}
+    - target: {fileID: 1470852838, guid: 063681d5ad532444e9f53c4eb0ce8b2f, type: 3}
+      propertyPath: m_Pages.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1470852838, guid: 063681d5ad532444e9f53c4eb0ce8b2f, type: 3}
+      propertyPath: m_Pages.Array.data[0]
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 1470852838, guid: 063681d5ad532444e9f53c4eb0ce8b2f, type: 3}
       propertyPath: m_Pages.Array.data[1]
-      value: '<color=#fff8><f=5>... ur mom<p=0.2> g?y ...<p=0.2>
-
-        lollll<p=0.3>
-        ... got?emm?mm<r></color>'
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 9200549440281054290, guid: 063681d5ad532444e9f53c4eb0ce8b2f, type: 3}
       propertyPath: m_Name

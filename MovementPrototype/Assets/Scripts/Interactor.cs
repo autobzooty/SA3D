@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class Interactor : MonoBehaviour
 {
+  public HoldHandle m_PlayerInputHoldHandle;
   public Interactive.Events m_Events;
 
   private Transform m_Transform;
@@ -23,6 +24,8 @@ public class Interactor : MonoBehaviour
 
   void Update()
   {
+    if (m_PlayerInputHoldHandle.HasHolds) return;
+
     SortInteractives();
 
     if (Input.GetButtonDown("Interact"))

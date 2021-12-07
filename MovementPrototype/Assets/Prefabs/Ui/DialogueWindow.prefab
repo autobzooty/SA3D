@@ -90,7 +90,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Period: 1
   m_Max: 0
-  m_Exponent: 10
+  m_Exponent: 8
 --- !u!1 &2495225220542813300
 GameObject:
   m_ObjectHideFlags: 0
@@ -181,7 +181,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Period: 1
   m_Max: 0
-  m_Exponent: 10
+  m_Exponent: 8
 --- !u!1 &8083473148293463624
 GameObject:
   m_ObjectHideFlags: 0

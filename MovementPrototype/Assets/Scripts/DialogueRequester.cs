@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class DialogueRequester : MonoBehaviour
 {
+  public Dialogue m_Dialogue;
   [Multiline]
   public List<string> m_Pages = new List<string>
   {
@@ -18,6 +19,9 @@ public class DialogueRequester : MonoBehaviour
 
   public void OnInteractionStarted(InteractionEventData ieData)
   {
-    UiWindowMaster.DialogueWindow(m_Pages);
+    if (m_Dialogue == null)
+      UiWindowMaster.DialogueWindow(m_Pages);
+    else
+      UiWindowMaster.DialogueWindow(m_Dialogue);
   }
 }

@@ -82,10 +82,17 @@ public class DialogueWindow : UiWindow
   }
 
 
-  public void OpenWithDialogue()
+  public void OpenWithDialogue(Dialogue dialogue)
   {
+    if (dialogue == null)
+    {
+      OpenWithString("");
+      return;
+    }
+
+    OpenWithPages(dialogue.m_Pages);
     // TODO:
-    //   Implement Dialogue : ScriptableObject class and support it here
+    //   do something with the dialogue's m_Events list
   }
 
 
