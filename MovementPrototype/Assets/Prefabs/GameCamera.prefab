@@ -112,3 +112,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b6189ec42baeb240a57059376f9f9f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_PlayerInputHoldHandle: {fileID: 0}
+  m_CameraInputHoldHandle: {fileID: 11400000, guid: 624769c3341f1ef49ad35966518c95a4, type: 2}
