@@ -238,12 +238,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Root: {fileID: 1142576212}
   m_DialogueWindowPrefab: {fileID: 22019031, guid: 250418d0684646949a261bb2563f1ccc, type: 3}
-  m_DefaultTypingDelay: 0.033333335
-  m_FastTypingDelay: 0.016666668
+  m_DefaultTypingDelay: 0.05
+  m_FastTypingDelay: 0.01
   m_NoisySequenceEventErrors: 1
-  m_TestMessage: "<color=#fe4>So it Begins:</color><d=0.8>\r\n<r>  Our hero has <color=#3c8>ventured
-    forth</color>\r\n  into the <color=#38c>cold</color><d=0.3> <r>(at times)<d=0.3>
-    <r>and\r\n  <color=#f45>frightening</color><d=0.3> <r>(usually)<d=0.3> <r>world."
+  m_TestPages:
+  - "<color=#fe4>So it Begins:</color><p=0.8>\r\n  Our hero has <color=#3c8>ventured
+    forth</color>\r\n  into the <color=#38c>cold</color><p=0.3> (at times)<p=0.3>
+    and\r\n  <color=#f45>frightening</color><p=0.3> (usually)<p=0.3> world."
 --- !u!1 &867598895
 GameObject:
   m_ObjectHideFlags: 0
@@ -773,6 +774,32 @@ PrefabInstance:
       value: "<color=#fe4>So it Begins:</color><p=0.8>\n  Our hero has <color=#3c8>ventured
         forth</color>\n  into the <color=#38c>cold</color><p=0.3> (at times)<p=0.3>
         and\n  <color=#f45>frightening</color><p=0.3> (usually)<p=0.3> world."
+      objectReference: {fileID: 0}
+    - target: {fileID: 1470852838, guid: 063681d5ad532444e9f53c4eb0ce8b2f, type: 3}
+      propertyPath: m_Pages.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1470852838, guid: 063681d5ad532444e9f53c4eb0ce8b2f, type: 3}
+      propertyPath: m_Pages.Array.data[0]
+      value: '<i>The text is worn and hard
+
+        to read.<p=0.5> You can barely
+        make
+
+        out a few words:</i>'
+      objectReference: {fileID: 0}
+    - target: {fileID: 1470852838, guid: 063681d5ad532444e9f53c4eb0ce8b2f, type: 3}
+      propertyPath: m_Pages.Array.data[1]
+      value: '<color=#fff8><d=0.15>... ur mom<p=0.25> g?y ...<p=0.5>
+
+        lollll<p=0.25>
+        ... got?emm?mm<r></color>'
+      objectReference: {fileID: 0}
+    - target: {fileID: 1470852838, guid: 063681d5ad532444e9f53c4eb0ce8b2f, type: 3}
+      propertyPath: m_Pages.Array.data[2]
+      value: '<i>Perhaps a warning left by
+
+        an ancient scholar...?</i>'
       objectReference: {fileID: 0}
     - target: {fileID: 9200549440281054290, guid: 063681d5ad532444e9f53c4eb0ce8b2f, type: 3}
       propertyPath: m_Name
