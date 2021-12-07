@@ -6,8 +6,9 @@ using UnityEngine;
 public class UiWindow : MonoBehaviour
 {
   public bool m_BlocksUiInput = true;
-  public bool m_HoldsPlayer = true;
-  public bool m_HoldsCamera = true;
+  public bool m_HoldsPlayerInput = false;
+  public bool m_HoldsPlayerUpdate = false;
+  public bool m_HoldsCameraInput = false;
 
 
   virtual public void Open() { }

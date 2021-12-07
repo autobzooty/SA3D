@@ -256,6 +256,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b6189ec42baeb240a57059376f9f9f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_PlayerInputHoldHandle: {fileID: 11400000, guid: 0fec886890221f449be05c1e168c1aed, type: 2}
+  m_CameraInputHoldHandle: {fileID: 0}
 --- !u!114 &1775132148156881324
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -286,6 +288,7 @@ MonoBehaviour:
   DiveForwardStrength: 2
   DiveDownwardStrength: 1
   SlidingInfluenceScalar: 5
+  m_PlayerUpdateHoldHandle: {fileID: 11400000, guid: fa075a8e17491934eab4c86ffd77ff5b, type: 2}
 --- !u!114 &-7111339994410137894
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -311,6 +314,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa527ff8023e3dd4b9bcd78a0b9c5978, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_Events:
+    InteractionStarted:
+      m_PersistentCalls:
+        m_Calls: []
+    InteractionEnded:
+      m_PersistentCalls:
+        m_Calls: []
 --- !u!54 &1590037300
 Rigidbody:
   m_ObjectHideFlags: 0

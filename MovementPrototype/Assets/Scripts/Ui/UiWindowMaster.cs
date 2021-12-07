@@ -8,6 +8,9 @@ public class UiWindowMaster : MonoBehaviour
 {
   public RectTransform m_Root;
   public DialogueWindow m_DialogueWindowPrefab;
+  public HoldHandle m_PlayerInputHoldHandle;
+  public HoldHandle m_PlayerUpdateHoldHandle;
+  public HoldHandle m_CameraInputHoldHandle;
   public float m_DefaultTypingDelay = 2.0f / 60.0f;
   public float m_FastTypingDelay = 1.0f / 60.0f;
   public bool m_NoisySequenceEventErrors = true;
@@ -29,8 +32,9 @@ public class UiWindowMaster : MonoBehaviour
 
   private List<UiWindow> m_Windows = new List<UiWindow>();
   private bool m_TextAdvanceAvailable = true;
-  private int m_PlayerHolders = 0;
-  private int m_CameraHolders = 0;
+  private int m_PlayerInputHolders = 0;
+  private int m_PlayerUpdateHolders = 0;
+  private int m_CameraInputHolders = 0;
 
 
   void Start()
@@ -119,30 +123,58 @@ public class UiWindowMaster : MonoBehaviour
   {
     m_Windows.Add(window);
 
-    if (window.m_HoldsPlayer)
-      ++m_PlayerHolders;
-    if (window.m_HoldsCamera)
-      ++m_CameraHolders;
+    if (window.m_HoldsPlayerInput)
+    {
+      if (m_PlayerInputHolders <= 0)
+        AddPlayerInputHold();
 
-    if (m_PlayerHolders > 0)
-      AddPlayerHold();
-    if (m_CameraHolders > 0)
-      AddCameraHold();
+      ++m_PlayerInputHolders;
+    }
+
+    if (window.m_HoldsPlayerUpdate)
+    {
+      if (m_PlayerUpdateHolders <= 0)
+        AddPlayerUpdateHold();
+
+      ++m_PlayerUpdateHolders;
+    }
+
+    if (window.m_HoldsCameraInput)
+    {
+      if (m_CameraInputHolders <= 0)
+        AddCameraInputHold();
+
+      ++m_CameraInputHolders;
+    }
   }
 
 
   /// Do not call unless you are a UiWindow!
   public void WindowHasClosed(UiWindow window)
   {
-    if (window.m_HoldsPlayer)
-      --m_PlayerHolders;
-    if (window.m_HoldsCamera)
-      --m_CameraHolders;
+    if (window.m_HoldsPlayerInput)
+    {
+      --m_PlayerInputHolders;
 
-    if (m_PlayerHolders <= 0)
-      ReleasePlayerHold();
-    if (m_CameraHolders <= 0)
-      ReleaseCameraHold();
+      if (m_PlayerInputHolders <= 0)
+        ReleasePlayerInputHold();
+    }
+
+    if (window.m_HoldsPlayerUpdate)
+    {
+      --m_PlayerUpdateHolders;
+
+      if (m_PlayerUpdateHolders <= 0)
+        ReleasePlayerUpdateHold();
+    }
+
+    if (window.m_HoldsCameraInput)
+    {
+      --m_CameraInputHolders;
+
+      if (m_CameraInputHolders <= 0)
+        ReleaseCameraInputHold();
+    }
 
     Destroy(window.gameObject);
     // Actual removal from the list occurs in LateUpdate
@@ -155,26 +187,38 @@ public class UiWindowMaster : MonoBehaviour
   }
 
 
-  void AddPlayerHold()
+  void AddPlayerInputHold()
   {
-
+    m_PlayerInputHoldHandle.Add(this);
   }
 
 
-  void ReleasePlayerHold()
+  void ReleasePlayerInputHold()
   {
-
+    m_PlayerInputHoldHandle.Release(this);
   }
 
 
-  void AddCameraHold()
+  void AddPlayerUpdateHold()
   {
-
+    m_PlayerUpdateHoldHandle.Add(this);
   }
 
 
-  void ReleaseCameraHold()
+  void ReleasePlayerUpdateHold()
   {
+    m_PlayerUpdateHoldHandle.Release(this);
+  }
 
+
+  void AddCameraInputHold()
+  {
+    m_CameraInputHoldHandle.Add(this);
+  }
+
+
+  void ReleaseCameraInputHold()
+  {
+    m_CameraInputHoldHandle.Release(this);
   }
 }

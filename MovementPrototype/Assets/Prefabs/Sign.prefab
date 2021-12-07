@@ -204,7 +204,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50c9d3895f960a4449bb6c340073e239, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Text: If you're reading this ur gay
+  m_Pages:
+  - '<i>The text is worn and hard
+
+    to read.<p=0.5> You can barely make
+
+    out
+    a few words:</i>'
+  - '<color=#fff8><d=0.15>... ur mom<p=0.25> g?y ...<p=0.5>
+
+    lollll<p=0.25> ...
+    got?emm?mm<r></color>'
+  - '<i>Perhaps a warning left by
+
+    an ancient scholar...?</i>'
 --- !u!1 &9200549440808293172
 GameObject:
   m_ObjectHideFlags: 0

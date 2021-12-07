@@ -25,6 +25,7 @@ public class PlayerMover : MonoBehaviour
   public float DiveForwardStrength = 2.0f;
   public float DiveDownwardStrength = 1.0f;
   public float SlidingInfluenceScalar = 5.0f;
+  public HoldHandle m_PlayerUpdateHoldHandle;
 
   //Components
   private InputListener IL;
@@ -58,6 +59,8 @@ public class PlayerMover : MonoBehaviour
 
   void Update()
   {
+    if (m_PlayerUpdateHoldHandle.HasHolds) return;
+
     Turn();
     HSpeedUpdate();
     VSpeedUpdate();
