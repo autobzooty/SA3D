@@ -287,7 +287,7 @@ MonoBehaviour:
   JumpStrengthSpeedScalar: 1.6
   DiveForwardStrength: 2
   DiveDownwardStrength: 1
-  SlidingInfluenceScalar: 5
+  SlidingInfluenceScalar: 7
   m_PlayerUpdateHoldHandle: {fileID: 11400000, guid: fa075a8e17491934eab4c86ffd77ff5b, type: 2}
 --- !u!114 &-7111339994410137894
 MonoBehaviour:
@@ -430,7 +430,7 @@ GameObject:
   - component: {fileID: 1775132148819867020}
   - component: {fileID: 1775132148819867021}
   m_Layer: 3
-  m_Name: Collider
+  m_Name: PlayerCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
