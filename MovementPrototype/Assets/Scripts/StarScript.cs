@@ -11,13 +11,12 @@ public class StarScript : MonoBehaviour
 
   private void OnTriggerEnter(Collider other)
   {
+    //B-)
+    if(other.isTrigger) return;
+
     if(other.gameObject.GetComponentInParent<PlayerMover>())
     {
-      print(other.name);
-      if(other.name == "PlayerCollider")
-      {
-        Destroy(gameObject);
-      }
+      Destroy(gameObject);
     }
   }
 

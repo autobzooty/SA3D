@@ -17,7 +17,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &918111972
 Transform:
   m_ObjectHideFlags: 0
@@ -289,6 +289,7 @@ MonoBehaviour:
   DiveDownwardStrength: 1
   SlidingInfluenceScalar: 7
   m_PlayerUpdateHoldHandle: {fileID: 11400000, guid: fa075a8e17491934eab4c86ffd77ff5b, type: 2}
+  m_PlayerInputHoldHandle: {fileID: 11400000, guid: 0fec886890221f449be05c1e168c1aed, type: 2}
 --- !u!114 &-7111339994410137894
 MonoBehaviour:
   m_ObjectHideFlags: 0

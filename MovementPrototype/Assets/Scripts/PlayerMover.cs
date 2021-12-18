@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Pixelplacement;
 
 [RequireComponent(typeof(InputListener))]
 
@@ -26,6 +27,7 @@ public class PlayerMover : MonoBehaviour
   public float DiveDownwardStrength = 1.0f;
   public float SlidingInfluenceScalar = 5.0f;
   public HoldHandle m_PlayerUpdateHoldHandle;
+  public HoldHandle m_PlayerInputHoldHandle;
 
   //Components
   private InputListener IL;
@@ -46,6 +48,8 @@ public class PlayerMover : MonoBehaviour
   private Vector3 MovementDirection;
   private float JumpLaunchStopwatch = 0.0f;
   private bool JumpLaunching = false;
+  private float JiggyJigTimer = 0.0f;
+  private bool WaitingToJig = false;
 
   void Start()
   {
@@ -319,6 +323,10 @@ public class PlayerMover : MonoBehaviour
         if(Vector3.Dot(Vector3.up, hit.normal) >= GroundDotValue)
         {
           OnGround = true;
+          if(WaitingToJig)
+          {
+            BeginJiggyJig();
+          }
           SnapToGround();
 
           float currentStandableGroundDotValue;
@@ -545,5 +553,33 @@ public class PlayerMover : MonoBehaviour
     {
       transform.position = hit.point;
     }
+  }
+
+  private void OnTriggerEnter(Collider other)
+  {
+    if(other.gameObject.GetComponent<StarScript>())
+    {
+      StarCollision();
+    }
+  }
+
+  void StarCollision()
+  {
+    WaitingToJig = true;
+    HSpeed = Vector3.zero;
+    m_PlayerInputHoldHandle.Add(this);
+    //timer
+  }
+
+  void BeginJiggyJig()
+  {
+    WaitingToJig = false;
+    float JiggyJigTime = 2.0f;
+    Tween.Value(0, 0, (x)=>JiggyJigTimer = x, JiggyJigTime, 0.0f, completeCallback:OnJiggyJigComplete);
+  }
+
+  void OnJiggyJigComplete()
+  {
+    m_PlayerInputHoldHandle.Release(this);
   }
 }
