@@ -50,6 +50,10 @@ public class PlayerMover : MonoBehaviour
   private bool JumpLaunching = false;
   private float JiggyJigTimer = 0.0f;
   private bool WaitingToJig = false;
+  private GameObject DeathPlane;
+  private Vector3 LastKnownSafePosition;
+  private Vector3 LastKnownGoodCameraPosition;
+  private Quaternion LastKnownGoodCameraRotation;
 
   void Start()
   {
@@ -59,6 +63,7 @@ public class PlayerMover : MonoBehaviour
     GroundDotValue = Mathf.Cos(Mathf.Deg2Rad * GroundAngle);
     CeilingDotValue = Mathf.Cos(Mathf.Deg2Rad * CeilingAngle);
     FindGameCamera();
+    DeathPlane = GameObject.Find("DeathPlane");
   }
 
   void Update()
@@ -524,6 +529,12 @@ public class PlayerMover : MonoBehaviour
     //Move Vertical
     transform.position += Vector3.up * VSpeed * Time.deltaTime;
 
+    //Deathplane check
+    if(transform.position.y < DeathPlane.transform.position.y)
+    {
+      RespawnAtLastKnownSafePosition();
+    }
+
     PreviousOnGround = OnGround;
   }
 
@@ -552,6 +563,9 @@ public class PlayerMover : MonoBehaviour
     if(Physics.Raycast(ray, out RaycastHit hit, 2, layerMask, QueryTriggerInteraction.Ignore))
     {
       transform.position = hit.point;
+      LastKnownSafePosition = transform.position;
+      LastKnownGoodCameraPosition = GameCamera.transform.position;
+      LastKnownGoodCameraRotation = GameCamera.transform.rotation;
     }
   }
 
@@ -581,5 +595,31 @@ public class PlayerMover : MonoBehaviour
   void OnJiggyJigComplete()
   {
     m_PlayerInputHoldHandle.Release(this);
+  }
+
+  void KillHSpeed()
+  {
+    HSpeed = Vector3.zero;
+  }
+
+  void KillVSpeed()
+  {
+    VSpeed = 0;
+  }
+
+  public bool GetOnGround()
+  {
+    return OnGround;
+  }
+
+  void RespawnAtLastKnownSafePosition()
+  {
+    KillHSpeed();
+    KillVSpeed();
+    transform.position = LastKnownSafePosition;
+    Diving = false;
+    OnGround = true;
+    GameCamera.transform.position = LastKnownGoodCameraPosition;
+    GameCamera.transform.rotation = LastKnownGoodCameraRotation;
   }
 }
