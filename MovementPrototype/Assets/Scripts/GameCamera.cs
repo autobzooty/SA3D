@@ -29,7 +29,7 @@ public class GameCamera : MonoBehaviour
 
   void Truck()
   {
-    transform.position += transform.right * IL.GetRightStickVector().x * SpeedScalar * Time.deltaTime;
+    transform.position += -transform.right * IL.GetRightStickVector().x * SpeedScalar * Time.deltaTime;
   }
 
   void Boom()

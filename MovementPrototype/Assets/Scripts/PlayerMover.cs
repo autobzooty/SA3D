@@ -26,6 +26,7 @@ public class PlayerMover : MonoBehaviour
   public float DiveForwardStrength = 2.0f;
   public float DiveDownwardStrength = 1.0f;
   public float SlidingInfluenceScalar = 5.0f;
+  public float SteepSlopeAccelerationInfluence = 5.0f;
   public HoldHandle m_PlayerUpdateHoldHandle;
   public HoldHandle m_PlayerInputHoldHandle;
 
@@ -95,9 +96,21 @@ public class PlayerMover : MonoBehaviour
         Ray ray = new Ray(transform.position + transform.up, -transform.up);
         if(Physics.Raycast(ray, out RaycastHit hit, 2, layerMask, QueryTriggerInteraction.Ignore))
         {
-          Vector3 targetLookDirection = hit.normal;
-          targetLookDirection.y = 0;
-          targetLookDirection.Normalize();
+          Vector3 slopeDownDirection= hit.normal;
+          slopeDownDirection.y = 0;
+          slopeDownDirection.Normalize();
+
+          //Put the left stick input into camera space
+          Vector3 stickDirection = GameCamera.transform.TransformDirection(new Vector3(IL.GetLeftStickVector().x, 0, IL.GetLeftStickVector().y));
+          //We never want the character to look up or down, so 0 this value out
+          stickDirection.y = 0;
+          //Normalize the vector for good measure since we modified the Y value, though this probably doesn't matter
+          stickDirection.Normalize();
+          stickDirection = transform.InverseTransformDirection(stickDirection);
+
+          Vector3 stickLateralDirection = new Vector3(stickDirection.x, 0, 0);
+          
+          Vector3 targetLookDirection = slopeDownDirection + stickLateralDirection;
 
           Vector3 newDirection = Vector3.RotateTowards(transform.forward, targetLookDirection, TurnSpeed * 0.25f * Time.deltaTime, 0.0f);
           transform.rotation = Quaternion.LookRotation(newDirection);
@@ -134,19 +147,23 @@ public class PlayerMover : MonoBehaviour
           targetSlideDirection.y = 0;
           targetSlideDirection.Normalize();
 
-          Vector3 localTargetLookDirection = transform.InverseTransformDirection(targetSlideDirection);
-          float slidingAcceleration = Mathf.Lerp(Gravity, 0, (Vector3.Dot(hit.normal, Vector3.up)));
-
           //Put the left stick input into camera space
-          Vector3 leftStickWorldDirection = GameCamera.transform.TransformDirection(new Vector3(IL.GetLeftStickVector().x, 0, IL.GetLeftStickVector().y));
+          Vector3 leftStickDirection = GameCamera.transform.TransformDirection(new Vector3(IL.GetLeftStickVector().x, 0, IL.GetLeftStickVector().y));
           //We never want the character to look up or down, so 0 this value out
-          leftStickWorldDirection.y = 0;
+          leftStickDirection.y = 0;
           //Normalize the vector for good measure since we modified the Y value, though this probably doesn't matter
-          leftStickWorldDirection.Normalize();
+          leftStickDirection.Normalize();
           //Put the vector into local player space
-          leftStickWorldDirection = transform.InverseTransformDirection(leftStickWorldDirection);
+          leftStickDirection = transform.InverseTransformDirection(leftStickDirection);
 
-          HSpeed += (localTargetLookDirection * slidingAcceleration * Time.deltaTime) + (leftStickWorldDirection * SlidingInfluenceScalar * Time.deltaTime);
+          Vector3 localTargetLookDirection = transform.InverseTransformDirection(targetSlideDirection);
+          float slidingAcceleration = Mathf.Lerp(Gravity, 0, (Vector3.Dot(hit.normal, Vector3.up))) + (leftStickDirection.z * SteepSlopeAccelerationInfluence);
+          if(slidingAcceleration < 0)
+          {
+            slidingAcceleration = 0;
+          }
+
+          HSpeed += (localTargetLookDirection * (slidingAcceleration) * Time.deltaTime);
         }
       }
       else if(Diving)
@@ -530,11 +547,13 @@ public class PlayerMover : MonoBehaviour
     transform.position += Vector3.up * VSpeed * Time.deltaTime;
 
     //Deathplane check
-    if(transform.position.y < DeathPlane.transform.position.y)
+    if(DeathPlane)
     {
-      RespawnAtLastKnownSafePosition();
+      if(transform.position.y < DeathPlane.transform.position.y)
+      {
+        RespawnAtLastKnownSafePosition();
+      }
     }
-
     PreviousOnGround = OnGround;
   }
 
@@ -563,9 +582,10 @@ public class PlayerMover : MonoBehaviour
     if(Physics.Raycast(ray, out RaycastHit hit, 2, layerMask, QueryTriggerInteraction.Ignore))
     {
       transform.position = hit.point;
-      LastKnownSafePosition = transform.position;
-      LastKnownGoodCameraPosition = GameCamera.transform.position;
-      LastKnownGoodCameraRotation = GameCamera.transform.rotation;
+      if(Sliding == false)
+      {
+        UpdateLastKnownSafePosition();
+      }
     }
   }
 
@@ -621,5 +641,12 @@ public class PlayerMover : MonoBehaviour
     OnGround = true;
     GameCamera.transform.position = LastKnownGoodCameraPosition;
     GameCamera.transform.rotation = LastKnownGoodCameraRotation;
+  }
+
+  void UpdateLastKnownSafePosition()
+  {
+    LastKnownSafePosition = transform.position;
+    LastKnownGoodCameraPosition = GameCamera.transform.position;
+    LastKnownGoodCameraRotation = GameCamera.transform.rotation;
   }
 }
