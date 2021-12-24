@@ -25,8 +25,8 @@ public class PlayerMover : MonoBehaviour
   public float JumpStrengthSpeedScalar = 1.8f;
   public float DiveForwardStrength = 2.0f;
   public float DiveDownwardStrength = 1.0f;
-  public float SlidingInfluenceScalar = 5.0f;
   public float SteepSlopeAccelerationInfluence = 5.0f;
+  public float SteepSlopeTurnSpeed = 1.0f;
   public HoldHandle m_PlayerUpdateHoldHandle;
   public HoldHandle m_PlayerInputHoldHandle;
 
@@ -106,13 +106,12 @@ public class PlayerMover : MonoBehaviour
           stickDirection.y = 0;
           //Normalize the vector for good measure since we modified the Y value, though this probably doesn't matter
           stickDirection.Normalize();
-          stickDirection = transform.InverseTransformDirection(stickDirection);
 
           Vector3 stickLateralDirection = new Vector3(stickDirection.x, 0, 0);
           
           Vector3 targetLookDirection = slopeDownDirection + stickLateralDirection;
 
-          Vector3 newDirection = Vector3.RotateTowards(transform.forward, targetLookDirection, TurnSpeed * 0.25f * Time.deltaTime, 0.0f);
+          Vector3 newDirection = Vector3.RotateTowards(transform.forward, targetLookDirection, SteepSlopeTurnSpeed * Time.deltaTime, 0.0f);
           transform.rotation = Quaternion.LookRotation(newDirection);
         }
       }
@@ -163,7 +162,7 @@ public class PlayerMover : MonoBehaviour
             slidingAcceleration = 0;
           }
 
-          HSpeed += (localTargetLookDirection * (slidingAcceleration) * Time.deltaTime);
+          HSpeed += (Vector3.forward * (slidingAcceleration) * Time.deltaTime);
         }
       }
       else if(Diving)
