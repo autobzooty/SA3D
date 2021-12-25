@@ -107,12 +107,18 @@ public class PlayerMover : MonoBehaviour
           //Normalize the vector for good measure since we modified the Y value, though this probably doesn't matter
           stickDirection.Normalize();
 
+          stickDirection = transform.InverseTransformDirection(stickDirection);
+
           Vector3 stickLateralDirection = new Vector3(stickDirection.x, 0, 0);
+
+          stickLateralDirection = transform.TransformDirection(stickLateralDirection);
           
           Vector3 targetLookDirection = slopeDownDirection + stickLateralDirection;
 
           Vector3 newDirection = Vector3.RotateTowards(transform.forward, targetLookDirection, SteepSlopeTurnSpeed * Time.deltaTime, 0.0f);
-          transform.rotation = Quaternion.LookRotation(newDirection);
+          transform.rotation = Quaternion.LookRotation(newDirection, Vector3.up);
+
+          Debug.DrawLine(transform.position, transform.position + stickLateralDirection * 4);
         }
       }
       else
@@ -125,7 +131,7 @@ public class PlayerMover : MonoBehaviour
         targetLookDirection.Normalize();
         //Rotate towards the target rotation at a set speed
         Vector3 newDirection = Vector3.RotateTowards(transform.forward, targetLookDirection, TurnSpeed * Time.deltaTime, 0.0f);
-        transform.rotation = Quaternion.LookRotation(newDirection);
+        transform.rotation = Quaternion.LookRotation(newDirection, Vector3.up);
       }
     }
   }
@@ -155,7 +161,7 @@ public class PlayerMover : MonoBehaviour
           //Put the vector into local player space
           leftStickDirection = transform.InverseTransformDirection(leftStickDirection);
 
-          Vector3 localTargetLookDirection = transform.InverseTransformDirection(targetSlideDirection);
+
           float slidingAcceleration = Mathf.Lerp(Gravity, 0, (Vector3.Dot(hit.normal, Vector3.up))) + (leftStickDirection.z * SteepSlopeAccelerationInfluence);
           if(slidingAcceleration < 0)
           {
@@ -533,6 +539,8 @@ public class PlayerMover : MonoBehaviour
                                   out Vector3 direction,
                                   out float distance);
       transform.position += direction * distance;
+      SnapToGround();
+
       Vector3 newPosition = transform.position;
       Vector3 diffVector = (previousPosition - newPosition);
       diffVector.y = 0;
@@ -540,6 +548,13 @@ public class PlayerMover : MonoBehaviour
       float adjustedHSpeedMagnitude = diffVectorDistance / Time.deltaTime;
       float hSpeedMagnitude = HSpeed.magnitude;
       HSpeed = HSpeed.normalized * Mathf.Min(hSpeedMagnitude, adjustedHSpeedMagnitude);
+      if (Sliding)
+      {
+        Vector3 newForward = Vector3.Reflect(transform.forward, nearestHit.normal);
+        newForward.y = 0;
+        newForward.Normalize();
+        transform.rotation = Quaternion.LookRotation(newForward, Vector3.up);
+      }
     }
 
     //Move Vertical
