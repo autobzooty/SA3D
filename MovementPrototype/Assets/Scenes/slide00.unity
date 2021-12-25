@@ -18304,7 +18304,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1775132148156881315, guid: 96ce700496121f643bca3782756b65b3, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.6262796
+      value: -1.4012299
       objectReference: {fileID: 0}
     - target: {fileID: 1775132148156881315, guid: 96ce700496121f643bca3782756b65b3, type: 3}
       propertyPath: m_LocalPosition.y
@@ -18312,7 +18312,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1775132148156881315, guid: 96ce700496121f643bca3782756b65b3, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 2.096367
+      value: 1.2938232
       objectReference: {fileID: 0}
     - target: {fileID: 1775132148156881315, guid: 96ce700496121f643bca3782756b65b3, type: 3}
       propertyPath: m_LocalRotation.w
@@ -18345,14 +18345,6 @@ PrefabInstance:
     - target: {fileID: 1775132148156881321, guid: 96ce700496121f643bca3782756b65b3, type: 3}
       propertyPath: m_Name
       value: Player
-      objectReference: {fileID: 0}
-    - target: {fileID: 1775132148156881324, guid: 96ce700496121f643bca3782756b65b3, type: 3}
-      propertyPath: SteepSlopeTurnSpeed
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1775132148156881324, guid: 96ce700496121f643bca3782756b65b3, type: 3}
-      propertyPath: SteepSlopeAccelerationInfluence
-      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 96ce700496121f643bca3782756b65b3, type: 3}

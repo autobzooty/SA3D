@@ -113,8 +113,14 @@ public class PlayerMover : MonoBehaviour
 
           stickLateralDirection = transform.TransformDirection(stickLateralDirection);
           
-          Vector3 targetLookDirection = slopeDownDirection + stickLateralDirection;
+          Vector3 targetLookDirection = slopeDownDirection;
 
+          //If this is true, we are facing down a steep slope. If you are facing uphill, you aren't allowed to affect your turn with the left stick
+          if(Vector3.Dot(transform.forward, slopeDownDirection) > 0)
+          {
+            float leftStickXMagnitude = Mathf.Abs(IL.GetLeftStickVector().x);
+            targetLookDirection += stickLateralDirection * leftStickXMagnitude;
+          }
           Vector3 newDirection = Vector3.RotateTowards(transform.forward, targetLookDirection, SteepSlopeTurnSpeed * Time.deltaTime, 0.0f);
           transform.rotation = Quaternion.LookRotation(newDirection, Vector3.up);
 
@@ -161,14 +167,16 @@ public class PlayerMover : MonoBehaviour
           //Put the vector into local player space
           leftStickDirection = transform.InverseTransformDirection(leftStickDirection);
 
+          float slidingAcceleration;
 
-          float slidingAcceleration = Mathf.Lerp(Gravity, 0, (Vector3.Dot(hit.normal, Vector3.up))) + (leftStickDirection.z * SteepSlopeAccelerationInfluence);
+          slidingAcceleration = Mathf.Lerp(Gravity, 0, (Vector3.Dot(hit.normal, Vector3.up))) + (leftStickDirection.z * SteepSlopeAccelerationInfluence);
           if(slidingAcceleration < 0)
           {
             slidingAcceleration = 0;
           }
+          
 
-          HSpeed += (Vector3.forward * (slidingAcceleration) * Time.deltaTime);
+          HSpeed += (Vector3.forward * slidingAcceleration * Time.deltaTime);
         }
       }
       else if(Diving)
@@ -427,8 +435,17 @@ public class PlayerMover : MonoBehaviour
     }
     else
     {
-      graphicals.localPosition = Vector3.zero;
-      graphicals.localEulerAngles = Vector3.zero;
+      if(Sliding)
+      {
+        graphicals.localPosition = new Vector3(0, -0.3f, 0);
+        graphicals.localEulerAngles = Vector3.zero;
+      }
+      else
+      {
+        graphicals.localPosition = Vector3.zero;
+        graphicals.localEulerAngles = Vector3.zero;
+      }
+      
     }
   }
 
