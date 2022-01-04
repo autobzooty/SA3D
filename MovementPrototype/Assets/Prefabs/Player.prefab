@@ -272,7 +272,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TurnSpeed: 15
   Acceleration: 5
-  MaxRunSpeed: 3
+  MaxRunSpeed: 4
   Gravity: 20
   StandableGroundAngle: 45
   GroundAngle: 75
