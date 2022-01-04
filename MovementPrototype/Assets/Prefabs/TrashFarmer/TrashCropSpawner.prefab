@@ -45,4 +45,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TrashPrefab: {fileID: 3636350975196665716, guid: 10e8d4dd6f4586e4a91e0a930f5790b0, type: 3}
   MinSpawnTime: 10
-  MaxSpawnTime: 25
+  MaxSpawnTime: 50
