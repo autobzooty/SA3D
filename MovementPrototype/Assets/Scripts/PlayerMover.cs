@@ -63,6 +63,11 @@ public class PlayerMover : MonoBehaviour
   private Vector3 BonkVelocity;
   private float WallKickStopWatch = 0.0f;
   private float BonkStopWatch = 0.0f;
+  private Ray[] MovementCheckRays = new Ray[9];
+  private float HMovementRaySideDepth = 0.05f;                      //Distance sidemost rays are inset from the edge of the cylinder collider
+  private float ColliderRadius = 0.15f;                             //Radius of the cylinder collider
+  private RaycastHit NearestHit;                                    //Variable used to store our nearest collider hit from our HMovement rays
+  private List<RaycastHit> WallHitInfos;                            //List used to store all our raycast hits from HMovement rays
 
   void Start()
   {
@@ -480,84 +485,34 @@ public class PlayerMover : MonoBehaviour
 
   void Move()
   {
-    if(HSpeed.magnitude > 0)
+    ConstructHMovementRays();
+    PhysicsCastHMovementRays();
+
+    //Bonk check
+    if(WallHitInfos.Count > 0)
     {
-      VelocityFacer.rotation = Quaternion.LookRotation(transform.TransformVector(HSpeed));
-    }
-    Vector3 rayDirection = VelocityFacer.forward;
-
-    Debug.DrawRay(transform.position, rayDirection, Color.green);
-    Ray[] movementCheckRays = new Ray[9];
-    List<RaycastHit> wallHitInfos = new List<RaycastHit>();
-
-    float sideDepth = 0.05f;
-    float radius = 0.15f;
-
-    //Ray definitions
-    //TO-DO: Currently we are casting in the forward direction, but we ultimately should cast in our HSpeed direction
-    //Also, the source position of each ray should be oriented around the HSpeed direction as well
-    movementCheckRays[0] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * StepHeight), rayDirection);
-    movementCheckRays[1] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * StepHeight + -Vector3.right * (radius - sideDepth)), rayDirection);
-    movementCheckRays[2] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * StepHeight + Vector3.right *  (radius - sideDepth)), rayDirection);
-
-    movementCheckRays[3] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * 0.5f), rayDirection);
-    movementCheckRays[4] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * 0.5f + -Vector3.right * (radius - sideDepth)), rayDirection);
-    movementCheckRays[5] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * 0.5f + Vector3.right *  (radius - sideDepth)), rayDirection);
-
-    movementCheckRays[6] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up), rayDirection);
-    movementCheckRays[7] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up + -Vector3.right * (radius - sideDepth)), rayDirection);
-    movementCheckRays[8] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up + Vector3.right *  (radius - sideDepth)), rayDirection);
-
-    //The side rays inset from the player's collider slightly, so we need to modify their distance based on where the ray EXITS the player's collider
-    float sideCastDistanceModifier = Mathf.Sqrt(radius * radius - (radius - sideDepth) * (radius - sideDepth));
-
-    //Physics raycast and debug draw each ray
-    for(int i = 0; i < 9; ++i)
-    {
-      //Cast distance will be a little extra on our middle rays to simulate the shape of our cylinder collider
-      float castDistance = ((i % 3 == 0) ? radius : sideCastDistanceModifier) + HSpeed.magnitude * Time.deltaTime;
-      Ray ray = movementCheckRays[i];
-      RaycastHit hit;
-      int layerMask = LayerMask.GetMask("Default");      
-      if(Physics.Raycast(ray, out hit, castDistance, layerMask, QueryTriggerInteraction.Ignore))
+      float bonkSpeedThreshold = 3.0f;
+      if(HSpeed.magnitude > bonkSpeedThreshold)
       {
-        if(Vector3.Dot(Vector3.up, hit.normal) >= GroundDotValue)
+        if(Vector3.Dot(transform.forward, NearestHit.normal) <= -0.5f)
         {
-          continue;
-        }
-        wallHitInfos.Add(hit);
-      }
-      Debug.DrawLine(ray.origin, ray.direction * castDistance + ray.origin, Color.blue);
-    }
-
-    float smallestDistance = float.MaxValue;
-    RaycastHit nearestHit = new RaycastHit();
-    foreach(RaycastHit hit in wallHitInfos)
-    {
-      if(hit.distance < smallestDistance)
-      {
-        smallestDistance = hit.distance;
-        nearestHit = hit;
-        //Bonk check
-        float bonkSpeedThreshold = 3.0f;
-        if(HSpeed.magnitude > bonkSpeedThreshold)
-        {
-          if(Vector3.Dot(transform.forward, hit.normal) <= -0.5f)
-          {
-            Bonk(hit.normal, HSpeed);
-          }
+          Bonk(NearestHit.normal, HSpeed);
         }
       }
     }
 
+    //Temporary variable for modification
     Vector3 hSpeed = HSpeed;
     //Scale HSpeed based on the angle of the wall you are hitting
-    if(wallHitInfos.Count > 0)
+    //If we're hitting any walls at all...
+    if(WallHitInfos.Count > 0)
     {
       //Doug is skeptical about this, no one knows why
-      hSpeed = hSpeed * (1 - Vector3.Dot(nearestHit.normal, -transform.forward));
+      //Alek's stamp of approval
+      hSpeed = hSpeed * (1 - Vector3.Dot(NearestHit.normal, -transform.forward));
     }
 
+    //Scale our hSpeed based on whether we are facing up or down hill
     if(OnGround)
     {
       Vector3 deFactoSlope = Vector3.Cross(Vector3.Cross(GetGroundNormal(), transform.forward), GetGroundNormal());
@@ -567,6 +522,7 @@ public class PlayerMover : MonoBehaviour
       }
     }
 
+    //Store out our previous position before moving
     Vector3 previousPosition = transform.position;
     //Move Horizontal
     hSpeed = transform.TransformVector(hSpeed);
@@ -582,20 +538,15 @@ public class PlayerMover : MonoBehaviour
     }
 
     //Eject from wall collisions
-    if(wallHitInfos.Count > 0)
+    if(WallHitInfos.Count > 0)
     {
-      
-      Physics.ComputePenetration( MovementCollider,
-                                  transform.position,
-                                  transform.rotation,
-                                  nearestHit.collider,
-                                  nearestHit.transform.position,
-                                  nearestHit.transform.rotation,
-                                  out Vector3 direction,
-                                  out float distance);
-      transform.position += direction * distance;
-      SnapToGround();
+      //Snap to ground repeatedly until EjectFromWalls() does not move the player
+      while(EjectFromWalls().sqrMagnitude > 0)
+      {
+        SnapToGround();
+      }
 
+      //Adjusting our HSpeed for the frame we collided with the wall to reflect the speed it took for us to reach contact with the wall
       Vector3 newPosition = transform.position;
       Vector3 diffVector = (previousPosition - newPosition);
       diffVector.y = 0;
@@ -603,9 +554,10 @@ public class PlayerMover : MonoBehaviour
       float adjustedHSpeedMagnitude = diffVectorDistance / Time.deltaTime;
       float hSpeedMagnitude = HSpeed.magnitude;
       HSpeed = HSpeed.normalized * Mathf.Min(hSpeedMagnitude, adjustedHSpeedMagnitude);
+      //Bounce off the walls if we are sliding
       if (Sliding)
       {
-        Vector3 newForward = Vector3.Reflect(transform.forward, nearestHit.normal);
+        Vector3 newForward = Vector3.Reflect(transform.forward, NearestHit.normal);
         newForward.y = 0;
         newForward.Normalize();
         transform.rotation = Quaternion.LookRotation(newForward, Vector3.up);
@@ -624,6 +576,105 @@ public class PlayerMover : MonoBehaviour
       }
     }
     PreviousOnGround = OnGround;
+  }
+
+  void ConstructHMovementRays()
+  {
+    //Orient our velocity facer if the player is moving. The velocity facer is used to make sure our movement check rays are pointed the right direction
+    if(HSpeed.magnitude > 0)
+    {
+      VelocityFacer.rotation = Quaternion.LookRotation(transform.TransformVector(HSpeed));
+    }
+    Vector3 rayDirection = VelocityFacer.forward;
+    //Draw the velocity facer's forward in green
+    Debug.DrawRay(transform.position, rayDirection, Color.green);   
+
+    //Ray definitions
+    //TO-DO: Currently we are casting in the forward direction, but we ultimately should cast in our HSpeed direction
+    //Also, the source position of each ray should be oriented around the HSpeed direction as well
+    //Bottom middle
+    MovementCheckRays[0] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * StepHeight), rayDirection);
+    //Bottom left
+    MovementCheckRays[1] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * StepHeight + -Vector3.right * (ColliderRadius - HMovementRaySideDepth)), rayDirection);
+    //Bottom right
+    MovementCheckRays[2] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * StepHeight + Vector3.right *  (ColliderRadius - HMovementRaySideDepth)), rayDirection);
+
+    //Middle middle
+    MovementCheckRays[3] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * 0.5f), rayDirection);
+    //Middle left
+    MovementCheckRays[4] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * 0.5f + -Vector3.right * (ColliderRadius - HMovementRaySideDepth)), rayDirection);
+    //Middle right
+    MovementCheckRays[5] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up * 0.5f + Vector3.right *  (ColliderRadius - HMovementRaySideDepth)), rayDirection);
+
+    //Top Middle
+    MovementCheckRays[6] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up), rayDirection);
+    //Top left
+    MovementCheckRays[7] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up + -Vector3.right * (ColliderRadius - HMovementRaySideDepth)), rayDirection);
+    //Top right
+    MovementCheckRays[8] = new Ray(transform.position + VelocityFacer.TransformVector(Vector3.up + Vector3.right *  (ColliderRadius - HMovementRaySideDepth)), rayDirection);
+  }
+
+  void PhysicsCastHMovementRays()
+  {
+    WallHitInfos = new List<RaycastHit>();
+    //The side rays inset from the player's collider slightly, so we need to modify their distance based on where the ray EXITS the player's collider
+    float sideCastDistanceModifier = Mathf.Sqrt(ColliderRadius * ColliderRadius - (ColliderRadius - HMovementRaySideDepth) * (ColliderRadius - HMovementRaySideDepth));
+
+    //Physics raycast and debug draw each ray
+    for(int i = 0; i < 9; ++i)
+    {
+      //Cast distance will be a little extra on our top center, middle center, and bottom center rays to simulate the shape of our cylinder collider
+      float castDistance = ((i % 3 == 0) ? ColliderRadius : sideCastDistanceModifier) + HSpeed.magnitude * Time.deltaTime;
+      Ray ray = MovementCheckRays[i];
+      RaycastHit hit;
+      int layerMask = LayerMask.GetMask("Default");
+
+      //Raycast the current indexed ray
+      if(Physics.Raycast(ray, out hit, castDistance, layerMask, QueryTriggerInteraction.Ignore))
+      {
+        //If the thing we hit is ground, don't worry about it
+        if(Vector3.Dot(Vector3.up, hit.normal) >= GroundDotValue)
+        {
+          continue;
+        }
+        //If the thing we hit is ceiling, don't worry about it
+        else if(Vector3.Dot(Vector3.down, hit.normal) >= CeilingDotValue)
+        {
+          continue;
+        }
+        //The thing we hit is definitely a wall, so add the hit info to our list
+        WallHitInfos.Add(hit);
+      }
+      Debug.DrawLine(ray.origin, ray.direction * castDistance + ray.origin, Color.blue);
+    }
+    
+    //Find which hit result is nearest
+    float smallestDistance = float.MaxValue;
+    foreach(RaycastHit hit in WallHitInfos)
+    {
+      if(hit.distance < smallestDistance)
+      {
+        smallestDistance = hit.distance;
+        NearestHit = hit;
+      }
+    }
+  }
+
+  //Returns ejection vector
+  Vector3 EjectFromWalls()
+  {
+    Vector3 previousPosition = transform.position;
+    Physics.ComputePenetration( MovementCollider,
+                                  transform.position,
+                                  transform.rotation,
+                                  NearestHit.collider,
+                                  NearestHit.transform.position,
+                                  NearestHit.transform.rotation,
+                                  out Vector3 direction,
+                                  out float distance);
+    transform.position += direction * distance;
+
+    return transform.position - previousPosition;
   }
 
   void UpdateTimers()
