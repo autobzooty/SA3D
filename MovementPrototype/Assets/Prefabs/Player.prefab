@@ -271,8 +271,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TurnSpeed: 15
-  Acceleration: 5
-  MaxRunSpeed: 4
+  Acceleration: 4
+  MaxRunSpeed: 4.5
   Gravity: 20
   StandableGroundAngle: 45
   GroundAngle: 75
@@ -291,6 +291,8 @@ MonoBehaviour:
   SteepSlopeTurnSpeed: 3
   m_PlayerUpdateHoldHandle: {fileID: 11400000, guid: fa075a8e17491934eab4c86ffd77ff5b, type: 2}
   m_PlayerInputHoldHandle: {fileID: 11400000, guid: 0fec886890221f449be05c1e168c1aed, type: 2}
+  WallKickTime: 0.13
+  BonkTime: 1.5
 --- !u!114 &-7111339994410137894
 MonoBehaviour:
   m_ObjectHideFlags: 0
