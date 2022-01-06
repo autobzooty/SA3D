@@ -2604,6 +2604,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 1775132148156881324, guid: 96ce700496121f643bca3782756b65b3, type: 3}
+      propertyPath: BonkTime
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 96ce700496121f643bca3782756b65b3, type: 3}
 --- !u!1001 &1145277025

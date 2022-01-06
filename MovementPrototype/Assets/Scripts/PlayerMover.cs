@@ -31,6 +31,9 @@ public class PlayerMover : MonoBehaviour
   public HoldHandle m_PlayerInputHoldHandle;
   public float WallKickTime = 0.13f;                              //Amount of time the player has to press A to wallkick after bonking in midair
   public float BonkTime = 1.5f;                                   //Amount of time it takes to recover from a bonk after touching the ground
+  public float BonkSpeed = 2.0f;                                  //The speed the player moves backwards after bonking
+  public float GroundBonkSpeedThreshold = 6.0f;                   //Speed required to bonk when on the ground
+  public float AirBonkSpeedThreshold = 3.0f;                      //Speed required to bonk when in the air
 
   //Components
   private InputListener IL;
@@ -491,7 +494,8 @@ public class PlayerMover : MonoBehaviour
     //Bonk check
     if(WallHitInfos.Count > 0)
     {
-      float bonkSpeedThreshold = 3.0f;
+      //Our bonk threshold is higher on the ground than it is in the air
+      float bonkSpeedThreshold = OnGround ? GroundBonkSpeedThreshold : AirBonkSpeedThreshold;
       if(HSpeed.magnitude > bonkSpeedThreshold)
       {
         if(Vector3.Dot(transform.forward, NearestHit.normal) <= -0.5f)
@@ -679,34 +683,50 @@ public class PlayerMover : MonoBehaviour
 
   void UpdateTimers()
   {
+    //Bonk timer logic
     if(Bonking)
     {
+      //If we're on the ground, there is no opportunity for a wall jump. An input hold should already be applied from the Bonk() function
       if(OnGround)
       {
+        //Increment the bonk stopwatch. When it expires, toggle the Bonking flag and release the input hold
         BonkStopWatch += Time.deltaTime;
         if(BonkStopWatch >= BonkTime)
         {
           Bonking = false;
-          if(m_PlayerInputHoldHandle.HasHolds)
-            m_PlayerInputHoldHandle.Release(this);
-        }
-      }
-      else
-      {
-        BonkStopWatch = 0.0f;
-        if(WallKickStopWatch < WallKickTime)
-        {
-          WallKickStopWatch += Time.deltaTime;
+          m_PlayerInputHoldHandle.Release(this);
         }
         else
         {
+          //If our bonk timer isn't expired yet but we are on the ground, we slowly decelerate to a stop via lerping HSpeed over the course of our bonk duration
+          float bonkSpeed = Mathf.Lerp(BonkSpeed, 0, BonkStopWatch / BonkTime);
+          HSpeed = -Vector3.forward * bonkSpeed;
+        }
+      }
+      //If we bonk in the air, we have to do some wall kick logic
+      else
+      {
+        //The bonk stop watch should always be reset to 0 if you are in midair. This will allow the player to bonk and fall down a flight of stairs, for instance
+        BonkStopWatch = 0.0f;
+        //Check if we are still in our wall kick window. WallKickStopWatch is set to 0 in the Bonk() function
+        if(WallKickStopWatch < WallKickTime)
+        {
+          //Set the WallKickWindow flag and increment the WallKickStopWatch. VSpeed is set to 0 during this time so you stick to the wall for a moment before bonking
+          WallKickWindow = true;
+          WallKickStopWatch += Time.deltaTime;
+          VSpeed = 0;
+        }
+        else
+        {
+          //Is this the first frame of our wall kick window expiring?
           if(WallKickWindow)
           {
+            //Toggle the flag and add a hold
             WallKickWindow = false;
             m_PlayerInputHoldHandle.Add(this);
           }
-          float bonkSpeed = 2.0f;
-          HSpeed = -Vector3.forward * bonkSpeed;
+          //Player moves backwards at a fixed speed when bonking in the air
+          HSpeed = -Vector3.forward * BonkSpeed;
         }
       }
     }
@@ -808,12 +828,17 @@ public class PlayerMover : MonoBehaviour
 
   void Bonk(Vector3 bonkNormal, Vector3 bonkVelocity)
   {
-    if(!OnGround)
+    if(OnGround)
+    {
+      m_PlayerInputHoldHandle.Add(this);
+    }
+    else
     {
       WallKickWindow = true;
       WallKickStopWatch = 0.0f;
     }
     Bonking = true;
+    Diving = false;
     BonkStopWatch = 0.0f;
     BonkNormal = bonkNormal;
     BonkVelocity = bonkVelocity;
