@@ -8,69 +8,79 @@ using Pixelplacement;
 public class PlayerMover : MonoBehaviour
 {
   //Public Variables
-  public float TurnSpeed = 15.0f;
-  public float Acceleration = 5.0f;
-  public float MaxRunSpeed = 4.0f;
-  public float Gravity = 10.0f;
-  public float StandableGroundAngle = 50.0f;
-  public float GroundAngle = 89.0f;
-  public float CeilingAngle = 50.0f;
-  public Collider MovementCollider;
-  public float StepHeight = 0.2f;
-  public float InitialJumpStrength = 5.0f;
-  public float AdditiveJumpStrength = 1.0f;
-  public float JumpLaunchTime = 5f/60f;
-  public Transform VelocityFacer;
-  public float MinimumJumpLaunchTime = 5/60;
-  public float JumpStrengthSpeedScalar = 1.8f;
-  public float DiveForwardStrength = 2.0f;
-  public float DiveDownwardStrength = 1.0f;
-  public float SteepSlopeAccelerationInfluence = 5.0f;
-  public float SteepSlopeTurnSpeed = 1.0f;
-  public HoldHandle m_PlayerUpdateHoldHandle;
-  public HoldHandle m_PlayerInputHoldHandle;
+  public float TurnSpeed = 15.0f;                                 //
+  public float Acceleration = 5.0f;                               //
+  public float MaxRunSpeed = 4.0f;                                //
+  public float Gravity = 10.0f;                                   //
+  public float StandableGroundAngle = 50.0f;                      //
+  public float GroundAngle = 89.0f;                               //
+  public float CeilingAngle = 50.0f;                              //
+  public Collider MovementCollider;                               //
+  public float StepHeight = 0.2f;                                 //
+  public float InitialJumpStrength = 5.0f;                        //
+  public float AdditiveJumpStrength = 1.0f;                       //
+  public float JumpLaunchTime = 5f/60f;                           //
+  public Transform VelocityFacer;                                 //
+  public float MinimumJumpLaunchTime = 5/60;                      //
+  public float JumpStrengthSpeedScalar = 1.8f;                    //
+  public float DiveForwardStrength = 2.0f;                        //
+  public float DiveDownwardStrength = 1.0f;                       //
+  public float SteepSlopeAccelerationInfluence = 5.0f;            //
+  public float SteepSlopeTurnSpeed = 1.0f;                        //
+  public HoldHandle m_PlayerUpdateHoldHandle;                     //
+  public HoldHandle m_PlayerInputHoldHandle;                      //
   public float WallKickTime = 0.13f;                              //Amount of time the player has to press A to wallkick after bonking in midair
   public float BonkTime = 1.5f;                                   //Amount of time it takes to recover from a bonk after touching the ground
   public float BonkSpeed = 2.0f;                                  //The speed the player moves backwards after bonking
   public float GroundBonkSpeedThreshold = 6.0f;                   //Speed required to bonk when on the ground
   public float AirBonkSpeedThreshold = 3.0f;                      //Speed required to bonk when in the air
+  public float HardBonkThreshold = 8.0f;                          //Speed at which a bonk will be forced to be a hard bonk
 
-  //Components
-  private InputListener IL;
+  //SFX References
+  public AudioClip JumpSound;
+  public AudioClip BonkSound;
+  public AudioClip WallImpactSound;
+  public AudioClip WallKickSound;
+  public AudioClip DiveSound;
+  public AudioClip RolloutSound;
 
-  //Private variables
-  private GameObject GameCamera;
-  private Vector3 HSpeed = new Vector3();
-  private float VSpeed = 0.0f;
-  private bool OnGround = true;
-  private bool Sliding = true;
-  private bool Diving = false;
-  private bool PreviousOnGround = true;
-  private float Deceleration;
-  private ContactPoint[] Contacts = new ContactPoint[0];
-  private float StandableGroundDotValue;
-  private float GroundDotValue;
-  private float CeilingDotValue;
-  private Vector3 MovementDirection;
-  private float JumpLaunchStopwatch = 0.0f;
-  private bool JumpLaunching = false;
-  private float JiggyJigTimer = 0.0f;
-  private bool WaitingToJig = false;
-  private GameObject DeathPlane;
-  private Vector3 LastKnownSafePosition;
-  private Vector3 LastKnownGoodCameraPosition;
-  private Quaternion LastKnownGoodCameraRotation;
-  private bool Bonking = false;
-  private bool WallKickWindow = false;                              //Is true during the first portion of an aerial bonk where a wallkick is possible.
-  private Vector3 BonkNormal;
-  private Vector3 BonkVelocity;
-  private float WallKickStopWatch = 0.0f;
-  private float BonkStopWatch = 0.0f;
-  private Ray[] MovementCheckRays = new Ray[9];
-  private float HMovementRaySideDepth = 0.05f;                      //Distance sidemost rays are inset from the edge of the cylinder collider
-  private float ColliderRadius = 0.15f;                             //Radius of the cylinder collider
-  private RaycastHit NearestHit;                                    //Variable used to store our nearest collider hit from our HMovement rays
-  private List<RaycastHit> WallHitInfos;                            //List used to store all our raycast hits from HMovement rays
+  //Components                                                    //
+  private InputListener IL;                                       //
+
+  //Private variables                                             //
+  private GameObject GameCamera;                                  //
+  private Vector3 HSpeed = new Vector3();                         //
+  private float VSpeed = 0.0f;                                    //
+  private bool OnGround = true;                                   //
+  private bool Sliding = true;                                    //
+  private bool Diving = false;                                    //
+  private bool PreviousOnGround = true;                           //
+  private float Deceleration;                                     //
+  private ContactPoint[] Contacts = new ContactPoint[0];          //
+  private float StandableGroundDotValue;                          //
+  private float GroundDotValue;                                   //
+  private float CeilingDotValue;                                  //
+  private Vector3 MovementDirection;                              //
+  private float JumpLaunchStopwatch = 0.0f;                       //
+  private bool JumpLaunching = false;                             //
+  private float JiggyJigTimer = 0.0f;                             //
+  private bool WaitingToJig = false;                              //
+  private GameObject DeathPlane;                                  //
+  private Vector3 LastKnownSafePosition;                          //
+  private Vector3 LastKnownGoodCameraPosition;                    //
+  private Quaternion LastKnownGoodCameraRotation;                 //
+  private bool Bonking = false;                                   //Flag for whether or not we are in a bonk state. Is set to true as soon as a wall collision begins
+  private bool WallKickWindow = false;                            //Is true during the first portion of an aerial bonk where a wallkick is possible.
+  private bool HardBonk;                                          //Variable for storing whether or not the next bonk will be a hard bonk
+  private Vector3 BonkNormal;                                     //Variable for storing the normal of the wall we bonked on
+  private Vector3 BonkVelocity;                                   //Variable for storing the velocity we had when we hit the wall
+  private float WallKickStopWatch = 0.0f;                         //Stop watch for timing the window after a wall collision but before a bonk
+  private float BonkStopWatch = 0.0f;                             //Stop watch for timing the bonk
+  private Ray[] MovementCheckRays = new Ray[9];                   //Array of rays used to check for wall collision in our forward direction
+  private float HMovementRaySideDepth = 0.05f;                    //Distance sidemost rays are inset from the edge of the cylinder collider
+  private float ColliderRadius = 0.15f;                           //Radius of the cylinder collider
+  private RaycastHit NearestHit;                                  //Variable used to store our nearest collider hit from our HMovement rays
+  private List<RaycastHit> WallHitInfos;                          //List used to store all our raycast hits from HMovement rays
 
   void Start()
   {
@@ -415,6 +425,7 @@ public class PlayerMover : MonoBehaviour
     {
       if(OnGround && !Diving && !Sliding)
       {
+        AudioSource.PlayClipAtPoint(JumpSound, transform.position);
         JumpLaunching = true;
       }
       if(Bonking && !Diving && WallKickWindow)
@@ -426,6 +437,7 @@ public class PlayerMover : MonoBehaviour
 
   void WallKick()
   {
+    AudioSource.PlayClipAtPoint(WallKickSound, transform.position);
     Bonking = false;
     VSpeed = 0;
     float firstieScalar = Mathf.Lerp(1.2f, 0.5f, WallKickStopWatch / WallKickTime);
@@ -440,6 +452,7 @@ public class PlayerMover : MonoBehaviour
   {
     if(IL.GetLeftButtonDown() && !Diving)
     {
+      AudioSource.PlayClipAtPoint(DiveSound, transform.position);
       Diving = true;
       HSpeed.z += DiveForwardStrength;
       if(OnGround)
@@ -455,6 +468,7 @@ public class PlayerMover : MonoBehaviour
     }
     else if((IL.GetLeftButtonDown() || IL.GetBottomButtonDown()) && Diving && OnGround)
     {
+      AudioSource.PlayClipAtPoint(RolloutSound, transform.position);
       VSpeed += InitialJumpStrength;
       OnGround = false;
       Diving = false;
@@ -500,7 +514,20 @@ public class PlayerMover : MonoBehaviour
       {
         if(Vector3.Dot(transform.forward, NearestHit.normal) <= -0.5f)
         {
-          Bonk(NearestHit.normal, HSpeed);
+          //The bonk will be a hard bonk if they are on the ground, or if they are diving during an air bonk
+          bool hardBonk = false;
+          if(OnGround)
+          {
+            hardBonk = true;
+          }
+          else
+          {
+            if(Diving || HSpeed.magnitude >= HardBonkThreshold)
+            {
+              hardBonk = true;
+            }
+          }
+          Bonk(hardBonk, NearestHit.normal, HSpeed);
         }
       }
     }
@@ -689,9 +716,10 @@ public class PlayerMover : MonoBehaviour
       //If we're on the ground, there is no opportunity for a wall jump. An input hold should already be applied from the Bonk() function
       if(OnGround)
       {
-        //Increment the bonk stopwatch. When it expires, toggle the Bonking flag and release the input hold
+        Diving = false;
         BonkStopWatch += Time.deltaTime;
-        if(BonkStopWatch >= BonkTime)
+        //Bonk is over when the bonk stop watch finishes or if we are not hard bonking
+        if(BonkStopWatch >= BonkTime || !HardBonk)
         {
           Bonking = false;
           m_PlayerInputHoldHandle.Release(this);
@@ -708,8 +736,8 @@ public class PlayerMover : MonoBehaviour
       {
         //The bonk stop watch should always be reset to 0 if you are in midair. This will allow the player to bonk and fall down a flight of stairs, for instance
         BonkStopWatch = 0.0f;
-        //Check if we are still in our wall kick window. WallKickStopWatch is set to 0 in the Bonk() function
-        if(WallKickStopWatch < WallKickTime)
+        //Check if we are still in our wall kick window. WallKickStopWatch is set to 0 in the Bonk() function. There is no wall kick window if the player is diving.
+        if(WallKickStopWatch < WallKickTime && !Diving)
         {
           //Set the WallKickWindow flag and increment the WallKickStopWatch. VSpeed is set to 0 during this time so you stick to the wall for a moment before bonking
           WallKickWindow = true;
@@ -721,6 +749,7 @@ public class PlayerMover : MonoBehaviour
           //Is this the first frame of our wall kick window expiring?
           if(WallKickWindow)
           {
+            AudioSource.PlayClipAtPoint(BonkSound, transform.position);
             //Toggle the flag and add a hold
             WallKickWindow = false;
             m_PlayerInputHoldHandle.Add(this);
@@ -826,10 +855,11 @@ public class PlayerMover : MonoBehaviour
     LastKnownGoodCameraRotation = GameCamera.transform.rotation;
   }
 
-  void Bonk(Vector3 bonkNormal, Vector3 bonkVelocity)
+  void Bonk(bool hardBonk, Vector3 bonkNormal, Vector3 bonkVelocity)
   {
     if(OnGround)
     {
+      AudioSource.PlayClipAtPoint(BonkSound, transform.position);
       m_PlayerInputHoldHandle.Add(this);
     }
     else
@@ -837,8 +867,9 @@ public class PlayerMover : MonoBehaviour
       WallKickWindow = true;
       WallKickStopWatch = 0.0f;
     }
+    AudioSource.PlayClipAtPoint(WallImpactSound, transform.position);
+    HardBonk = hardBonk;
     Bonking = true;
-    Diving = false;
     BonkStopWatch = 0.0f;
     BonkNormal = bonkNormal;
     BonkVelocity = bonkVelocity;

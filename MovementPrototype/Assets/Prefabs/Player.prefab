@@ -292,7 +292,17 @@ MonoBehaviour:
   m_PlayerUpdateHoldHandle: {fileID: 11400000, guid: fa075a8e17491934eab4c86ffd77ff5b, type: 2}
   m_PlayerInputHoldHandle: {fileID: 11400000, guid: 0fec886890221f449be05c1e168c1aed, type: 2}
   WallKickTime: 0.13
-  BonkTime: 1.5
+  BonkTime: 1
+  BonkSpeed: 2
+  GroundBonkSpeedThreshold: 6
+  AirBonkSpeedThreshold: 3
+  HardBonkThreshold: 8
+  JumpSound: {fileID: 8300000, guid: 518827b3dc8320e4daa77c506bae84de, type: 3}
+  BonkSound: {fileID: 8300000, guid: 87ea3d06f19f9f54b935fa675d7951e7, type: 3}
+  WallImpactSound: {fileID: 8300000, guid: 8bd8ade6f609a0c42af86c9de13354c3, type: 3}
+  WallKickSound: {fileID: 8300000, guid: 48aad33edebc5854dad4091afe1435cc, type: 3}
+  DiveSound: {fileID: 8300000, guid: 34f4c878ee2bef449b9fdce9c3c46144, type: 3}
+  RolloutSound: {fileID: 8300000, guid: f8c988fcca5bb524e900f1fbccf0c44c, type: 3}
 --- !u!114 &-7111339994410137894
 MonoBehaviour:
   m_ObjectHideFlags: 0
