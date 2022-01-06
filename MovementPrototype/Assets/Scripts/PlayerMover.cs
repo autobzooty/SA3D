@@ -687,7 +687,8 @@ public class PlayerMover : MonoBehaviour
         if(BonkStopWatch >= BonkTime)
         {
           Bonking = false;
-          m_PlayerInputHoldHandle.Release(this);
+          if(m_PlayerInputHoldHandle.HasHolds)
+            m_PlayerInputHoldHandle.Release(this);
         }
       }
       else
@@ -733,7 +734,8 @@ public class PlayerMover : MonoBehaviour
     int layerMask = LayerMask.GetMask("Default");
     Ray ray = new Ray(transform.position + transform.up, -transform.up);
     //The "2" here is kind of a magic number
-    if(Physics.Raycast(ray, out RaycastHit hit, 2, layerMask, QueryTriggerInteraction.Ignore))
+    float castDistance = (OnGround) ? 2 : VSpeed * Time.deltaTime;
+    if(Physics.Raycast(ray, out RaycastHit hit, castDistance, layerMask, QueryTriggerInteraction.Ignore))
     {
       transform.position = hit.point;
       if(Sliding == false)
