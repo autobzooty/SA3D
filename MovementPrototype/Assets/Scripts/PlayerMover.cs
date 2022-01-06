@@ -29,6 +29,8 @@ public class PlayerMover : MonoBehaviour
   public float SteepSlopeTurnSpeed = 1.0f;
   public HoldHandle m_PlayerUpdateHoldHandle;
   public HoldHandle m_PlayerInputHoldHandle;
+  public float WallKickTime = 0.13f;                              //Amount of time the player has to press A to wallkick after bonking in midair
+  public float BonkTime = 1.5f;                                   //Amount of time it takes to recover from a bonk after touching the ground
 
   //Components
   private InputListener IL;
@@ -55,6 +57,12 @@ public class PlayerMover : MonoBehaviour
   private Vector3 LastKnownSafePosition;
   private Vector3 LastKnownGoodCameraPosition;
   private Quaternion LastKnownGoodCameraRotation;
+  private bool Bonking = false;
+  private bool WallKickWindow = false;                              //Is true during the first portion of an aerial bonk where a wallkick is possible.
+  private Vector3 BonkNormal;
+  private Vector3 BonkVelocity;
+  private float WallKickStopWatch = 0.0f;
+  private float BonkStopWatch = 0.0f;
 
   void Start()
   {
@@ -75,6 +83,7 @@ public class PlayerMover : MonoBehaviour
     HSpeedUpdate();
     VSpeedUpdate();
     Move();
+    UpdateTimers();
   }
 
   void FindGameCamera()
@@ -394,10 +403,29 @@ public class PlayerMover : MonoBehaviour
 
   void AttemptJump()
   {
-    if(IL.GetBottomButtonDown() && OnGround && !Diving && !Sliding)
+    if (IL.GetBottomButtonDown())
     {
-      JumpLaunching = true;
+      if(OnGround && !Diving && !Sliding)
+      {
+        JumpLaunching = true;
+      }
+      if(Bonking && !Diving && WallKickWindow)
+      {
+        WallKick();
+      }
     }
+  }
+
+  void WallKick()
+  {
+    Bonking = false;
+    VSpeed = 0;
+    float firstieScalar = Mathf.Lerp(1.2f, 0.5f, WallKickStopWatch / WallKickTime);
+    HSpeed = BonkVelocity * firstieScalar;
+    JumpLaunching = true;
+    Vector3 newForward = Vector3.Reflect(transform.forward, BonkNormal);
+    newForward.y = 0;
+    transform.rotation = Quaternion.LookRotation(newForward, Vector3.up);
   }
 
   void AttemptDive()
@@ -428,24 +456,25 @@ public class PlayerMover : MonoBehaviour
   void UpdateGraphicals()
   {
     Transform graphicals = transform.Find("Graphicals").transform;
-    if(Diving)
+    if(Bonking && !WallKickWindow)
+    {
+      graphicals.localPosition = new Vector3(0, 0, 0f);
+      graphicals.localEulerAngles = new Vector3(-35, 0, 0);
+    }
+    else if(Diving)
     {
       graphicals.localPosition = new Vector3(0, 0, -0.4f);
       graphicals.localEulerAngles = new Vector3(90, 0, 0);
     }
+    else if(Sliding)
+    {
+      graphicals.localPosition = new Vector3(0, -0.3f, 0);
+      graphicals.localEulerAngles = Vector3.zero;
+    }
     else
     {
-      if(Sliding)
-      {
-        graphicals.localPosition = new Vector3(0, -0.3f, 0);
-        graphicals.localEulerAngles = Vector3.zero;
-      }
-      else
-      {
-        graphicals.localPosition = Vector3.zero;
-        graphicals.localEulerAngles = Vector3.zero;
-      }
-      
+      graphicals.localPosition = Vector3.zero;
+      graphicals.localEulerAngles = Vector3.zero;
     }
   }
 
@@ -509,6 +538,15 @@ public class PlayerMover : MonoBehaviour
       {
         smallestDistance = hit.distance;
         nearestHit = hit;
+        //Bonk check
+        float bonkSpeedThreshold = 3.0f;
+        if(HSpeed.magnitude > bonkSpeedThreshold)
+        {
+          if(Vector3.Dot(transform.forward, hit.normal) <= -0.5f)
+          {
+            Bonk(hit.normal, HSpeed);
+          }
+        }
       }
     }
 
@@ -586,6 +624,40 @@ public class PlayerMover : MonoBehaviour
       }
     }
     PreviousOnGround = OnGround;
+  }
+
+  void UpdateTimers()
+  {
+    if(Bonking)
+    {
+      if(OnGround)
+      {
+        BonkStopWatch += Time.deltaTime;
+        if(BonkStopWatch >= BonkTime)
+        {
+          Bonking = false;
+          m_PlayerInputHoldHandle.Release(this);
+        }
+      }
+      else
+      {
+        BonkStopWatch = 0.0f;
+        if(WallKickStopWatch < WallKickTime)
+        {
+          WallKickStopWatch += Time.deltaTime;
+        }
+        else
+        {
+          if(WallKickWindow)
+          {
+            WallKickWindow = false;
+            m_PlayerInputHoldHandle.Add(this);
+          }
+          float bonkSpeed = 2.0f;
+          HSpeed = -Vector3.forward * bonkSpeed;
+        }
+      }
+    }
   }
 
   //Returns Vector3.zero if it's fucked up
@@ -679,5 +751,18 @@ public class PlayerMover : MonoBehaviour
     LastKnownSafePosition = transform.position;
     LastKnownGoodCameraPosition = GameCamera.transform.position;
     LastKnownGoodCameraRotation = GameCamera.transform.rotation;
+  }
+
+  void Bonk(Vector3 bonkNormal, Vector3 bonkVelocity)
+  {
+    if(!OnGround)
+    {
+      WallKickWindow = true;
+      WallKickStopWatch = 0.0f;
+    }
+    Bonking = true;
+    BonkStopWatch = 0.0f;
+    BonkNormal = bonkNormal;
+    BonkVelocity = bonkVelocity;
   }
 }
