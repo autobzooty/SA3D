@@ -1,16 +1,25 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Pixelplacement;
 
 public class GameCamera : MonoBehaviour
 {
+  public enum CameraModes
+  {
+    Orbit,
+    Static,
+  }
   public GameObject Target;
   public float SpeedScalar = 1.0f;
   public float TargetDistance = 5.0f;
 
   private InputListener IL;
+
+  private CameraModes CurrentCameraMode;
   void Start()
   {
+    CurrentCameraMode = CameraModes.Orbit;
     IL = GetComponent<InputListener>();
     if(!Target)
     {
@@ -20,11 +29,14 @@ public class GameCamera : MonoBehaviour
 
   void Update()
   {
-    Truck();
-    Boom();
-    LookAtTarget();
-    MoveToTargetDistance();
-    SnapToSurface();
+    if(CurrentCameraMode == CameraModes.Orbit)
+    {
+      Truck();
+      Boom();
+      LookAtTarget();
+      MoveToTargetDistance();
+      SnapToSurface();
+    }
   }
 
   void Truck()
@@ -61,5 +73,17 @@ public class GameCamera : MonoBehaviour
   void SnapToSurface()
   {
 
+  }
+
+  public void SwitchToStaticCam(Transform staticCamTransform, float switchTime)
+  {
+    CurrentCameraMode = CameraModes.Static;
+    Tween.Position(transform, staticCamTransform.position, switchTime, 0, Tween.EaseInOut, Tween.LoopType.None);
+    Tween.Rotation(transform, staticCamTransform.rotation, switchTime, 0, Tween.EaseInOut, Tween.LoopType.None);
+  }
+
+  public void SwitchToOrbitCam()
+  {
+    CurrentCameraMode = CameraModes.Orbit;
   }
 }
