@@ -8,7 +8,8 @@ using Pixelplacement;
 public class PlayerMover : MonoBehaviour
 {
   //Public Variables
-  public float TurnSpeed = 15.0f;                                 //
+  public float MaxTurnSpeed = 8.0f;                               //This is our turn speed when our HSpeed crosses the InstantTurnThreshold
+  public float MinTurnSpeed = 3.0f;                               //This is our turn speed when our HSpeed reaches MaxRunSpeed
   public float Acceleration = 5.0f;                               //
   public float MaxRunSpeed = 4.0f;                                //
   public float Gravity = 10.0f;                                   //
@@ -35,6 +36,7 @@ public class PlayerMover : MonoBehaviour
   public float GroundBonkSpeedThreshold = 6.0f;                   //Speed required to bonk when on the ground
   public float AirBonkSpeedThreshold = 3.0f;                      //Speed required to bonk when in the air
   public float HardBonkThreshold = 8.0f;                          //Speed at which a bonk will be forced to be a hard bonk
+  public float InstantTurnThreshold = 1.0f;                       //If the player is moving slower than this speed, their turn speed is instantaneous
 
   //SFX References
   public AudioClip JumpSound;
@@ -150,7 +152,6 @@ public class PlayerMover : MonoBehaviour
           }
           Vector3 newDirection = Vector3.RotateTowards(transform.forward, targetLookDirection, SteepSlopeTurnSpeed * Time.deltaTime, 0.0f);
           transform.rotation = Quaternion.LookRotation(newDirection, Vector3.up);
-
           Debug.DrawLine(transform.position, transform.position + stickLateralDirection * 4);
         }
       }
@@ -162,9 +163,19 @@ public class PlayerMover : MonoBehaviour
         targetLookDirection.y = 0;
         //Normalize the vector for good measure since we modified the Y value, though this probably doesn't matter
         targetLookDirection.Normalize();
+        //Lerp our turn speed based on our HSpeed
+        float turnSpeed = Mathf.Lerp(MaxTurnSpeed, MinTurnSpeed, HSpeed.magnitude/MaxRunSpeed);
         //Rotate towards the target rotation at a set speed
-        Vector3 newDirection = Vector3.RotateTowards(transform.forward, targetLookDirection, TurnSpeed * Time.deltaTime, 0.0f);
-        transform.rotation = Quaternion.LookRotation(newDirection, Vector3.up);
+        Vector3 newDirection = Vector3.RotateTowards(transform.forward, targetLookDirection, turnSpeed * Time.deltaTime, 0.0f);
+
+        if(HSpeed.magnitude <= InstantTurnThreshold && IL.GetLeftStickVector().magnitude >= 0.25f)
+        {
+          transform.rotation = Quaternion.LookRotation(targetLookDirection, Vector3.up);
+        }
+        else
+        {
+          transform.rotation = Quaternion.LookRotation(newDirection, Vector3.up);
+        }
       }
     }
   }
@@ -579,6 +590,7 @@ public class PlayerMover : MonoBehaviour
         ++numberOfIterations;
         if(numberOfIterations > 100)
         {
+          //This break is a failsafe, though hitting it means we probably have an issue. We hit it from time to time :)
           break;
         }
       }
