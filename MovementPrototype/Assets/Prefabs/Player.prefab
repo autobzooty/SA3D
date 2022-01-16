@@ -272,9 +272,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MaxTurnSpeed: 8
-  MinTurnSpeed: 3
+  MinTurnSpeed: 4
   Acceleration: 4
-  MaxRunSpeed: 4.5
+  MaxRunSpeed: 5.5
   Gravity: 20
   StandableGroundAngle: 45
   GroundAngle: 75
@@ -300,6 +300,8 @@ MonoBehaviour:
   AirBonkSpeedThreshold: 3
   HardBonkThreshold: 8
   InstantTurnThreshold: 1
+  TurnKickSpeedThreshold: 3
+  TurnKickDeceleration: 20
   JumpSound: {fileID: 8300000, guid: 518827b3dc8320e4daa77c506bae84de, type: 3}
   BonkSound: {fileID: 8300000, guid: 87ea3d06f19f9f54b935fa675d7951e7, type: 3}
   WallImpactSound: {fileID: 8300000, guid: 8bd8ade6f609a0c42af86c9de13354c3, type: 3}

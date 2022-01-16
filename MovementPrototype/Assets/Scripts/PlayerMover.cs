@@ -37,6 +37,8 @@ public class PlayerMover : MonoBehaviour
   public float AirBonkSpeedThreshold = 3.0f;                      //Speed required to bonk when in the air
   public float HardBonkThreshold = 8.0f;                          //Speed at which a bonk will be forced to be a hard bonk
   public float InstantTurnThreshold = 1.0f;                       //If the player is moving slower than this speed, their turn speed is instantaneous
+  public float TurnKickSpeedThreshold = 3.0f;                     //Speed required for a turn kick to be possible
+  public float TurnKickDeceleration = 25.0f;                      //Deceleration rate after a turn kick begins
 
   //SFX References
   public AudioClip JumpSound;
@@ -83,6 +85,7 @@ public class PlayerMover : MonoBehaviour
   private float ColliderRadius = 0.15f;                           //Radius of the cylinder collider
   private RaycastHit NearestHit;                                  //Variable used to store our nearest collider hit from our HMovement rays
   private List<RaycastHit> WallHitInfos;                          //List used to store all our raycast hits from HMovement rays
+  private bool TurnKicking = false;                               //Bool for controlling whether or not we are in a turn kicking state
 
   void Start()
   {
@@ -157,24 +160,54 @@ public class PlayerMover : MonoBehaviour
       }
       else
       {
-        //Put the left stick input into camera space
-        Vector3 targetLookDirection = GameCamera.transform.TransformDirection(new Vector3(IL.GetLeftStickVector().x, 0, IL.GetLeftStickVector().y));
-        //We never want the character to look up or down, so 0 this value out
-        targetLookDirection.y = 0;
-        //Normalize the vector for good measure since we modified the Y value, though this probably doesn't matter
-        targetLookDirection.Normalize();
-        //Lerp our turn speed based on our HSpeed
-        float turnSpeed = Mathf.Lerp(MaxTurnSpeed, MinTurnSpeed, HSpeed.magnitude/MaxRunSpeed);
-        //Rotate towards the target rotation at a set speed
-        Vector3 newDirection = Vector3.RotateTowards(transform.forward, targetLookDirection, turnSpeed * Time.deltaTime, 0.0f);
-
-        if(HSpeed.magnitude <= InstantTurnThreshold && IL.GetLeftStickVector().magnitude >= 0.25f)
+        if(TurnKicking)
         {
-          transform.rotation = Quaternion.LookRotation(targetLookDirection, Vector3.up);
+          Vector3 decelerationDirection = -HSpeed.normalized;
+          //TO-DO: Set up a property on SurfaceProperties that can modify TurnKickDeceleration to make certain surfaces more grippy or more slippy
+          HSpeed += decelerationDirection * TurnKickDeceleration * Time.deltaTime;
+          if(Vector3.Dot(HSpeed, decelerationDirection) > 0)
+          {
+            HSpeed = Vector3.zero;
+          }
+          if(HSpeed == Vector3.zero)
+          {
+            transform.rotation = Quaternion.LookRotation(-transform.forward, Vector3.up);
+            TurnKicking = false;
+            return;
+          }
         }
         else
         {
-          transform.rotation = Quaternion.LookRotation(newDirection, Vector3.up);
+          //Put the left stick input into camera space
+          Vector3 targetLookDirection = GameCamera.transform.TransformDirection(new Vector3(IL.GetLeftStickVector().x, 0, IL.GetLeftStickVector().y));
+          //We never want the character to look up or down, so 0 this value out
+          targetLookDirection.y = 0;
+          //Normalize the vector for good measure since we modified the Y value, though this probably doesn't matter
+          targetLookDirection.Normalize();
+
+          //TurnKick check
+          if( Vector3.Dot(targetLookDirection, transform.forward) < -0.80f &&
+              HSpeed.magnitude > TurnKickSpeedThreshold &&
+              IL.GetLeftStickVector().magnitude > 0.5f)
+          {
+            print("Turn kick");
+            TurnKicking = true;
+            return;
+          }
+
+          //Lerp our turn speed based on our HSpeed
+          float turnSpeed = Mathf.Lerp(MaxTurnSpeed, MinTurnSpeed, HSpeed.magnitude/MaxRunSpeed);
+          //Rotate towards the target rotation at a set speed
+          Vector3 newDirection = Vector3.RotateTowards(transform.forward, targetLookDirection, turnSpeed * Time.deltaTime, 0.0f);
+
+          if(HSpeed.magnitude <= InstantTurnThreshold && IL.GetLeftStickVector().magnitude >= 0.25f)
+          {
+            transform.rotation = Quaternion.LookRotation(targetLookDirection, Vector3.up);
+          }
+          else
+          {
+            transform.rotation = Quaternion.LookRotation(newDirection, Vector3.up);
+          }
         }
       }
     }
@@ -438,6 +471,11 @@ public class PlayerMover : MonoBehaviour
       {
         AudioSource.PlayClipAtPoint(JumpSound, transform.position);
         JumpLaunching = true;
+        if(TurnKicking)
+        {
+          transform.rotation = Quaternion.LookRotation(-transform.forward, Vector3.up);
+          TurnKicking = false;
+        }
       }
       if(Bonking && !Diving && WallKickWindow)
       {
@@ -465,15 +503,26 @@ public class PlayerMover : MonoBehaviour
     {
       AudioSource.PlayClipAtPoint(DiveSound, transform.position);
       Diving = true;
-      HSpeed.z += DiveForwardStrength;
       if(OnGround)
       {
-        VSpeed += InitialJumpStrength;
+        if(TurnKicking)
+        {
+          transform.rotation = Quaternion.LookRotation(-transform.forward, Vector3.up);
+          HSpeed.z = DiveForwardStrength * 2.5f;
+          VSpeed += InitialJumpStrength * 1.5f;
+          TurnKicking = false;
+        }
+        else
+        {
+          HSpeed.z += DiveForwardStrength;
+          VSpeed += InitialJumpStrength;
+        }
         OnGround = false;
         Diving = true;
       }
       else
       {
+        HSpeed.z += DiveForwardStrength;
         VSpeed -= DiveDownwardStrength;
       }
     }
@@ -503,6 +552,11 @@ public class PlayerMover : MonoBehaviour
     {
       graphicals.localPosition = new Vector3(0, -0.3f, 0);
       graphicals.localEulerAngles = Vector3.zero;
+    }
+    else if(TurnKicking)
+    {
+      graphicals.localPosition = new Vector3(0, 0, 0);
+      graphicals.localEulerAngles = new Vector3(-15, 0, 0);
     }
     else
     {
