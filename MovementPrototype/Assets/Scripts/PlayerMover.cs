@@ -571,10 +571,16 @@ public class PlayerMover : MonoBehaviour
     //Eject from wall collisions
     if(WallHitInfos.Count > 0)
     {
+      int numberOfIterations = 0;
       //Snap to ground repeatedly until EjectFromWalls() does not move the player
       while(EjectFromWalls().sqrMagnitude > 0)
       {
         SnapToGround();
+        ++numberOfIterations;
+        if(numberOfIterations > 100)
+        {
+          break;
+        }
       }
 
       //Adjusting our HSpeed for the frame we collided with the wall to reflect the speed it took for us to reach contact with the wall
@@ -873,5 +879,15 @@ public class PlayerMover : MonoBehaviour
     BonkStopWatch = 0.0f;
     BonkNormal = bonkNormal;
     BonkVelocity = bonkVelocity;
+  }
+
+  public void OnLeftStickSpin()
+  {
+    print("SPEEN");
+    if(!OnGround && !Bonking && !Diving)
+    {
+      HSpeed *= 0.15f;
+      VSpeed *= 0.15f;
+    }
   }
 }
