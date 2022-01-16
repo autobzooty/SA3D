@@ -11,7 +11,7 @@ public class DropShadow : MonoBehaviour
     MyDropShadow = GameObject.Instantiate(DropShadowPrefab);
   }
 
-  void Update()
+  void LateUpdate()
   {
     Ray ray = new Ray(transform.position + Vector3.up, Vector3.down);
     float maxDistance = 20.0f;
