@@ -190,7 +190,6 @@ public class PlayerMover : MonoBehaviour
               HSpeed.magnitude > TurnKickSpeedThreshold &&
               IL.GetLeftStickVector().magnitude > 0.5f)
           {
-            print("Turn kick");
             TurnKicking = true;
             return;
           }

@@ -97,6 +97,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bbb849fd16cd7c0498561060860539a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  MinDistanceToGround: 0.5
   Target: {fileID: 0}
   SpeedScalar: 7
   TargetDistance: 5

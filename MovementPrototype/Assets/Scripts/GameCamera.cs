@@ -5,6 +5,7 @@ using Pixelplacement;
 
 public class GameCamera : MonoBehaviour
 {
+  public float MinDistanceToGround = 2.0f;
   public enum CameraModes
   {
     Orbit,
@@ -47,6 +48,12 @@ public class GameCamera : MonoBehaviour
   void Boom()
   {
     transform.position += transform.up * -IL.GetRightStickVector().y * SpeedScalar * Time.deltaTime;
+    Ray downRay = new Ray(transform.position, Vector3.down);
+    int layerMask = LayerMask.GetMask("Default");
+    if(Physics.Raycast(downRay, out RaycastHit hitInfo, MinDistanceToGround, layerMask, QueryTriggerInteraction.Ignore))
+    {
+      transform.position = hitInfo.point + Vector3.up * MinDistanceToGround;
+    }
   }
 
   void LookAtTarget()
@@ -61,7 +68,13 @@ public class GameCamera : MonoBehaviour
     int layerMask = LayerMask.GetMask("Default");
     if(Physics.Raycast(snapRay, out RaycastHit hitInfo, TargetDistance, layerMask, QueryTriggerInteraction.Ignore))
     {
-      transform.position = hitInfo.point;
+      //Only snap to walls, not floors or ceilings
+      Vector3 normalForwardVector = hitInfo.normal;
+      normalForwardVector.y = 0;
+      if(Vector3.Angle(hitInfo.normal, normalForwardVector) > 75.0f)
+      {
+        transform.position = hitInfo.point;
+      }
     }
     else
     {

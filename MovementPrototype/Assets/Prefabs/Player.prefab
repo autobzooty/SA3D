@@ -272,7 +272,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MaxTurnSpeed: 8
-  MinTurnSpeed: 4
+  MinTurnSpeed: 5
   Acceleration: 4
   MaxRunSpeed: 5.5
   Gravity: 20

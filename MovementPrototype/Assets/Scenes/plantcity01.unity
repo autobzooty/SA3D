@@ -1978,6 +1978,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: GameCamera
       objectReference: {fileID: 0}
+    - target: {fileID: 4072428766789503994, guid: dc42a3535b643bd4d81fd09c84a7f679, type: 3}
+      propertyPath: MinDistanceToGround
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 4072428766789503995, guid: dc42a3535b643bd4d81fd09c84a7f679, type: 3}
       propertyPath: m_RootOrder
       value: 2
@@ -2706,16 +2710,8 @@ PrefabInstance:
       value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 1775132148156881324, guid: 96ce700496121f643bca3782756b65b3, type: 3}
-      propertyPath: MaxRunSpeed
-      value: 5.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 1775132148156881324, guid: 96ce700496121f643bca3782756b65b3, type: 3}
       propertyPath: MinTurnSpeed
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 1775132148156881324, guid: 96ce700496121f643bca3782756b65b3, type: 3}
-      propertyPath: TurnKickDeceleration
-      value: 20
+      value: 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 96ce700496121f643bca3782756b65b3, type: 3}
