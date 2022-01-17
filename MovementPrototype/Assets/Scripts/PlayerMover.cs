@@ -83,8 +83,9 @@ public class PlayerMover : MonoBehaviour
   private Ray[] MovementCheckRays = new Ray[9];                   //Array of rays used to check for wall collision in our forward direction
   private float HMovementRaySideDepth = 0.05f;                    //Distance sidemost rays are inset from the edge of the cylinder collider
   private float ColliderRadius = 0.15f;                           //Radius of the cylinder collider
-  private RaycastHit NearestHit;                                  //Variable used to store our nearest collider hit from our HMovement rays
-  private List<RaycastHit> WallHitInfos;                          //List used to store all our raycast hits from HMovement rays
+  private RaycastHit NearestWallHit;                              //Variable used to store our nearest wall collider hit from our HMovement rays
+  private List<RaycastHit> WallHitInfos;                          //List used to store all our wall raycast hits from HMovement rays
+  private List<RaycastHit> GroundHitInfos;                        //List used to store all our ground raycast hits from HMovement rays
   private bool TurnKicking = false;                               //Bool for controlling whether or not we are in a turn kicking state
 
   void Start()
@@ -96,6 +97,7 @@ public class PlayerMover : MonoBehaviour
     CeilingDotValue = Mathf.Cos(Mathf.Deg2Rad * CeilingAngle);
     FindGameCamera();
     DeathPlane = GameObject.Find("DeathPlane");
+    GroundHitInfos = new List<RaycastHit>();
   }
 
   void Update()
@@ -398,6 +400,12 @@ public class PlayerMover : MonoBehaviour
   //Also updates Sliding
   void UpdateOnGround()
   {
+    //If one of our wall check colliders has hit ground while we are in the air, it means that we are jumping into a slope. This takes priority over all other ground checks.
+    if(GroundHitInfos.Count > 0 && !OnGround)
+    {
+      OnGround = true;
+      return;
+    }
     //Default OnGround to false. If we find a ground normal, we'll flip it to true
     OnGround = false;
 
@@ -576,7 +584,7 @@ public class PlayerMover : MonoBehaviour
       float bonkSpeedThreshold = OnGround ? GroundBonkSpeedThreshold : AirBonkSpeedThreshold;
       if(HSpeed.magnitude > bonkSpeedThreshold)
       {
-        if(Vector3.Dot(transform.forward, NearestHit.normal) <= -0.5f)
+        if(Vector3.Dot(transform.forward, NearestWallHit.normal) <= -0.5f)
         {
           //The bonk will be a hard bonk if they are on the ground, or if they are diving during an air bonk
           bool hardBonk = false;
@@ -591,7 +599,7 @@ public class PlayerMover : MonoBehaviour
               hardBonk = true;
             }
           }
-          Bonk(hardBonk, NearestHit.normal, HSpeed);
+          Bonk(hardBonk, NearestWallHit.normal, HSpeed);
         }
       }
     }
@@ -604,7 +612,7 @@ public class PlayerMover : MonoBehaviour
     {
       //Doug is skeptical about this, no one knows why
       //Alek's stamp of approval
-      hSpeed = hSpeed * (1 - Vector3.Dot(NearestHit.normal, -transform.forward));
+      hSpeed = hSpeed * (1 - Vector3.Dot(NearestWallHit.normal, -transform.forward));
     }
 
     //Scale our hSpeed based on whether we are facing up or down hill
@@ -659,7 +667,7 @@ public class PlayerMover : MonoBehaviour
       //Bounce off the walls if we are sliding
       if (Sliding)
       {
-        Vector3 newForward = Vector3.Reflect(transform.forward, NearestHit.normal);
+        Vector3 newForward = Vector3.Reflect(transform.forward, NearestWallHit.normal);
         newForward.y = 0;
         newForward.Normalize();
         transform.rotation = Quaternion.LookRotation(newForward, Vector3.up);
@@ -719,6 +727,7 @@ public class PlayerMover : MonoBehaviour
   void PhysicsCastHMovementRays()
   {
     WallHitInfos = new List<RaycastHit>();
+    GroundHitInfos = new List<RaycastHit>();
     //The side rays inset from the player's collider slightly, so we need to modify their distance based on where the ray EXITS the player's collider
     float sideCastDistanceModifier = Mathf.Sqrt(ColliderRadius * ColliderRadius - (ColliderRadius - HMovementRaySideDepth) * (ColliderRadius - HMovementRaySideDepth));
 
@@ -734,30 +743,33 @@ public class PlayerMover : MonoBehaviour
       //Raycast the current indexed ray
       if(Physics.Raycast(ray, out hit, castDistance, layerMask, QueryTriggerInteraction.Ignore))
       {
-        //If the thing we hit is ground, don't worry about it
+        //If the thing we hit is ground, add it to the ground list
         if(Vector3.Dot(Vector3.up, hit.normal) >= GroundDotValue)
         {
-          continue;
+          GroundHitInfos.Add(hit);
         }
         //If the thing we hit is ceiling, don't worry about it
         else if(Vector3.Dot(Vector3.down, hit.normal) >= CeilingDotValue)
         {
           continue;
         }
-        //The thing we hit is definitely a wall, so add the hit info to our list
-        WallHitInfos.Add(hit);
+        //Else, the thing we hit is definitely a wall, so add the hit info to our wall list
+        else
+        {
+          WallHitInfos.Add(hit);
+        }
       }
       Debug.DrawLine(ray.origin, ray.direction * castDistance + ray.origin, Color.blue);
     }
     
-    //Find which hit result is nearest
+    //Find which wall hit result is nearest
     float smallestDistance = float.MaxValue;
     foreach(RaycastHit hit in WallHitInfos)
     {
       if(hit.distance < smallestDistance)
       {
         smallestDistance = hit.distance;
-        NearestHit = hit;
+        NearestWallHit = hit;
       }
     }
   }
@@ -769,9 +781,9 @@ public class PlayerMover : MonoBehaviour
     Physics.ComputePenetration( MovementCollider,
                                   transform.position,
                                   transform.rotation,
-                                  NearestHit.collider,
-                                  NearestHit.transform.position,
-                                  NearestHit.transform.rotation,
+                                  NearestWallHit.collider,
+                                  NearestWallHit.transform.position,
+                                  NearestWallHit.transform.rotation,
                                   out Vector3 direction,
                                   out float distance);
     transform.position += direction * distance;
