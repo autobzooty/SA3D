@@ -401,10 +401,13 @@ public class PlayerMover : MonoBehaviour
   void UpdateOnGround()
   {
     //If one of our wall check colliders has hit ground while we are in the air, it means that we are jumping into a slope. This takes priority over all other ground checks.
-    if(GroundHitInfos.Count > 0 && !OnGround)
+    if(GroundHitInfos != null)
     {
-      OnGround = true;
-      return;
+      if(GroundHitInfos.Count > 0 && !OnGround)
+      {
+        OnGround = true;
+        return;
+      }
     }
     //Default OnGround to false. If we find a ground normal, we'll flip it to true
     OnGround = false;
@@ -544,6 +547,7 @@ public class PlayerMover : MonoBehaviour
 
   void UpdateGraphicals()
   {
+    GetRequestedLookDirection();
     Transform graphicals = transform.Find("Graphicals").transform;
     if(Bonking && !WallKickWindow)
     {
@@ -567,8 +571,21 @@ public class PlayerMover : MonoBehaviour
     }
     else
     {
+      Vector3 turnTilt = Vector3.zero;
+      if(OnGround)
+      {
+        float t = Vector3.Angle(transform.forward, GetRequestedLookDirection()) / 90;
+        turnTilt.z = Mathf.Lerp(0, 45, t);
+        if(Vector3.Dot(transform.right, GetRequestedLookDirection()) >= 0)
+        {
+          turnTilt.z = turnTilt.z * -1;
+        }
+      }
+
       graphicals.localPosition = Vector3.zero;
       graphicals.localEulerAngles = Vector3.zero;
+
+      graphicals.localEulerAngles = Vector3.RotateTowards(graphicals.localEulerAngles, turnTilt, Time.deltaTime, 100);
     }
   }
 
@@ -966,5 +983,25 @@ public class PlayerMover : MonoBehaviour
       HSpeed *= 0.15f;
       VSpeed *= 0.15f;
     }
+  }
+
+  public Vector3 GetRequestedLookDirection()
+  {
+    Vector3 requestedLookDirection = Vector3.zero;
+
+    if(IL.GetLeftStickVector().magnitude > 0)
+    {
+      //Put the left stick input into camera space
+      requestedLookDirection = GameCamera.transform.TransformDirection(new Vector3(IL.GetLeftStickVector().x, 0, IL.GetLeftStickVector().y));
+      //We never want the character to look up or down, so 0 this value out
+      requestedLookDirection.y = 0;
+      //Normalize the vector for good measure since we modified the Y value, though this probably doesn't matter
+      requestedLookDirection.Normalize();
+
+      transform.InverseTransformDirection(requestedLookDirection);
+
+      
+    }
+    return requestedLookDirection;
   }
 }

@@ -38,6 +38,10 @@ public class GameCamera : MonoBehaviour
       MoveToTargetDistance();
       SnapToSurface();
     }
+    if(CurrentCameraMode == CameraModes.Static)
+    {
+      UpdateStaticCam();
+    }
   }
 
   void Truck()
@@ -93,6 +97,11 @@ public class GameCamera : MonoBehaviour
     CurrentCameraMode = CameraModes.Static;
     Tween.Position(transform, staticCamTransform.position, switchTime, 0, Tween.EaseInOut, Tween.LoopType.None);
     Tween.Rotation(transform, staticCamTransform.rotation, switchTime, 0, Tween.EaseInOut, Tween.LoopType.None);
+  }
+
+  void UpdateStaticCam()
+  {
+    
   }
 
   public void SwitchToOrbitCam()

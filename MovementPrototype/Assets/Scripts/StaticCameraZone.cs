@@ -7,6 +7,9 @@ using UnityEngine;
 public class StaticCameraZone : MonoBehaviour
 {
   public float TransitionTime = 1.0f;
+  public bool TrackX = false;
+  public bool TrackY = false;
+  public bool TrackZ = false;
 
   private GameObject Player;
   private GameCamera GameCamera;
