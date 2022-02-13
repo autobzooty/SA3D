@@ -136,6 +136,7 @@ GameObject:
   - component: {fileID: 336717046}
   - component: {fileID: 336717045}
   - component: {fileID: 336717049}
+  - component: {fileID: 336717050}
   m_Layer: 5
   m_Name: Hud
   m_TagString: Untagged
@@ -248,6 +249,18 @@ MonoBehaviour:
   - "<color=#fe4>So it Begins:</color><p=0.8>\r\n  Our hero has <color=#3c8>ventured
     forth</color>\r\n  into the <color=#38c>cold</color><p=0.3> (at times)<p=0.3>
     and\r\n  <color=#f45>frightening</color><p=0.3> (usually)<p=0.3> world."
+--- !u!114 &336717050
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 336717044}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49efb1d167ba18d40ab7e106c62bd341, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &867598895
 GameObject:
   m_ObjectHideFlags: 0
