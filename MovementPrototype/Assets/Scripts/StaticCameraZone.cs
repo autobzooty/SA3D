@@ -27,7 +27,7 @@ public class StaticCameraZone : MonoBehaviour
     {
       print("Switching camera");
       //Change camera mode
-      GameCamera.SwitchToStaticCam(DummyCamera, TransitionTime);
+      GameCamera.SwitchToStaticCam(DummyCamera, TransitionTime, TrackX, TrackY, TrackZ);
     }
   }
 

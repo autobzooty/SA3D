@@ -18,6 +18,11 @@ public class GameCamera : MonoBehaviour
   private InputListener IL;
 
   private CameraModes CurrentCameraMode;
+  private bool TrackX = false;
+  private bool TrackY = false;
+  private bool TrackZ = false;
+  private GameObject DummyCamera;
+
   void Start()
   {
     CurrentCameraMode = CameraModes.Orbit;
@@ -92,16 +97,37 @@ public class GameCamera : MonoBehaviour
 
   }
 
-  public void SwitchToStaticCam(Transform staticCamTransform, float switchTime)
+  public void SwitchToStaticCam(Transform staticCamTransform, float switchTime, bool trackX, bool trackY, bool trackZ)
   {
+    if(CurrentCameraMode == CameraModes.Static) return;
     CurrentCameraMode = CameraModes.Static;
+    DummyCamera = staticCamTransform.gameObject;
+    TrackX = trackX;
+    TrackY = trackY;
+    TrackZ = trackZ;
     Tween.Position(transform, staticCamTransform.position, switchTime, 0, Tween.EaseInOut, Tween.LoopType.None);
     Tween.Rotation(transform, staticCamTransform.rotation, switchTime, 0, Tween.EaseInOut, Tween.LoopType.None);
   }
 
   void UpdateStaticCam()
   {
-    
+    //Vector3 targetLocalPosition = transform.InverseTransformPoint(Target.transform.position);
+    Vector3 targetLocalPosition = Target.transform.position;
+    Vector3 newPosition = transform.position;
+    if(TrackX)
+    {
+      newPosition.x = targetLocalPosition.x;
+    }
+    if(TrackY)
+    {
+      newPosition.y = targetLocalPosition.y;
+    }
+    if(TrackZ)
+    {
+      newPosition.z = targetLocalPosition.z;
+    }
+    transform.localPosition = newPosition;
+    DummyCamera.transform.position = transform.position;
   }
 
   public void SwitchToOrbitCam()
