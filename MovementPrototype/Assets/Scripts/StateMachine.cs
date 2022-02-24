@@ -29,7 +29,7 @@ public class StateMachine : MonoBehaviour
   public Dictionary<string, State> m_States =
     new Dictionary<string, State>();
 
-  public void ChangeTo(string newState)
+  private void ChangeTo(string newState)
   {
     m_CurrentState.Exit();
 
