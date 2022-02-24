@@ -8,49 +8,50 @@ public class StageSpotlight : StateMachine
   public GameObject Spotlight;
   public class Off : State
   {
-    public Off(StateMachine owner, string name) : base(owner, name)
-    {
-      m_Name = "Off";
-    }
+    public Off(StageSpotlight owner, string name) : base(owner, name) { }
 
     public override void Enter()
     {
       print("Spotlight off");
-      //This is maybe sloppy because I'm not null checking StageSpotlight but idk if it's necessary
-      m_Owner.GetComponent<StageSpotlight>().Spotlight.GetComponent<Light>().enabled = false;
+      (m_Owner as StageSpotlight).Spotlight.GetComponent<Light>().enabled = false;
+    }
+
+    public override void Exit()
+    {
+      (m_Owner as StageSpotlight).TimeToSwitch = false;
     }
 
     public override string CheckConnections()
     {
       string newState = string.Empty;
-      if(m_Owner.GetComponent<StageSpotlight>().TimeToSwitch)
+      if((m_Owner as StageSpotlight).TimeToSwitch)
       {
         newState = "On";
-        m_Owner.GetComponent<StageSpotlight>().TimeToSwitch = false;
       }
       return newState;
     }
   }
   public class On : State
   {
-    public On(StateMachine owner, string name) : base(owner, name)
-    {
-      m_Name = "On";
-    }
+    public On(StageSpotlight owner, string name) : base(owner, name) { }
 
     public override void Enter()
     {
       print("Spotlight on");
-      m_Owner.GetComponent<StageSpotlight>().Spotlight.GetComponent<Light>().enabled = true;
+      (m_Owner as StageSpotlight).Spotlight.GetComponent<Light>().enabled = true;
+    }
+
+    public override void Exit()
+    {
+      (m_Owner as StageSpotlight).TimeToSwitch = false;
     }
 
     public override string CheckConnections()
     {
       string newState = string.Empty;
-      if(m_Owner.GetComponent<StageSpotlight>().TimeToSwitch)
+      if((m_Owner as StageSpotlight).TimeToSwitch)
       {
         newState = "Off";
-        m_Owner.GetComponent<StageSpotlight>().TimeToSwitch = false;
       }
       return newState;
     }
@@ -68,7 +69,7 @@ public class StageSpotlight : StateMachine
     GameObject obj = other.gameObject;
     if(obj.name == "PlayerCollider")
     {
-      ChangeTo("On");
+      TimeToSwitch = true;
     }
   }
 
@@ -77,7 +78,7 @@ public class StageSpotlight : StateMachine
     GameObject obj = other.gameObject;
     if(obj.name == "PlayerCollider")
     {
-      ChangeTo("Off");
+      TimeToSwitch = true;
     }
   }
 }

@@ -35,7 +35,7 @@ public class StateMachine : MonoBehaviour
 
     m_CurrentState = m_States[newState];
 
-    m_States[newState].Enter();
+    m_CurrentState.Enter();
   }
 
   public virtual void Start()
