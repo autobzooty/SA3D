@@ -7,9 +7,12 @@ public class StateMachine : MonoBehaviour
   public class State
   {
     public string m_Name = "Base";
+    public StateMachine m_Owner;
 
-    public State(StateMachine owner)
+    public State(StateMachine owner, string name)
     {
+      m_Name = name;
+      m_Owner = owner;
       owner.m_States.Add(m_Name, this);
     }
 
@@ -21,21 +24,25 @@ public class StateMachine : MonoBehaviour
 
 
   public State m_CurrentState;
-  public State m_StartingState;
+  public string m_StartingState;
 
   public Dictionary<string, State> m_States =
     new Dictionary<string, State>();
 
-
-  private void ChangeTo(State newState)
+  public void ChangeTo(string newState)
   {
     m_CurrentState.Exit();
 
-    m_CurrentState = newState;
+    m_CurrentState = m_States[newState];
 
-    newState.Enter();
+    m_States[newState].Enter();
   }
 
+  public virtual void Start()
+  {
+    print(m_StartingState);
+    m_States[m_StartingState].Enter();
+  }
 
   private void Update()
   {
@@ -43,6 +50,6 @@ public class StateMachine : MonoBehaviour
 
     var nextName = m_CurrentState.CheckConnections();
     if (m_States.ContainsKey(nextName))
-      ChangeTo(m_States[nextName]);
+      ChangeTo(nextName);
   }
 }
