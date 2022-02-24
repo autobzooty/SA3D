@@ -23,12 +23,11 @@ public class StageSpotlight : StateMachine
 
     public override string CheckConnections()
     {
-      string newState = string.Empty;
       if((m_Owner as StageSpotlight).TimeToSwitch)
       {
-        newState = "On";
+        return "On";
       }
-      return newState;
+      return string.Empty;
     }
   }
   public class On : State
@@ -48,12 +47,11 @@ public class StageSpotlight : StateMachine
 
     public override string CheckConnections()
     {
-      string newState = string.Empty;
       if((m_Owner as StageSpotlight).TimeToSwitch)
       {
-        newState = "Off";
+        return "Off";
       }
-      return newState;
+      return string.Empty;
     }
   }
 
