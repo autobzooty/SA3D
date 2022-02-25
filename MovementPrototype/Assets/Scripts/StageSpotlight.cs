@@ -6,6 +6,9 @@ public class StageSpotlight : StateMachine
 {
   public bool TimeToSwitch = false;
   public GameObject Spotlight;
+  public GameObject SpotlightMesh;
+  [HideInInspector]
+  public GameObject Player;
   public class Off : State
   {
     public Off(StageSpotlight owner, string name) : base(owner, name) { }
@@ -32,12 +35,20 @@ public class StageSpotlight : StateMachine
   }
   public class On : State
   {
+
     public On(StageSpotlight owner, string name) : base(owner, name) { }
 
     public override void Enter()
     {
       print("Spotlight on");
       (m_Owner as StageSpotlight).Spotlight.GetComponent<Light>().enabled = true;
+    }
+
+    public override void Update()
+    {
+      Vector3 playerLookVector = (m_Owner as StageSpotlight).Player.transform.position - (m_Owner as StageSpotlight).SpotlightMesh.transform.position;
+      Quaternion newRotation = Quaternion.LookRotation(playerLookVector, Vector3.up);
+      (m_Owner as StageSpotlight).SpotlightMesh.transform.rotation = newRotation;
     }
 
     public override void Exit()
@@ -57,6 +68,7 @@ public class StageSpotlight : StateMachine
 
   public override void Start()
   {
+    Player = GameObject.Find("Player");
     m_CurrentState = new Off(this, "Off");
     new On(this, "On");
     base.Start();
