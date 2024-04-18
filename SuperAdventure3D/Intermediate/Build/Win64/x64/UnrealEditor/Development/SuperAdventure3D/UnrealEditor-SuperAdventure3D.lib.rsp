@@ -1,0 +1,12 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UnrealEditor-SuperAdventure3D.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"C:\MilkyWayGames\Super Adventure 3D\SA3D\SuperAdventure3D\Intermediate\Build\Win64\x64\SuperAdventure3DEditor\Development\Engine\SharedPCH.Engine.Cpp20.h.obj"
+"C:\MilkyWayGames\Super Adventure 3D\SA3D\SuperAdventure3D\Intermediate\Build\Win64\x64\UnrealEditor\Development\SuperAdventure3D\SuperAdventure3D.cpp.obj"
+"C:\MilkyWayGames\Super Adventure 3D\SA3D\SuperAdventure3D\Intermediate\Build\Win64\x64\UnrealEditor\Development\SuperAdventure3D\Default.rc2.res"
+/OUT:"C:\MilkyWayGames\Super Adventure 3D\SA3D\SuperAdventure3D\Intermediate\Build\Win64\x64\UnrealEditor\Development\SuperAdventure3D\UnrealEditor-SuperAdventure3D.lib"
