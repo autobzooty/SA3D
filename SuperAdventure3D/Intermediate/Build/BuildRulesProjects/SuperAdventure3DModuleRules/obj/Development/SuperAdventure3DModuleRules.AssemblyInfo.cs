@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SuperAdventure3DModuleRules")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Development")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d9993745360855606f62a75a7435471ebded73bc")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e2a16ef4a43ae26b37983e7041b74435a805fc7c")]
 [assembly: System.Reflection.AssemblyProductAttribute("SuperAdventure3DModuleRules")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SuperAdventure3DModuleRules")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
