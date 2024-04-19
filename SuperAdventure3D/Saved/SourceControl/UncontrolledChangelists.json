@@ -5,7 +5,8 @@
 			"guid": "00000000000000000000000000000000",
 			"description": "Default Uncontrolled Changelist",
 			"files": [
-				"C:/MilkyWayGames/Super Adventure 3D/SA3D/SuperAdventure3D/Content/StarterContent/Architecture/Floor_400x400.uasset"
+				"C:/MilkyWayGames/Super Adventure 3D/SA3D/SuperAdventure3D/Content/StarterContent/Architecture/Floor_400x400.uasset",
+				"C:/MilkyWayGames/Super Adventure 3D/SA3D/SuperAdventure3D/Content/Levels/LVL_AlekTest.umap"
 			]
 		}
 	]
