@@ -99,12 +99,6 @@ void AMilkyWayPawn::OnLeftStickHorizontal(float AxisValue)
 
 void AMilkyWayPawn::OnRightStickVertical(float AxisValue)
 {
-	if (GEngine)
-	{
-		//Print debug message
-		GEngine->AddOnScreenDebugMessage(-10, 1.f, FColor::Yellow, "Hello");
-	}
-
 	CurrentRightStick.Y = AxisValue;
 	CurrentRightStick.Normalize();
 
@@ -152,9 +146,8 @@ void AMilkyWayPawn::Walk_Tick()
 	}
 
 	//Rotate toward camera's requested direction
-	FVector cameraRequestedMoveDirection = GetCameraRequestedMoveDirection();
 	float turnDirection = 1;
-	if (cameraRequestedMoveDirection.Dot(GetActorRightVector()) < 0)
+	if (GetCameraRequestedMoveDirection().Dot(GetActorRightVector()) < 0)
 	{
 		turnDirection = -1;
 	}
