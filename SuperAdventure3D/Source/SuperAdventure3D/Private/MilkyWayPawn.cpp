@@ -285,8 +285,9 @@ void AMilkyWayPawn::Fall_Tick()
 void AMilkyWayPawn::Move()
 {
 	PreviousFrameLocation = GetActorLocation();
-	FVector vVector = FVector(0, 0, 1) * VSpeed * DeltaTime;
 	SetActorLocation(WallCollisionCheck());
+	CeilingCheck();
+	FVector vVector = FVector(0, 0, 1) * VSpeed * DeltaTime;
 	AddActorLocalOffset(vVector);
 }
 
@@ -401,4 +402,18 @@ void AMilkyWayPawn::GroundCheck()
 		}
 	}
 	OnGround = false;
+}
+
+void AMilkyWayPawn::CeilingCheck()
+{
+	FHitResult hitResult;
+	FVector startLocation = GetActorLocation() + FVector(0, 0, 1) * PlayerHeight;
+	FVector endLocation = startLocation + FVector(0, 0, 1) * VSpeed * DeltaTime;
+	if (GetWorld()->LineTraceSingleByChannel(hitResult, startLocation, endLocation, ECC_WorldStatic))
+	{
+		if (QuerySurfaceType(hitResult.ImpactNormal) == Ceiling)
+		{
+			VSpeed = 0;
+		}
+	}
 }

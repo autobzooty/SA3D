@@ -105,4 +105,5 @@ protected:
 	FVector WallCollisionCheck();
 	enum SurfaceTypes QuerySurfaceType(FVector surfaceNormal);
 	void GroundCheck();
+	void CeilingCheck();
 };
