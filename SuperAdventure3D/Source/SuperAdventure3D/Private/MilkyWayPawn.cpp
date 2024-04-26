@@ -82,6 +82,8 @@ void AMilkyWayPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	PlayerInputComponent->BindAxis(TEXT("LeftStickHorizontal"), this, &AMilkyWayPawn::OnLeftStickHorizontal);
 	PlayerInputComponent->BindAxis(TEXT("RightStickVertical"), this, &AMilkyWayPawn::OnRightStickVertical);
 	PlayerInputComponent->BindAxis(TEXT("RightStickHorizontal"), this, &AMilkyWayPawn::OnRightStickHorizontal);
+	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Pressed, this, &AMilkyWayPawn::OnJumpButtonPressed);
+	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Released, this, &AMilkyWayPawn::OnJumpButtonReleased);
 
 	//Add input mapping context
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
@@ -126,20 +128,45 @@ void AMilkyWayPawn::OnRightStickHorizontal(float axisValue)
 	SpringArm->AddWorldRotation(rotator);
 }
 
+void AMilkyWayPawn::OnJumpButtonPressed()
+{
+	JumpButtonPressedThisFrame = false;
+	bool previousFrameJumpButton = CurrentJumpButton;
+	CurrentJumpButton = true;
+	if (previousFrameJumpButton != CurrentJumpButton)
+	{
+		//First frame of button press
+		JumpButtonPressedThisFrame = true;
+	}
+}
+
+void AMilkyWayPawn::OnJumpButtonReleased()
+{
+	CurrentJumpButton = false;
+}
+
 void AMilkyWayPawn::Idle_Tick()
 {
 	GroundCheck();
 	if (!OnGround)
 	{
 		CurrentState = Fall;
+		return;
 	}
-
+	if (CurrentJumpButton)
+	{
+		VSpeed += InitialJumpStrength;
+		OnGround = false;
+		CurrentState = Jump;
+		return;
+	}
 	if (CurrentLeftStick.Length() > 0)
 	{
 		//Snap rotation to camera's requested move direction
 		FRotator rotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), GetActorLocation() + GetCameraRequestedMoveDirection());
 		SetActorRotation(rotation);
 		CurrentState = Walk;
+		return;
 	}
 }
 
@@ -149,10 +176,19 @@ void AMilkyWayPawn::Walk_Tick()
 	if (!OnGround)
 	{
 		CurrentState = Fall;
+		return;
+	}
+	if (CurrentJumpButton)
+	{
+		VSpeed += InitialJumpStrength;
+		OnGround = false;
+		CurrentState = Jump;
+		return;
 	}
 	if (CurrentLeftStick.Length() == 0)
 	{
 		CurrentState = Stop;
+		return;
 	}
 
 	//Accelerate in facing direction
@@ -203,19 +239,47 @@ void AMilkyWayPawn::Stop_Tick()
 
 void AMilkyWayPawn::Jump_Tick()
 {
-	
+	VSpeed -= Gravity * DeltaTime;
+	if (VSpeed <= 0)
+	{
+		GroundCheck();
+		if (OnGround)
+		{
+			VSpeed = 0;
+			if (CurrentLeftStick.Length() == 0)
+			{
+				HSpeed = 0;
+				CurrentState = Idle;
+			}
+			else
+			{
+				CurrentState = Walk;
+			}
+			return;
+		}
+	}
+	Move();
 }
 
 void AMilkyWayPawn::Fall_Tick()
 {
 	VSpeed -= Gravity * DeltaTime;
-	Move();
 	GroundCheck();
 	if (OnGround)
 	{
-		CurrentState = Idle;
 		VSpeed = 0;
+		if (CurrentLeftStick.Length() == 0)
+		{
+			HSpeed = 0;
+			CurrentState = Idle;
+		}
+		else
+		{
+			CurrentState = Walk;
+		}
+		return;
 	}
+	Move();
 }
 
 void AMilkyWayPawn::Move()
@@ -333,14 +397,8 @@ void AMilkyWayPawn::GroundCheck()
 		{
 			SetActorLocation(hitResult.ImpactPoint);
 			OnGround = true;
-		}
-		else
-		{
-			OnGround = false;
+			return;
 		}
 	}
-	else
-	{
-		OnGround = false;
-	}
+	OnGround = false;
 }

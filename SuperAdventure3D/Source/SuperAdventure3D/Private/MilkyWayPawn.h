@@ -64,6 +64,9 @@ public:
 	float Gravity = 10;
 
 	UPROPERTY(EditAnywhere)
+	float InitialJumpStrength = 100;
+
+	UPROPERTY(EditAnywhere)
 	float WallDotThreshold = 0.05;
 	
 	UPROPERTY(EditAnywhere, Category = "Debug")
@@ -73,6 +76,8 @@ private:
 	float DeltaTime;
 	FVector2D CurrentLeftStick;
 	FVector2D CurrentRightStick;
+	bool CurrentJumpButton = false;
+	bool JumpButtonPressedThisFrame = false;
 	float HSpeed;
 	float VSpeed;
 	FVector WallCollisionRayStartPoints[9];
@@ -87,6 +92,8 @@ protected:
 	void OnLeftStickHorizontal(float axisValue);
 	void OnRightStickVertical(float axisValue);
 	void OnRightStickHorizontal(float axisValue);
+	void OnJumpButtonPressed();
+	void OnJumpButtonReleased();
 	void Idle_Tick();
 	void Walk_Tick();
 	void Stop_Tick();
