@@ -67,6 +67,9 @@ void AMilkyWayPawn::Tick(float _DeltaTime)
 		case Jump:
 			Jump_Tick();
 			break;
+		case Fall:
+			Fall_Tick();
+			break;
 	}
 }
 
@@ -125,18 +128,28 @@ void AMilkyWayPawn::OnRightStickHorizontal(float axisValue)
 
 void AMilkyWayPawn::Idle_Tick()
 {
+	GroundCheck();
+	if (!OnGround)
+	{
+		CurrentState = Fall;
+	}
+
 	if (CurrentLeftStick.Length() > 0)
 	{
 		//Snap rotation to camera's requested move direction
 		FRotator rotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), GetActorLocation() + GetCameraRequestedMoveDirection());
 		SetActorRotation(rotation);
-
 		CurrentState = Walk;
 	}
 }
 
 void AMilkyWayPawn::Walk_Tick()
 {
+	GroundCheck();
+	if (!OnGround)
+	{
+		CurrentState = Fall;
+	}
 	if (CurrentLeftStick.Length() == 0)
 	{
 		CurrentState = Stop;
@@ -160,6 +173,11 @@ void AMilkyWayPawn::Walk_Tick()
 
 void AMilkyWayPawn::Stop_Tick()
 {
+	GroundCheck();
+	if (!OnGround)
+	{
+		CurrentState = Fall;
+	}
 	if (CurrentLeftStick.Length() > 0)
 	{
 		CurrentState = Walk;
@@ -188,10 +206,24 @@ void AMilkyWayPawn::Jump_Tick()
 	
 }
 
+void AMilkyWayPawn::Fall_Tick()
+{
+	VSpeed -= Gravity * DeltaTime;
+	Move();
+	GroundCheck();
+	if (OnGround)
+	{
+		CurrentState = Idle;
+		VSpeed = 0;
+	}
+}
+
 void AMilkyWayPawn::Move()
 {
 	PreviousFrameLocation = GetActorLocation();
+	FVector vVector = FVector(0, 0, 1) * VSpeed * DeltaTime;
 	SetActorLocation(WallCollisionCheck());
+	AddActorLocalOffset(vVector);
 }
 
 FVector AMilkyWayPawn::GetCameraRequestedMoveDirection()
@@ -234,12 +266,12 @@ void AMilkyWayPawn::UpdateWallCollisionRayStartPoints()
 
 FVector AMilkyWayPawn::WallCollisionCheck()
 {
-	FVector lineTraceOffset = GetActorForwardVector() * HSpeed;
+	FVector lineTraceOffset = GetActorForwardVector() * HSpeed * DeltaTime;
 	UpdateWallCollisionRayStartPoints();
 
 	FVector hitNormal;
 	FVector hitPoint;
-	float shortestCollisionDistance = HSpeed;
+	float shortestCollisionDistance = HSpeed * DeltaTime;
 	for (int i = 0; i < 9; ++i)
 	{
 		if (DebugDrawWallCollisionChecks)
@@ -259,10 +291,10 @@ FVector AMilkyWayPawn::WallCollisionCheck()
 			}
 		}
 	}
-	if (shortestCollisionDistance < HSpeed)
+	if (shortestCollisionDistance < HSpeed * DeltaTime)
 	{
 		//eject from wall
-		FVector attemptedMoveLocation = GetActorLocation() + GetActorForwardVector() * HSpeed;
+		FVector attemptedMoveLocation = GetActorLocation() + GetActorForwardVector() * HSpeed * DeltaTime;
 		FVector entryVector = attemptedMoveLocation - hitPoint;
 		FVector flippedNormalizedEntryVector = -entryVector;
 		flippedNormalizedEntryVector.Normalize();
@@ -275,13 +307,40 @@ FVector AMilkyWayPawn::WallCollisionCheck()
 	}
 	else
 	{
-		return GetActorLocation() + GetActorForwardVector() * HSpeed;
+		return GetActorLocation() + GetActorForwardVector() * HSpeed * DeltaTime;
 	}	
 }
 
 enum AMilkyWayPawn::SurfaceTypes AMilkyWayPawn::QuerySurfaceType(FVector surfaceNormal)
 {
-	return Wall;
-	return Ground;
-	return Ceiling;
+	float surfaceNormalDot = surfaceNormal.Dot(FVector(0, 0, 1));
+	if (surfaceNormalDot > WallDotThreshold)
+		return Ground;
+	else if (surfaceNormalDot < -WallDotThreshold)
+		return Ceiling;
+	else
+		return Wall;
+}
+
+void AMilkyWayPawn::GroundCheck()
+{
+	FHitResult hitResult;
+	FVector startLocation = GetActorLocation() + FVector(0, 0, 1) * PlayerHeight;
+	FVector endLocation = GetActorLocation() + FVector(0, 0, 1) * -StepHeight;
+	if (GetWorld()->LineTraceSingleByChannel(hitResult, startLocation, endLocation, ECC_WorldStatic))
+	{
+		if (QuerySurfaceType(hitResult.ImpactNormal) == Ground)
+		{
+			SetActorLocation(hitResult.ImpactPoint);
+			OnGround = true;
+		}
+		else
+		{
+			OnGround = false;
+		}
+	}
+	else
+	{
+		OnGround = false;
+	}
 }

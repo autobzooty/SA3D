@@ -59,6 +59,12 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	float StepHeight = 20;
+
+	UPROPERTY(EditAnywhere)
+	float Gravity = 10;
+
+	UPROPERTY(EditAnywhere)
+	float WallDotThreshold = 0.05;
 	
 	UPROPERTY(EditAnywhere, Category = "Debug")
 	bool DebugDrawWallCollisionChecks = false;
@@ -71,9 +77,10 @@ private:
 	float VSpeed;
 	FVector WallCollisionRayStartPoints[9];
 	FVector PreviousFrameLocation;
+	bool OnGround = true;
 
 protected:
-	enum PawnStates { Idle, Walk, Stop, Jump };
+	enum PawnStates { Idle, Walk, Stop, Jump, Fall };
 	enum SurfaceTypes { Wall, Ground, Ceiling };
 	PawnStates CurrentState = Idle;
 	void OnLeftStickVertical(float axisValue);
@@ -84,11 +91,11 @@ protected:
 	void Walk_Tick();
 	void Stop_Tick();
 	void Jump_Tick();
+	void Fall_Tick();
 	void Move();
 	FVector GetCameraRequestedMoveDirection();
 	void UpdateWallCollisionRayStartPoints();
 	FVector WallCollisionCheck();
 	enum SurfaceTypes QuerySurfaceType(FVector surfaceNormal);
-
-
+	void GroundCheck();
 };
