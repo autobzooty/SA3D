@@ -51,26 +51,44 @@ public:
 	UPROPERTY(EditAnywhere)
 	float CameraTurnSpeed = 180;
 
-protected:
+	UPROPERTY(EditAnywhere)
+	float PlayerRadius = 50;
 
-	void OnLeftStickVertical(float AxisValue);
-	void OnLeftStickHorizontal(float AxisValue);
-	void OnRightStickVertical(float AxisValue);
-	void OnRightStickHorizontal(float AxisValue);
+	UPROPERTY(EditAnywhere)
+	float PlayerHeight = 100;
+
+	UPROPERTY(EditAnywhere)
+	float StepHeight = 20;
+	
+	UPROPERTY(EditAnywhere, Category = "Debug")
+	bool DebugDrawWallCollisionChecks = false;
+
+private:
+	float DeltaTime;
+	FVector2D CurrentLeftStick;
+	FVector2D CurrentRightStick;
+	float HSpeed;
+	float VSpeed;
+	FVector WallCollisionRayStartPoints[9];
+	FVector PreviousFrameLocation;
+
+protected:
+	enum PawnStates { Idle, Walk, Stop, Jump };
+	enum SurfaceTypes { Wall, Ground, Ceiling };
+	PawnStates CurrentState = Idle;
+	void OnLeftStickVertical(float axisValue);
+	void OnLeftStickHorizontal(float axisValue);
+	void OnRightStickVertical(float axisValue);
+	void OnRightStickHorizontal(float axisValue);
 	void Idle_Tick();
 	void Walk_Tick();
 	void Stop_Tick();
 	void Jump_Tick();
 	void Move();
 	FVector GetCameraRequestedMoveDirection();
+	void UpdateWallCollisionRayStartPoints();
+	FVector WallCollisionCheck();
+	enum SurfaceTypes QuerySurfaceType(FVector surfaceNormal);
 
-private:
-	float DeltaTime;
-	enum PawnStates {Idle , Walk , Stop , Jump};
-	PawnStates CurrentState = Idle;
-	FVector2D CurrentLeftStick;
-	FVector2D CurrentRightStick;
-	float HSpeed;
-	float VSpeed;
 
 };

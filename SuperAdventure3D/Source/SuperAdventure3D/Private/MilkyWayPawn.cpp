@@ -6,6 +6,9 @@
 #include "Camera/CameraComponent.h"
 #include "Components/ArrowComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "DrawDebugHelpers.h"
+
 
 
 // Sets default values
@@ -85,36 +88,36 @@ void AMilkyWayPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 }
 
-void AMilkyWayPawn::OnLeftStickVertical(float AxisValue)
+void AMilkyWayPawn::OnLeftStickVertical(float axisValue)
 {
-	CurrentLeftStick.Y = AxisValue;
+	CurrentLeftStick.Y = axisValue;
 	CurrentLeftStick.Normalize();
 }
 
-void AMilkyWayPawn::OnLeftStickHorizontal(float AxisValue)
+void AMilkyWayPawn::OnLeftStickHorizontal(float axisValue)
 {
-	CurrentLeftStick.X = AxisValue;
+	CurrentLeftStick.X = axisValue;
 	CurrentLeftStick.Normalize();
 }
 
-void AMilkyWayPawn::OnRightStickVertical(float AxisValue)
+void AMilkyWayPawn::OnRightStickVertical(float axisValue)
 {
-	CurrentRightStick.Y = AxisValue;
+	CurrentRightStick.Y = axisValue;
 	CurrentRightStick.Normalize();
 
-	float newPitch = CameraTurnSpeed * AxisValue * DeltaTime;
+	float newPitch = CameraTurnSpeed * axisValue * DeltaTime;
 	FRotator rotator = FRotator(newPitch, 0, 0);
 
 	SpringArm->AddLocalRotation(rotator);
 }
 
-void AMilkyWayPawn::OnRightStickHorizontal(float AxisValue)
+void AMilkyWayPawn::OnRightStickHorizontal(float axisValue)
 {
 	
-	CurrentRightStick.X = AxisValue;
+	CurrentRightStick.X = axisValue;
 	CurrentRightStick.Normalize();
 
-	float newYaw = CameraTurnSpeed * AxisValue * DeltaTime;
+	float newYaw = CameraTurnSpeed * axisValue * DeltaTime;
 	FRotator rotator = FRotator(0, newYaw, 0);
 
 	SpringArm->AddWorldRotation(rotator);
@@ -146,12 +149,9 @@ void AMilkyWayPawn::Walk_Tick()
 	}
 
 	//Rotate toward camera's requested direction
-	float turnDirection = 1;
-	if (GetCameraRequestedMoveDirection().Dot(GetActorRightVector()) < 0)
-	{
-		turnDirection = -1;
-	}
-	float turnAmount = TurnSpeed * turnDirection * DeltaTime;
+	float turnScalar = GetCameraRequestedMoveDirection().Dot(GetActorRightVector());
+	float turnAmount = TurnSpeed * turnScalar * DeltaTime;
+
 	FRotator rotator = FRotator(0, turnAmount, 0);
 	AddActorLocalRotation(rotator);
 
@@ -190,8 +190,8 @@ void AMilkyWayPawn::Jump_Tick()
 
 void AMilkyWayPawn::Move()
 {
-	FVector newLocation = GetActorLocation() + GetActorForwardVector() * HSpeed;
-	SetActorLocation(newLocation);
+	PreviousFrameLocation = GetActorLocation();
+	SetActorLocation(WallCollisionCheck());
 }
 
 FVector AMilkyWayPawn::GetCameraRequestedMoveDirection()
@@ -205,4 +205,83 @@ FVector AMilkyWayPawn::GetCameraRequestedMoveDirection()
 	cameraRequestedMoveDirection.Z = 0;
 	cameraRequestedMoveDirection.Normalize();
 	return cameraRequestedMoveDirection;
+}
+
+void AMilkyWayPawn::UpdateWallCollisionRayStartPoints()
+{
+	float smallPlayerRadius = PlayerRadius * 0.99;
+	//Bottom-left
+	WallCollisionRayStartPoints[0] = UKismetMathLibrary::TransformLocation(GetActorTransform(), FVector(0, -smallPlayerRadius, StepHeight));
+	//Bottom-middle
+	WallCollisionRayStartPoints[1] = UKismetMathLibrary::TransformLocation(GetActorTransform(), FVector(smallPlayerRadius, 0, StepHeight));
+	//Bottom-right
+	WallCollisionRayStartPoints[2] = UKismetMathLibrary::TransformLocation(GetActorTransform(), FVector(0, smallPlayerRadius, StepHeight));
+
+	//Middle-left
+	WallCollisionRayStartPoints[3] = UKismetMathLibrary::TransformLocation(GetActorTransform(), FVector(0, -smallPlayerRadius, PlayerHeight * 0.5));
+	//Middle-middle
+	WallCollisionRayStartPoints[4] = UKismetMathLibrary::TransformLocation(GetActorTransform(), FVector(smallPlayerRadius, 0, PlayerHeight * 0.5));
+	//Middle-Right
+	WallCollisionRayStartPoints[5] = UKismetMathLibrary::TransformLocation(GetActorTransform(), FVector(0, smallPlayerRadius, PlayerHeight * 0.5));
+
+	//Top-left
+	WallCollisionRayStartPoints[6] = UKismetMathLibrary::TransformLocation(GetActorTransform(), FVector(0, -smallPlayerRadius, PlayerHeight));
+	//Top-middle
+	WallCollisionRayStartPoints[7] = UKismetMathLibrary::TransformLocation(GetActorTransform(), FVector(smallPlayerRadius, 0, PlayerHeight));
+	//Top-right
+	WallCollisionRayStartPoints[8] = UKismetMathLibrary::TransformLocation(GetActorTransform(), FVector(0, smallPlayerRadius, PlayerHeight));
+}
+
+FVector AMilkyWayPawn::WallCollisionCheck()
+{
+	FVector lineTraceOffset = GetActorForwardVector() * HSpeed;
+	UpdateWallCollisionRayStartPoints();
+
+	FVector hitNormal;
+	FVector hitPoint;
+	float shortestCollisionDistance = HSpeed;
+	for (int i = 0; i < 9; ++i)
+	{
+		if (DebugDrawWallCollisionChecks)
+			DrawDebugDirectionalArrow(GetWorld(), WallCollisionRayStartPoints[i], WallCollisionRayStartPoints[i] + lineTraceOffset, 10, FColor::Red, false);
+
+		FHitResult hitResult;
+		if (GetWorld()->LineTraceSingleByChannel(hitResult, WallCollisionRayStartPoints[i], WallCollisionRayStartPoints[i] + lineTraceOffset, ECC_WorldStatic))
+		{
+			if (QuerySurfaceType(hitResult.ImpactNormal) == Wall)
+			{
+				if (hitResult.Distance < shortestCollisionDistance)
+				{
+					shortestCollisionDistance = hitResult.Distance;
+					hitNormal = hitResult.ImpactNormal;
+					hitPoint = hitResult.ImpactPoint;
+				}
+			}
+		}
+	}
+	if (shortestCollisionDistance < HSpeed)
+	{
+		//eject from wall
+		FVector attemptedMoveLocation = GetActorLocation() + GetActorForwardVector() * HSpeed;
+		FVector entryVector = attemptedMoveLocation - hitPoint;
+		FVector flippedNormalizedEntryVector = -entryVector;
+		flippedNormalizedEntryVector.Normalize();
+		float cosine = hitNormal.Dot(flippedNormalizedEntryVector);
+		float ejectionDistance = cosine * entryVector.Length() + PlayerRadius;
+		FVector ejectionVector = ejectionDistance * hitNormal;
+		FVector newPosition = attemptedMoveLocation + ejectionVector;
+
+		return newPosition;
+	}
+	else
+	{
+		return GetActorLocation() + GetActorForwardVector() * HSpeed;
+	}	
+}
+
+enum AMilkyWayPawn::SurfaceTypes AMilkyWayPawn::QuerySurfaceType(FVector surfaceNormal)
+{
+	return Wall;
+	return Ground;
+	return Ceiling;
 }
