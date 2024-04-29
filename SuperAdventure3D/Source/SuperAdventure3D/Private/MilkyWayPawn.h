@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "MilkyWayPawnState.h"
 #include "MilkyWayPawn.generated.h"
 
 UCLASS()
@@ -21,7 +22,8 @@ public:
 	class USpringArmComponent* SpringArm;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	class UCameraComponent* Camera;
-	
+	UPROPERTY()
+	class UMilkyWayPawnStateMachine* StateMachine;
 
 protected:
 	// Called when the game starts or when spawned
@@ -106,4 +108,12 @@ protected:
 	enum SurfaceTypes QuerySurfaceType(FVector surfaceNormal);
 	void GroundCheck();
 	void CeilingCheck();
+	void PreInitializeComponents() override;
+
+	friend class State_Idle;
+	friend class State_Walk;
+	friend class State_Stop;
+	friend class State_Jump;
+	friend class State_Fall;
 };
+

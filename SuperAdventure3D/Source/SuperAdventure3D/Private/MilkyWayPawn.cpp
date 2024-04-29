@@ -8,6 +8,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "DrawDebugHelpers.h"
+#include "MilkyWayPawnStateMachine.h"
 
 
 
@@ -22,6 +23,7 @@ AMilkyWayPawn::AMilkyWayPawn()
 	RootArrow = CreateDefaultSubobject<UArrowComponent>(TEXT("RootArrow"));
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
+	StateMachine = CreateDefaultSubobject<UMilkyWayPawnStateMachine>(TEXT("Statema"));
 
 	RootArrow->SetupAttachment(GetRootComponent());
 
@@ -38,6 +40,11 @@ AMilkyWayPawn::AMilkyWayPawn()
 	SpringArm->bInheritRoll = false;
 	SpringArm->bEnableCameraLag = true;
 	SpringArm->TargetArmLength = 1000.0f;	
+}
+
+void AMilkyWayPawn::PreInitializeComponents()
+{
+	StateMachine->Setup(this);
 }
 
 // Called when the game starts or when spawned
@@ -147,139 +154,24 @@ void AMilkyWayPawn::OnJumpButtonReleased()
 
 void AMilkyWayPawn::Idle_Tick()
 {
-	GroundCheck();
-	if (!OnGround)
-	{
-		CurrentState = Fall;
-		return;
-	}
-	if (CurrentJumpButton)
-	{
-		VSpeed += InitialJumpStrength;
-		OnGround = false;
-		CurrentState = Jump;
-		return;
-	}
-	if (CurrentLeftStick.Length() > 0)
-	{
-		//Snap rotation to camera's requested move direction
-		FRotator rotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), GetActorLocation() + GetCameraRequestedMoveDirection());
-		SetActorRotation(rotation);
-		CurrentState = Walk;
-		return;
-	}
+
 }
 
 void AMilkyWayPawn::Walk_Tick()
 {
-	GroundCheck();
-	if (!OnGround)
-	{
-		CurrentState = Fall;
-		return;
-	}
-	if (CurrentJumpButton)
-	{
-		VSpeed += InitialJumpStrength;
-		OnGround = false;
-		CurrentState = Jump;
-		return;
-	}
-	if (CurrentLeftStick.Length() == 0)
-	{
-		CurrentState = Stop;
-		return;
-	}
-
-	//Accelerate in facing direction
-	if (HSpeed < BaseMaxGroundSpeed)
-	{
-		HSpeed += CurrentLeftStick.Length() * GroundAcceleration * DeltaTime;
-	}
-
-	//Rotate toward camera's requested direction
-	float turnScalar = GetCameraRequestedMoveDirection().Dot(GetActorRightVector());
-	float turnAmount = TurnSpeed * turnScalar * DeltaTime;
-
-	FRotator rotator = FRotator(0, turnAmount, 0);
-	AddActorLocalRotation(rotator);
-
-	Move();
 }
 
 void AMilkyWayPawn::Stop_Tick()
 {
-	GroundCheck();
-	if (!OnGround)
-	{
-		CurrentState = Fall;
-	}
-	if (CurrentLeftStick.Length() > 0)
-	{
-		CurrentState = Walk;
-	}
-	if (HSpeed == 0)
-	{
-		CurrentState = Idle;
-	}
-	else if (HSpeed > 0)
-	{
-		HSpeed -= GroundDeceleration * DeltaTime;
-	}
-	else if (HSpeed < 0)
-	{
-		HSpeed += GroundDeceleration * DeltaTime;
-	}
-	if (abs(HSpeed) < GroundDeceleration * DeltaTime)
-	{
-		HSpeed = 0;
-	}
-	Move();
 }
 
 void AMilkyWayPawn::Jump_Tick()
 {
-	VSpeed -= Gravity * DeltaTime;
-	if (VSpeed <= 0)
-	{
-		GroundCheck();
-		if (OnGround)
-		{
-			VSpeed = 0;
-			if (CurrentLeftStick.Length() == 0)
-			{
-				HSpeed = 0;
-				CurrentState = Idle;
-			}
-			else
-			{
-				CurrentState = Walk;
-			}
-			return;
-		}
-	}
-	Move();
 }
 
 void AMilkyWayPawn::Fall_Tick()
 {
-	VSpeed -= Gravity * DeltaTime;
-	GroundCheck();
-	if (OnGround)
-	{
-		VSpeed = 0;
-		if (CurrentLeftStick.Length() == 0)
-		{
-			HSpeed = 0;
-			CurrentState = Idle;
-		}
-		else
-		{
-			CurrentState = Walk;
-		}
-		return;
-	}
-	Move();
+
 }
 
 void AMilkyWayPawn::Move()
