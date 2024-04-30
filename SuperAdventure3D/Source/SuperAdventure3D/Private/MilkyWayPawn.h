@@ -96,6 +96,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Debug")
 	bool DebugDrawWallCollisionChecks = false;
 
+	FVector LastHitWallVector;
+
 private:
 	float DeltaTime;
 	FVector2D CurrentLeftStick;
@@ -139,5 +141,6 @@ protected:
 	friend class State_Dive;
 	friend class State_Rollout;
 	friend class State_Bonk;
+	friend class State_WallKick;
 };
 

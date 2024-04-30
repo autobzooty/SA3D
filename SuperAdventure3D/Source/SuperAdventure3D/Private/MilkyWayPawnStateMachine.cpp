@@ -37,6 +37,7 @@ void UMilkyWayPawnStateMachine::Setup(AMilkyWayPawn* owner)
 	Dive = new State_Dive(Owner);
 	Rollout = new State_Rollout(Owner);
 	Bonk = new State_Bonk(Owner);
+	WallKick = new State_WallKick(Owner);
 }
 
 
@@ -86,6 +87,8 @@ void UMilkyWayPawnStateMachine::ChangeState(FName newStateName)
 		newState = Rollout;
 	else if (newStateName == "Bonk")
 		newState = Bonk;
+	else if (newStateName == "WallKick")
+		newState = WallKick;
 
 	CurrentState->OnStateExit();
 	newState->OnStateEnter();
@@ -114,8 +117,6 @@ void State_Idle::StateTick()
 	}
 	if (Owner->CurrentJumpButton)
 	{
-		Owner->VSpeed += Owner->InitialJumpStrength;
-		Owner->OnGround = false;
 		StateMachine->ChangeState("Jump");
 		return;
 	}
@@ -399,7 +400,7 @@ void State_Dive::StateTick()
 {
 	if (Owner->OnGround)
 	{
-		if (Owner->CurrentDiveButton)
+		if (Owner->CurrentDiveButton || Owner->CurrentJumpButton)
 		{
 			StateMachine->ChangeState("Rollout");
 			return;
@@ -484,6 +485,9 @@ State_Bonk::State_Bonk(AMilkyWayPawn* owner)
 
 void State_Bonk::OnStateEnter()
 {
+	WallKickStopwatch = 0;
+	BonkStopwatch = 0;
+
 	Owner->VSpeed = 0;
 	Owner->HSpeed = Owner->BonkSpeed;
 
@@ -501,6 +505,16 @@ void State_Bonk::StateTick()
 	}
 	else
 	{
+		WallKickStopwatch += Owner->DeltaTime;
+		if (WallKickStopwatch <= WallKickWindow)
+		{
+			if (Owner->CurrentJumpButton)
+			{
+				//Owner->Move();
+				StateMachine->ChangeState("WallKick");
+				return;
+			}
+		}
 		BonkTimerActive = false;
 		BonkStopwatch = 0;
 	}
@@ -525,5 +539,56 @@ void State_Bonk::OnStateExit()
 	Owner->GraphicalsTransform->AddLocalRotation(rotator);
 	FVector deltaVector = FVector(0, 0, -Owner->PlayerHeight);
 	Owner->GraphicalsTransform->SetRelativeLocation(FVector(0, 0, 0));
+}
+#pragma endregion
+
+#pragma region Wall Kick
+State_WallKick::State_WallKick(AMilkyWayPawn* owner)
+	:MilkyWayPawnState(owner)
+{
+
+}
+
+void State_WallKick::OnStateEnter()
+{
+	FVector forward = Owner->GetActorForwardVector();
+	
+	FVector newForward = FMath::GetReflectionVector(forward, Owner->LastHitWallVector);
+	FRotator rotator = UKismetMathLibrary::FindLookAtRotation(Owner->GetActorLocation(), Owner->GetActorLocation() + newForward);
+	rotator.Pitch = 0;
+	rotator.Roll = 0;
+	Owner->HSpeed = 800;
+	Owner->VSpeed = Owner->InitialJumpStrength;
+	Owner->SetActorRotation(rotator);
+}
+
+void State_WallKick::StateTick()
+{
+	Owner->VSpeed -= Owner->Gravity * Owner->DeltaTime;
+	Owner->Move();
+	Owner->GroundCheck();
+	if (Owner->OnGround)
+	{
+		if (Owner->CurrentLeftStick.Length() == 0)
+		{
+			Owner->HSpeed = 0;
+			StateMachine->ChangeState("Idle");
+		}
+		else
+		{
+			StateMachine->ChangeState("Walk");
+		}
+		return;
+	}
+	if (Owner->CurrentDiveButton)
+	{
+		StateMachine->ChangeState("Dive");
+		return;
+	}
+}
+
+void State_WallKick::OnStateExit()
+{
+	
 }
 #pragma endregion

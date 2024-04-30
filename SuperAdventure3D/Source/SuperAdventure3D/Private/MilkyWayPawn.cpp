@@ -233,11 +233,13 @@ FVector AMilkyWayPawn::WallCollisionCheck()
 		float cosine = hitNormal.Dot(flippedNormalizedEntryVector);
 		float ejectionDistance = cosine * entryVector.Length() + PlayerRadius;
 		FVector ejectionVector = ejectionDistance * hitNormal;
+		LastHitWallVector = hitNormal;
 		FVector newPosition = attemptedMoveLocation + ejectionVector;
 
 		if (StateMachine->CurrentState == StateMachine->Jump ||
 			StateMachine->CurrentState == StateMachine->Fall ||
-			StateMachine->CurrentState == StateMachine->Dive)
+			StateMachine->CurrentState == StateMachine->Dive ||
+			StateMachine->CurrentState == StateMachine->WallKick)
 		{
 			if (HSpeed > BonkSpeedThreshold && hitNormal.Dot(GetActorForwardVector()) < BonkDotThreshold)
 			{

@@ -34,6 +34,7 @@ public:
 	MilkyWayPawnState* Dive;
 	MilkyWayPawnState* Rollout;
 	MilkyWayPawnState* Bonk;
+	MilkyWayPawnState* WallKick;
 
 protected:
 	// Called when the game starts
@@ -148,4 +149,17 @@ public:
 	float BonkStopwatch = 0;
 	bool BonkTimerActive = false;
 
+	float WallKickWindow = 0.17;
+	float WallKickStopwatch = 0;
+
+};
+
+class State_WallKick : public MilkyWayPawnState
+{
+public:
+	State_WallKick(AMilkyWayPawn* owner);
+
+	virtual void OnStateEnter() override;
+	virtual void StateTick() override;
+	virtual void OnStateExit() override;
 };
