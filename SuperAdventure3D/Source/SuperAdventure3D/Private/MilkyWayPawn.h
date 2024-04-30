@@ -92,6 +92,9 @@ public:
 	float DiveHImpulse = 500;
 	UPROPERTY(EditAnywhere)
 	float DiveVImpulse = 500;
+
+	UPROPERTY(EditAnywhere)
+	float SideFlipJumpScalar = 1.5;
 	
 	UPROPERTY(EditAnywhere, Category = "Debug")
 	bool DebugDrawWallCollisionChecks = false;
@@ -142,5 +145,6 @@ protected:
 	friend class State_Rollout;
 	friend class State_Bonk;
 	friend class State_WallKick;
+	friend class State_SideFlip;
 };
 

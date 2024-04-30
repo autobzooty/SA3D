@@ -38,6 +38,7 @@ void UMilkyWayPawnStateMachine::Setup(AMilkyWayPawn* owner)
 	Rollout = new State_Rollout(Owner);
 	Bonk = new State_Bonk(Owner);
 	WallKick = new State_WallKick(Owner);
+	SideFlip = new State_SideFlip(Owner);
 }
 
 
@@ -89,6 +90,8 @@ void UMilkyWayPawnStateMachine::ChangeState(FName newStateName)
 		newState = Bonk;
 	else if (newStateName == "WallKick")
 		newState = WallKick;
+	else if (newStateName == "SideFlip")
+		newState = SideFlip;
 
 	CurrentState->OnStateExit();
 	newState->OnStateEnter();
@@ -333,6 +336,12 @@ void State_Fall::StateTick()
 		}
 		return;
 	}
+	if (Owner->CurrentDiveButton)
+	{
+		StateMachine->ChangeState("Dive");
+		return;
+	}
+
 	Owner->Move();
 }
 
@@ -361,13 +370,18 @@ void State_TurnKick::StateTick()
 		StateMachine->ChangeState("Fall");
 		return;
 	}
-	Owner->HSpeed += Owner->GroundDeceleration * Owner->DeltaTime;
-	Owner->Move();
 	if (Owner->HSpeed >= 0)
 	{
 		StateMachine->ChangeState("Walk");
 		return;
 	}
+	if (Owner->CurrentJumpButton)
+	{
+		StateMachine->ChangeState("SideFlip");
+		return;
+	}
+	Owner->HSpeed += Owner->GroundDeceleration * Owner->DeltaTime;
+	Owner->Move();
 }
 void State_TurnKick::OnStateExit()
 {
@@ -592,3 +606,45 @@ void State_WallKick::OnStateExit()
 	
 }
 #pragma endregion
+
+State_SideFlip::State_SideFlip(AMilkyWayPawn* owner)
+	:MilkyWayPawnState(owner)
+{
+}
+
+void State_SideFlip::OnStateEnter()
+{
+	Owner->HSpeed *= -1;
+	Owner->VSpeed = Owner->InitialJumpStrength * Owner->SideFlipJumpScalar;
+	Owner->OnGround = false;
+}
+
+void State_SideFlip::StateTick()
+{
+	Owner->VSpeed -= Owner->Gravity * Owner->DeltaTime;
+	Owner->Move();
+	Owner->GroundCheck();
+	if (Owner->OnGround)
+	{
+		if (Owner->CurrentLeftStick.Length() == 0)
+		{
+			Owner->HSpeed = 0;
+			StateMachine->ChangeState("Idle");
+		}
+		else
+		{
+			StateMachine->ChangeState("Walk");
+		}
+		return;
+	}
+	if (Owner->CurrentDiveButton)
+	{
+		StateMachine->ChangeState("Dive");
+		return;
+	}
+
+}
+
+void State_SideFlip::OnStateExit()
+{
+}

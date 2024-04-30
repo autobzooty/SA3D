@@ -35,6 +35,7 @@ public:
 	MilkyWayPawnState* Rollout;
 	MilkyWayPawnState* Bonk;
 	MilkyWayPawnState* WallKick;
+	MilkyWayPawnState* SideFlip;
 
 protected:
 	// Called when the game starts
@@ -158,6 +159,16 @@ class State_WallKick : public MilkyWayPawnState
 {
 public:
 	State_WallKick(AMilkyWayPawn* owner);
+
+	virtual void OnStateEnter() override;
+	virtual void StateTick() override;
+	virtual void OnStateExit() override;
+};
+
+class State_SideFlip : public MilkyWayPawnState
+{
+public:
+	State_SideFlip(AMilkyWayPawn* owner);
 
 	virtual void OnStateEnter() override;
 	virtual void StateTick() override;
