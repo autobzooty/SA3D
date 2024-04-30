@@ -78,6 +78,15 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	float TurnKickDotThreshold = -0.5;
+	
+	UPROPERTY(EditAnywhere)
+	float BonkSpeed = -200;
+
+	UPROPERTY(EditAnywhere)
+	float BonkSpeedThreshold = 300;
+	
+	UPROPERTY(EditAnywhere)
+	float BonkDotThreshold = -0.7;
 
 	UPROPERTY(EditAnywhere)
 	float DiveHImpulse = 500;
@@ -129,5 +138,6 @@ protected:
 	friend class State_TurnKick;
 	friend class State_Dive;
 	friend class State_Rollout;
+	friend class State_Bonk;
 };
 

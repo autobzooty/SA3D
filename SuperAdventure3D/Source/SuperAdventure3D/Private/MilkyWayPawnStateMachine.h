@@ -21,10 +21,6 @@ public:
 
 	void Setup(AMilkyWayPawn* owner);
 
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
-
 	MilkyWayPawnState* PreviousState;
 	MilkyWayPawnState* CurrentState;
 	AMilkyWayPawn* Owner;
@@ -37,6 +33,13 @@ protected:
 	MilkyWayPawnState* TurnKick;
 	MilkyWayPawnState* Dive;
 	MilkyWayPawnState* Rollout;
+	MilkyWayPawnState* Bonk;
+
+protected:
+	// Called when the game starts
+	virtual void BeginPlay() override;
+
+	void GetCurrentState();	
 
 public:	
 	// Called every frame
@@ -129,5 +132,20 @@ public:
 	virtual void OnStateEnter() override;
 	virtual void StateTick() override;
 	virtual void OnStateExit() override;
+
+};
+
+class State_Bonk : public MilkyWayPawnState
+{
+public:
+	State_Bonk(AMilkyWayPawn* owner);
+
+	virtual void OnStateEnter() override;
+	virtual void StateTick() override;
+	virtual void OnStateExit() override;
+
+	float BonkTime = 0.5;
+	float BonkStopwatch = 0;
+	bool BonkTimerActive = false;
 
 };

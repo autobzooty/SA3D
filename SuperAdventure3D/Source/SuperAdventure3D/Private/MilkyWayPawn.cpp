@@ -235,6 +235,22 @@ FVector AMilkyWayPawn::WallCollisionCheck()
 		FVector ejectionVector = ejectionDistance * hitNormal;
 		FVector newPosition = attemptedMoveLocation + ejectionVector;
 
+		if (StateMachine->CurrentState == StateMachine->Jump ||
+			StateMachine->CurrentState == StateMachine->Fall ||
+			StateMachine->CurrentState == StateMachine->Dive)
+		{
+			if (HSpeed > BonkSpeedThreshold && hitNormal.Dot(GetActorForwardVector()) < BonkDotThreshold)
+			{
+				StateMachine->ChangeState("Bonk");
+			}
+		}
+		if (StateMachine->CurrentState == StateMachine->Walk)
+		{
+			if (HSpeed > BaseMaxGroundSpeed)
+			{
+				StateMachine->ChangeState("Bonk");
+			}
+		}
 		return newPosition;
 	}
 	else

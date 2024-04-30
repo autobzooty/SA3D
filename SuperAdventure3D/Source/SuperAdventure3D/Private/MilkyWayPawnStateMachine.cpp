@@ -36,6 +36,7 @@ void UMilkyWayPawnStateMachine::Setup(AMilkyWayPawn* owner)
 	TurnKick = new State_TurnKick(Owner);
 	Dive = new State_Dive(Owner);
 	Rollout = new State_Rollout(Owner);
+	Bonk = new State_Bonk(Owner);
 }
 
 
@@ -45,6 +46,11 @@ void UMilkyWayPawnStateMachine::BeginPlay()
 	Super::BeginPlay();
 	CurrentState = Idle;
 	CurrentState->OnStateEnter();
+}
+
+void UMilkyWayPawnStateMachine::GetCurrentState()
+{
+
 }
 
 
@@ -78,6 +84,8 @@ void UMilkyWayPawnStateMachine::ChangeState(FName newStateName)
 		newState = Dive;
 	else if (newStateName == "Rollout")
 		newState = Rollout;
+	else if (newStateName == "Bonk")
+		newState = Bonk;
 
 	CurrentState->OnStateExit();
 	newState->OnStateEnter();
@@ -443,7 +451,7 @@ void State_Rollout::OnStateEnter()
 void State_Rollout::StateTick()
 {
 	Owner->VSpeed -= Owner->Gravity * Owner->DeltaTime;
-	if (Owner->VSpeed <= 0)
+	if (Owner->VSpeed < 0)
 	{
 		Owner->GroundCheck();
 		if (Owner->OnGround)
@@ -465,5 +473,57 @@ void State_Rollout::StateTick()
 void State_Rollout::OnStateExit()
 {
 	Owner->GraphicalsTransform->SetRelativeRotation(FRotator(0, 0, 0));
+}
+#pragma endregion
+
+#pragma region Bonk
+State_Bonk::State_Bonk(AMilkyWayPawn* owner)
+	:MilkyWayPawnState(owner)
+{
+}
+
+void State_Bonk::OnStateEnter()
+{
+	Owner->VSpeed = 0;
+	Owner->HSpeed = Owner->BonkSpeed;
+
+	FRotator rotator = FRotator(180, 0, 0);
+	Owner->GraphicalsTransform->AddLocalRotation(rotator);
+	FVector deltaVector = FVector(0, 0, -Owner->PlayerHeight);
+	Owner->GraphicalsTransform->AddLocalOffset(deltaVector);
+}
+
+void State_Bonk::StateTick()
+{
+	if (Owner->OnGround)
+	{
+		BonkTimerActive = true;
+	}
+	else
+	{
+		BonkTimerActive = false;
+		BonkStopwatch = 0;
+	}
+	if (BonkTimerActive)
+	{
+		BonkStopwatch += Owner->DeltaTime;
+	}
+	if (BonkStopwatch >= BonkTime)
+	{
+		StateMachine->ChangeState("Idle");
+		return;
+	}
+
+	Owner->VSpeed -= Owner->Gravity * Owner->DeltaTime;
+	Owner->Move();
+	Owner->GroundCheck();
+}
+
+void State_Bonk::OnStateExit()
+{
+	FRotator rotator = FRotator(-180, 0, 0);
+	Owner->GraphicalsTransform->AddLocalRotation(rotator);
+	FVector deltaVector = FVector(0, 0, -Owner->PlayerHeight);
+	Owner->GraphicalsTransform->SetRelativeLocation(FVector(0, 0, 0));
 }
 #pragma endregion
