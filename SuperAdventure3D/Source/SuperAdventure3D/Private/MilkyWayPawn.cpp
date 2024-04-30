@@ -20,18 +20,22 @@ AMilkyWayPawn::AMilkyWayPawn()
 	PrimaryActorTick.bCanEverTick = true;
 
 	// Instantiating your class Components
-	RootArrow = CreateDefaultSubobject<UArrowComponent>(TEXT("RootArrow"));
+	Root = CreateDefaultSubobject<USceneComponent>("Root");
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	StateMachine = CreateDefaultSubobject<UMilkyWayPawnStateMachine>(TEXT("Statema"));
+	GraphicalsTransform = CreateDefaultSubobject<USceneComponent>(TEXT("GraphicalsRoot"));
 
-	RootArrow->SetupAttachment(GetRootComponent());
+
+	GraphicalsTransform->SetupAttachment(Root);
 
 	//Attach the Spring Arm to the root
-	SpringArm->SetupAttachment(RootArrow);
+	//SpringArm->AttachToComponent(Root, FAttachmentTransformRules::KeepRelativeTransform);
+	SpringArm->SetupAttachment(Root);
 
 	//Attach the Camera to the SpringArmComponent
-	Camera->AttachToComponent(SpringArm, FAttachmentTransformRules::KeepRelativeTransform);
+	//Camera->AttachToComponent(SpringArm, FAttachmentTransformRules::KeepRelativeTransform);
+	Camera->SetupAttachment(SpringArm);
 
 	//Setting default properties of the SpringArmComp
 	SpringArm->bUsePawnControlRotation = false;
@@ -59,25 +63,6 @@ void AMilkyWayPawn::Tick(float _DeltaTime)
 {
 	Super::Tick(_DeltaTime);
 	DeltaTime = _DeltaTime;
-
-	switch (CurrentState)
-	{
-		case Idle:
-			Idle_Tick();
-			break;
-		case Walk:
-			Walk_Tick();
-			break;
-		case Stop:
-			Stop_Tick();
-			break;
-		case Jump:
-			Jump_Tick();
-			break;
-		case Fall:
-			Fall_Tick();
-			break;
-	}
 }
 
 // Called to bind functionality to input
@@ -91,6 +76,8 @@ void AMilkyWayPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	PlayerInputComponent->BindAxis(TEXT("RightStickHorizontal"), this, &AMilkyWayPawn::OnRightStickHorizontal);
 	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Pressed, this, &AMilkyWayPawn::OnJumpButtonPressed);
 	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Released, this, &AMilkyWayPawn::OnJumpButtonReleased);
+	PlayerInputComponent->BindAction(TEXT("Dive"), IE_Pressed, this, &AMilkyWayPawn::OnDiveButtonPressed);
+	PlayerInputComponent->BindAction(TEXT("Dive"), IE_Released, this, &AMilkyWayPawn::OnDiveButtonReleased);
 
 	//Add input mapping context
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
@@ -152,26 +139,14 @@ void AMilkyWayPawn::OnJumpButtonReleased()
 	CurrentJumpButton = false;
 }
 
-void AMilkyWayPawn::Idle_Tick()
+void AMilkyWayPawn::OnDiveButtonPressed()
 {
-
+	CurrentDiveButton = true;
 }
 
-void AMilkyWayPawn::Walk_Tick()
+void AMilkyWayPawn::OnDiveButtonReleased()
 {
-}
-
-void AMilkyWayPawn::Stop_Tick()
-{
-}
-
-void AMilkyWayPawn::Jump_Tick()
-{
-}
-
-void AMilkyWayPawn::Fall_Tick()
-{
-
+	CurrentDiveButton = false;
 }
 
 void AMilkyWayPawn::Move()
@@ -290,6 +265,7 @@ void AMilkyWayPawn::GroundCheck()
 		{
 			SetActorLocation(hitResult.ImpactPoint);
 			OnGround = true;
+			VSpeed = 0;
 			return;
 		}
 	}

@@ -34,6 +34,9 @@ protected:
 	MilkyWayPawnState* Stop;
 	MilkyWayPawnState* Jump;
 	MilkyWayPawnState* Fall;
+	MilkyWayPawnState* TurnKick;
+	MilkyWayPawnState* Dive;
+	MilkyWayPawnState* Rollout;
 
 public:	
 	// Called every frame
@@ -96,3 +99,35 @@ public:
 
 };
 
+class State_TurnKick : public MilkyWayPawnState
+{
+public:
+	State_TurnKick(AMilkyWayPawn* owner);
+
+	virtual void OnStateEnter() override;
+	virtual void StateTick() override;
+	virtual void OnStateExit() override;
+
+};
+
+class State_Dive : public MilkyWayPawnState
+{
+public:
+	State_Dive(AMilkyWayPawn* owner);
+
+	virtual void OnStateEnter() override;
+	virtual void StateTick() override;
+	virtual void OnStateExit() override;
+
+};
+
+class State_Rollout : public MilkyWayPawnState
+{
+public:
+	State_Rollout(AMilkyWayPawn* owner);
+
+	virtual void OnStateEnter() override;
+	virtual void StateTick() override;
+	virtual void OnStateExit() override;
+
+};

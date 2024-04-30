@@ -17,11 +17,13 @@ public:
 	AMilkyWayPawn();
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	class UArrowComponent* RootArrow;
+	class USceneComponent* Root;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	class USpringArmComponent* SpringArm;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	class UCameraComponent* Camera;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	class USceneComponent* GraphicalsTransform;
 	UPROPERTY()
 	class UMilkyWayPawnStateMachine* StateMachine;
 
@@ -43,6 +45,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	float GroundDeceleration = 1000;
+
+	UPROPERTY(EditAnywhere)
+	float GroundSpeedDecay = 200;
 
 	UPROPERTY(EditAnywhere)
 	float TurnSpeed = 540;
@@ -70,6 +75,14 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	float WallDotThreshold = 0.05;
+
+	UPROPERTY(EditAnywhere)
+	float TurnKickDotThreshold = -0.5;
+
+	UPROPERTY(EditAnywhere)
+	float DiveHImpulse = 500;
+	UPROPERTY(EditAnywhere)
+	float DiveVImpulse = 500;
 	
 	UPROPERTY(EditAnywhere, Category = "Debug")
 	bool DebugDrawWallCollisionChecks = false;
@@ -79,6 +92,7 @@ private:
 	FVector2D CurrentLeftStick;
 	FVector2D CurrentRightStick;
 	bool CurrentJumpButton = false;
+	bool CurrentDiveButton = false;
 	bool JumpButtonPressedThisFrame = false;
 	float HSpeed;
 	float VSpeed;
@@ -96,11 +110,8 @@ protected:
 	void OnRightStickHorizontal(float axisValue);
 	void OnJumpButtonPressed();
 	void OnJumpButtonReleased();
-	void Idle_Tick();
-	void Walk_Tick();
-	void Stop_Tick();
-	void Jump_Tick();
-	void Fall_Tick();
+	void OnDiveButtonPressed();
+	void OnDiveButtonReleased();
 	void Move();
 	FVector GetCameraRequestedMoveDirection();
 	void UpdateWallCollisionRayStartPoints();
@@ -115,5 +126,8 @@ protected:
 	friend class State_Stop;
 	friend class State_Jump;
 	friend class State_Fall;
+	friend class State_TurnKick;
+	friend class State_Dive;
+	friend class State_Rollout;
 };
 

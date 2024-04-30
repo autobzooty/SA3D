@@ -33,6 +33,9 @@ void UMilkyWayPawnStateMachine::Setup(AMilkyWayPawn* owner)
 	Stop = new State_Stop(Owner);
 	Jump = new State_Jump(Owner);
 	Fall = new State_Fall(Owner);
+	TurnKick = new State_TurnKick(Owner);
+	Dive = new State_Dive(Owner);
+	Rollout = new State_Rollout(Owner);
 }
 
 
@@ -69,13 +72,19 @@ void UMilkyWayPawnStateMachine::ChangeState(FName newStateName)
 		newState = Jump;
 	else if (newStateName == "Fall")
 		newState = Fall;
+	else if (newStateName == "TurnKick")
+		newState = TurnKick;
+	else if (newStateName == "Dive")
+		newState = Dive;
+	else if (newStateName == "Rollout")
+		newState = Rollout;
 
 	CurrentState->OnStateExit();
 	newState->OnStateEnter();
 	CurrentState = newState;
 }
 
-#pragma region IdleState
+#pragma region Idle
 State_Idle::State_Idle(AMilkyWayPawn* owner)
 	:MilkyWayPawnState(owner)
 {
@@ -84,7 +93,7 @@ State_Idle::State_Idle(AMilkyWayPawn* owner)
 
 void State_Idle::OnStateEnter()
 {
-
+	Owner->HSpeed = 0;
 }
 
 void State_Idle::StateTick()
@@ -119,7 +128,7 @@ void State_Idle::OnStateExit()
 
 #pragma endregion
 
-#pragma region WalkState
+#pragma region Walk
 State_Walk::State_Walk(AMilkyWayPawn* owner)
 	:MilkyWayPawnState(owner)
 {
@@ -141,9 +150,12 @@ void State_Walk::StateTick()
 	}
 	if (Owner->CurrentJumpButton)
 	{
-		Owner->VSpeed += Owner->InitialJumpStrength;
-		Owner->OnGround = false;
 		StateMachine->ChangeState("Jump");
+		return;
+	}
+	if (Owner->CurrentDiveButton)
+	{
+		StateMachine->ChangeState("Dive");
 		return;
 	}
 	if (Owner->CurrentLeftStick.Length() == 0)
@@ -151,11 +163,24 @@ void State_Walk::StateTick()
 		StateMachine->ChangeState("Stop");
 		return;
 	}
+	if (Owner->GetCameraRequestedMoveDirection().Dot(Owner->GetActorForwardVector()) < Owner->TurnKickDotThreshold)
+	{
+		StateMachine->ChangeState("TurnKick");
+		return;
+	}
 
 	//Accelerate in facing direction
 	if (Owner->HSpeed < Owner->BaseMaxGroundSpeed)
 	{
 		Owner->HSpeed += Owner->CurrentLeftStick.Length() * Owner->GroundAcceleration * Owner->DeltaTime;
+	}
+	//Apply speed decay if we are above our ground speed limit and still trying to move
+	else
+	{
+		if (Owner->CurrentLeftStick.Length() > 0)
+		{
+			Owner->HSpeed -= Owner->GroundSpeedDecay * Owner->DeltaTime;
+		}
 	}
 
 	//Rotate toward camera's requested direction
@@ -231,7 +256,8 @@ State_Jump::State_Jump(AMilkyWayPawn* owner)
 
 void State_Jump::OnStateEnter()
 {
-
+	Owner->VSpeed += Owner->InitialJumpStrength;
+	Owner->OnGround = false;
 }
 
 void State_Jump::StateTick()
@@ -242,7 +268,6 @@ void State_Jump::StateTick()
 		Owner->GroundCheck();
 		if (Owner->OnGround)
 		{
-			Owner->VSpeed = 0;
 			if (Owner->CurrentLeftStick.Length() == 0)
 			{
 				Owner->HSpeed = 0;
@@ -255,6 +280,11 @@ void State_Jump::StateTick()
 			return;
 		}
 	}
+	if (Owner->CurrentDiveButton)
+	{
+		StateMachine->ChangeState("Dive");
+	}
+
 	Owner->Move();
 
 }
@@ -283,7 +313,6 @@ void State_Fall::StateTick()
 	Owner->GroundCheck();
 	if (Owner->OnGround)
 	{
-		Owner->VSpeed = 0;
 		if (Owner->CurrentLeftStick.Length() == 0)
 		{
 			Owner->HSpeed = 0;
@@ -301,5 +330,140 @@ void State_Fall::StateTick()
 void State_Fall::OnStateExit()
 {
 
+}
+#pragma endregion
+
+#pragma region Turn Kick
+State_TurnKick::State_TurnKick(AMilkyWayPawn* owner)
+	:MilkyWayPawnState(owner)
+{
+}
+void State_TurnKick::OnStateEnter()
+{
+	Owner->HSpeed *= -1;
+	FRotator rotator = FRotator(0, 180, 0);
+	Owner->AddActorLocalRotation(rotator);
+}
+void State_TurnKick::StateTick()
+{
+	Owner->GroundCheck();
+	if (!Owner->OnGround)
+	{
+		StateMachine->ChangeState("Fall");
+		return;
+	}
+	Owner->HSpeed += Owner->GroundDeceleration * Owner->DeltaTime;
+	Owner->Move();
+	if (Owner->HSpeed >= 0)
+	{
+		StateMachine->ChangeState("Walk");
+		return;
+	}
+}
+void State_TurnKick::OnStateExit()
+{
+}
+#pragma endregion
+
+#pragma region Dive
+
+State_Dive::State_Dive(AMilkyWayPawn* owner)
+	:MilkyWayPawnState(owner)
+{
+	
+}
+
+void State_Dive::OnStateEnter()
+{
+	Owner->GraphicalsTransform->AddLocalRotation(FRotator(-50, 0, 0));
+	if (Owner->OnGround)
+	{
+		Owner->HSpeed += Owner->DiveHImpulse * 2;
+		Owner->VSpeed += Owner->DiveVImpulse;
+		Owner->OnGround = false;
+	}
+	else
+	{
+		Owner->HSpeed += Owner->DiveHImpulse;
+	}
+}
+void State_Dive::StateTick()
+{
+	if (Owner->OnGround)
+	{
+		if (Owner->CurrentDiveButton)
+		{
+			StateMachine->ChangeState("Rollout");
+			return;
+		}
+		float deltaDeceleration = Owner->GroundDeceleration * Owner->DeltaTime;
+		if (abs(Owner->HSpeed) <= deltaDeceleration)
+			Owner->HSpeed = 0;
+		else if (Owner->HSpeed > 0)
+			Owner->HSpeed -= deltaDeceleration;
+		else
+			Owner->HSpeed += deltaDeceleration;
+		Owner->GroundCheck();
+
+	}
+	else
+	{
+		Owner->VSpeed -= Owner->Gravity * Owner->DeltaTime;
+	}
+	if (Owner->VSpeed < 0)
+	{
+		Owner->GroundCheck();
+	}
+	Owner->Move();
+	if (Owner->OnGround && Owner->HSpeed <= 0)
+	{
+		StateMachine->ChangeState("Idle");
+		return;
+	}
+}
+void State_Dive::OnStateExit()
+{
+	Owner->GraphicalsTransform->AddLocalRotation(FRotator(50, 0, 0));
+}
+#pragma endregion
+
+#pragma region Rollout
+State_Rollout::State_Rollout(AMilkyWayPawn* owner)
+	:MilkyWayPawnState(owner)
+{
+
+}
+
+void State_Rollout::OnStateEnter()
+{
+	Owner->VSpeed += Owner->DiveVImpulse;
+	Owner->OnGround = false;
+}
+
+void State_Rollout::StateTick()
+{
+	Owner->VSpeed -= Owner->Gravity * Owner->DeltaTime;
+	if (Owner->VSpeed <= 0)
+	{
+		Owner->GroundCheck();
+		if (Owner->OnGround)
+		{
+			if (Owner->GetCameraRequestedMoveDirection().Length() > 0)
+				StateMachine->ChangeState("Walk");
+			else
+				StateMachine->ChangeState("Idle");
+			return;
+		}
+	}
+	Owner->Move();
+
+	float spinSpeed = 1080;
+	FRotator rotator = FRotator(-1, 0, 0) * Owner->DeltaTime * spinSpeed;
+	Owner->GraphicalsTransform->AddLocalRotation(rotator);
+}
+
+void State_Rollout::OnStateExit()
+{
+	Owner->GraphicalsTransform->SetRelativeRotation(FRotator(0, 0, 0));
 }
 #pragma endregion
