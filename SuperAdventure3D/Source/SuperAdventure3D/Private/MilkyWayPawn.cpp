@@ -239,7 +239,8 @@ FVector AMilkyWayPawn::WallCollisionCheck()
 		if (StateMachine->CurrentState == StateMachine->Jump ||
 			StateMachine->CurrentState == StateMachine->Fall ||
 			StateMachine->CurrentState == StateMachine->Dive ||
-			StateMachine->CurrentState == StateMachine->WallKick)
+			StateMachine->CurrentState == StateMachine->WallKick ||
+			StateMachine->CurrentState == StateMachine->SideFlip)
 		{
 			if (HSpeed > BonkSpeedThreshold && hitNormal.Dot(GetActorForwardVector()) < BonkDotThreshold)
 			{
