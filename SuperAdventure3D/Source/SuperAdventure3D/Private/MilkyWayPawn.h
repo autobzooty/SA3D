@@ -108,10 +108,13 @@ private:
 	bool CurrentJumpButton = false;
 	bool CurrentDiveButton = false;
 	bool JumpButtonPressedThisFrame = false;
+	bool DiveButtonPressedThisFrame = false;
 	float HSpeed;
 	float VSpeed;
 	FVector WallCollisionRayStartPoints[9];
 	FVector PreviousFrameLocation;
+	bool PreviousFrameJumpButton = false;
+	bool PreviousFrameDiveButton = false;
 	bool OnGround = true;
 
 protected:
@@ -123,8 +126,10 @@ protected:
 	void OnRightStickVertical(float axisValue);
 	void OnRightStickHorizontal(float axisValue);
 	void OnJumpButtonPressed();
+	void OnJumpButtonHeld();
 	void OnJumpButtonReleased();
 	void OnDiveButtonPressed();
+	void OnDiveButtonHeld();
 	void OnDiveButtonReleased();
 	void Move();
 	FVector GetCameraRequestedMoveDirection();

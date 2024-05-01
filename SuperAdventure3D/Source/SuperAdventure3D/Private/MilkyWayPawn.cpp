@@ -63,6 +63,17 @@ void AMilkyWayPawn::Tick(float _DeltaTime)
 {
 	Super::Tick(_DeltaTime);
 	DeltaTime = _DeltaTime;
+
+	if (CurrentJumpButton)
+	{
+		OnJumpButtonHeld();
+	}
+	if (CurrentDiveButton)
+	{
+		OnDiveButtonHeld();
+	}
+	PreviousFrameDiveButton = CurrentDiveButton;
+	PreviousFrameJumpButton = CurrentJumpButton;
 }
 
 // Called to bind functionality to input
@@ -124,13 +135,39 @@ void AMilkyWayPawn::OnRightStickHorizontal(float axisValue)
 
 void AMilkyWayPawn::OnJumpButtonPressed()
 {
-	JumpButtonPressedThisFrame = false;
-	bool previousFrameJumpButton = CurrentJumpButton;
 	CurrentJumpButton = true;
-	if (previousFrameJumpButton != CurrentJumpButton)
+	//if (StateMachine->CurrentState == StateMachine->Idle ||
+	//	StateMachine->CurrentState == StateMachine->Walk ||
+	//	StateMachine->CurrentState == StateMachine->Stop)
+	//{
+	//	StateMachine->ChangeState("Jump");
+	//	return;
+	//}
+	//else if (StateMachine->CurrentState == StateMachine->TurnKick)
+	//{
+	//	StateMachine->ChangeState("SideFlip");
+	//	return;
+	//}
+	//else if (StateMachine->CurrentState == StateMachine->Dive)
+	//{
+	//	if (OnGround)
+	//	{
+	//		StateMachine->ChangeState("Rollout");
+	//		return;
+	//	}
+	//}
+}
+
+void AMilkyWayPawn::OnJumpButtonHeld()
+{
+	if (PreviousFrameJumpButton == false)
 	{
-		//First frame of button press
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Some debug message!"));
 		JumpButtonPressedThisFrame = true;
+	}
+	else
+	{
+		JumpButtonPressedThisFrame = false;
 	}
 }
 
@@ -142,6 +179,19 @@ void AMilkyWayPawn::OnJumpButtonReleased()
 void AMilkyWayPawn::OnDiveButtonPressed()
 {
 	CurrentDiveButton = true;
+}
+
+void AMilkyWayPawn::OnDiveButtonHeld()
+{
+	if (PreviousFrameDiveButton == false)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Some debug message!"));
+		DiveButtonPressedThisFrame = true;
+	}
+	else
+	{
+		DiveButtonPressedThisFrame = false;
+	}
 }
 
 void AMilkyWayPawn::OnDiveButtonReleased()

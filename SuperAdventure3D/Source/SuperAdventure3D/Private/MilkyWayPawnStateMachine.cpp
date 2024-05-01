@@ -118,7 +118,7 @@ void State_Idle::StateTick()
 		StateMachine->ChangeState("Fall");
 		return;
 	}
-	if (Owner->CurrentJumpButton)
+	if (Owner->JumpButtonPressedThisFrame)
 	{
 		StateMachine->ChangeState("Jump");
 		return;
@@ -160,12 +160,12 @@ void State_Walk::StateTick()
 		StateMachine->ChangeState("Fall");
 		return;
 	}
-	if (Owner->CurrentJumpButton)
+	if (Owner->JumpButtonPressedThisFrame)
 	{
 		StateMachine->ChangeState("Jump");
 		return;
 	}
-	if (Owner->CurrentDiveButton)
+	if (Owner->DiveButtonPressedThisFrame)
 	{
 		StateMachine->ChangeState("Dive");
 		return;
@@ -229,16 +229,25 @@ void State_Stop::StateTick()
 	if (!Owner->OnGround)
 	{
 		StateMachine->ChangeState("Fall");
+		return;
 	}
-	if (Owner->CurrentLeftStick.Length() > 0)
+	else if (Owner->CurrentLeftStick.Length() > 0)
 	{
 		StateMachine->ChangeState("Walk");
+		return;
 	}
-	if (Owner->HSpeed == 0)
+	else if (Owner->HSpeed == 0)
 	{
 		StateMachine->ChangeState("Idle");
+		return;
 	}
-	else if (Owner->HSpeed > 0)
+	else if (Owner->JumpButtonPressedThisFrame)
+	{
+		StateMachine->ChangeState("Jump");
+		return;
+	}
+	
+	if (Owner->HSpeed > 0)
 	{
 		Owner->HSpeed -= Owner->GroundDeceleration * Owner->DeltaTime;
 	}
@@ -292,9 +301,10 @@ void State_Jump::StateTick()
 			return;
 		}
 	}
-	if (Owner->CurrentDiveButton)
+	if (Owner->DiveButtonPressedThisFrame)
 	{
 		StateMachine->ChangeState("Dive");
+		return;
 	}
 
 	Owner->Move();
@@ -336,7 +346,7 @@ void State_Fall::StateTick()
 		}
 		return;
 	}
-	if (Owner->CurrentDiveButton)
+	if (Owner->DiveButtonPressedThisFrame)
 	{
 		StateMachine->ChangeState("Dive");
 		return;
@@ -375,7 +385,7 @@ void State_TurnKick::StateTick()
 		StateMachine->ChangeState("Walk");
 		return;
 	}
-	if (Owner->CurrentJumpButton)
+	if (Owner->JumpButtonPressedThisFrame)
 	{
 		StateMachine->ChangeState("SideFlip");
 		return;
@@ -414,7 +424,7 @@ void State_Dive::StateTick()
 {
 	if (Owner->OnGround)
 	{
-		if (Owner->CurrentDiveButton || Owner->CurrentJumpButton)
+		if (Owner->DiveButtonPressedThisFrame || Owner->JumpButtonPressedThisFrame)
 		{
 			StateMachine->ChangeState("Rollout");
 			return;
@@ -522,7 +532,7 @@ void State_Bonk::StateTick()
 		WallKickStopwatch += Owner->DeltaTime;
 		if (WallKickStopwatch <= WallKickWindow)
 		{
-			if (Owner->CurrentJumpButton)
+			if (Owner->JumpButtonPressedThisFrame)
 			{
 				//Owner->Move();
 				StateMachine->ChangeState("WallKick");
@@ -594,7 +604,7 @@ void State_WallKick::StateTick()
 		}
 		return;
 	}
-	if (Owner->CurrentDiveButton)
+	if (Owner->DiveButtonPressedThisFrame)
 	{
 		StateMachine->ChangeState("Dive");
 		return;
@@ -637,7 +647,7 @@ void State_SideFlip::StateTick()
 		}
 		return;
 	}
-	if (Owner->CurrentDiveButton)
+	if (Owner->DiveButtonPressedThisFrame)
 	{
 		StateMachine->ChangeState("Dive");
 		return;
