@@ -182,9 +182,9 @@ void State_Walk::StateTick()
 	}
 
 	//Accelerate in facing direction
-	if (Owner->HSpeed < Owner->BaseMaxGroundSpeed)
+	if (Owner->HSpeed < Owner->CurrentMaxGroundSpeed)
 	{
-		Owner->HSpeed += Owner->CurrentLeftStick.Length() * Owner->GroundAcceleration * Owner->DeltaTime;
+		Owner->HSpeed += Owner->CurrentLeftStick.Length() * Owner->CurrentGroundAcceleration * Owner->DeltaTime;
 	}
 	//Apply speed decay if we are above our ground speed limit and still trying to move
 	else

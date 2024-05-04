@@ -41,7 +41,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UPROPERTY(EditAnywhere)
-	float GroundAcceleration = 500;
+	float BaseGroundAcceleration = 500;
 
 	UPROPERTY(EditAnywhere)
 	float GroundDeceleration = 1000;
@@ -109,6 +109,8 @@ private:
 	float DeltaTime;
 	FVector2D CurrentLeftStick;
 	FVector2D CurrentRightStick;
+	float CurrentMaxGroundSpeed;
+	float CurrentGroundAcceleration;
 	bool CurrentJumpButton = false;
 	bool CurrentDiveButton = false;
 	bool JumpButtonPressedThisFrame = false;

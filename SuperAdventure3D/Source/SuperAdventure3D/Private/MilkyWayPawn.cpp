@@ -101,19 +101,22 @@ void AMilkyWayPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 void AMilkyWayPawn::OnLeftStickVertical(float axisValue)
 {
 	CurrentLeftStick.Y = axisValue;
-	CurrentLeftStick.Normalize();
+	if(CurrentLeftStick.Length() > 1)
+		CurrentLeftStick.Normalize();
 }
 
 void AMilkyWayPawn::OnLeftStickHorizontal(float axisValue)
 {
 	CurrentLeftStick.X = axisValue;
-	CurrentLeftStick.Normalize();
+	if (CurrentLeftStick.Length() > 1)
+		CurrentLeftStick.Normalize();
 }
 
 void AMilkyWayPawn::OnRightStickVertical(float axisValue)
 {
 	CurrentRightStick.Y = axisValue;
-	CurrentRightStick.Normalize();
+	if (CurrentRightStick.Length() > 1)
+		CurrentRightStick.Normalize();
 
 	float newPitch = CameraTurnSpeed * axisValue * DeltaTime;
 	FRotator rotator = FRotator(newPitch, 0, 0);
@@ -125,7 +128,8 @@ void AMilkyWayPawn::OnRightStickHorizontal(float axisValue)
 {
 	
 	CurrentRightStick.X = axisValue;
-	CurrentRightStick.Normalize();
+	if (CurrentRightStick.Length() > 1)
+		CurrentRightStick.Normalize();
 
 	float newYaw = CameraTurnSpeed * axisValue * DeltaTime;
 	FRotator rotator = FRotator(0, newYaw, 0);
@@ -336,6 +340,12 @@ void AMilkyWayPawn::GroundCheck()
 			SetActorLocation(hitResult.ImpactPoint);
 			OnGround = true;
 			VSpeed = 0;
+
+			//Scale acceleration and max ground speed based on the ground normal
+			float dotScalar = hitResult.ImpactNormal.Dot(GetActorForwardVector()) * -1;
+			CurrentGroundAcceleration = BaseGroundAcceleration;
+			CurrentMaxGroundSpeed = BaseMaxGroundSpeed * CurrentLeftStick.Length();
+
 			return;
 		}
 	}
