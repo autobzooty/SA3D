@@ -96,6 +96,10 @@ public:
 	UPROPERTY(EditAnywhere)
 	float SideFlipJumpScalar = 1.5;
 	
+
+	UPROPERTY(EditAnywhere)
+	float AirControlAcceleration = 600;
+	
 	UPROPERTY(EditAnywhere, Category = "Debug")
 	bool DebugDrawWallCollisionChecks = false;
 
@@ -111,6 +115,7 @@ private:
 	bool DiveButtonPressedThisFrame = false;
 	float HSpeed;
 	float VSpeed;
+	FVector AirControlVelocity;
 	FVector WallCollisionRayStartPoints[9];
 	FVector PreviousFrameLocation;
 	bool PreviousFrameJumpButton = false;
@@ -134,7 +139,7 @@ protected:
 	void Move();
 	FVector GetCameraRequestedMoveDirection();
 	void UpdateWallCollisionRayStartPoints();
-	FVector WallCollisionCheck();
+	FVector WallCollisionCheck(FVector attemptedMoveLocation);
 	enum SurfaceTypes QuerySurfaceType(FVector surfaceNormal);
 	void GroundCheck();
 	void CeilingCheck();

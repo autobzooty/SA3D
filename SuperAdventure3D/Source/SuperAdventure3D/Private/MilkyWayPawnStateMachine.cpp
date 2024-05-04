@@ -272,11 +272,12 @@ void State_Stop::OnStateExit()
 State_Jump::State_Jump(AMilkyWayPawn* owner)
 	:MilkyWayPawnState(owner)
 {
-
+	
 }
 
 void State_Jump::OnStateEnter()
 {
+	Owner->AirControlVelocity = FVector(0, 0, 0);
 	Owner->VSpeed += Owner->InitialJumpStrength;
 	Owner->OnGround = false;
 }
@@ -301,19 +302,27 @@ void State_Jump::StateTick()
 			return;
 		}
 	}
+
+	//Apply air control
+	Owner->AirControlVelocity += Owner->GetCameraRequestedMoveDirection() * Owner->AirControlAcceleration * Owner->DeltaTime;
+	
+	FVector attemptedMoveLocation = Owner->GetActorLocation() + Owner->AirControlVelocity * Owner->DeltaTime;
+	//Owner->SetActorLocation(Owner->WallCollisionCheck(attemptedMoveLocation));
+
 	if (Owner->DiveButtonPressedThisFrame)
 	{
 		StateMachine->ChangeState("Dive");
 		return;
 	}
 
+	
 	Owner->Move();
 
 }
 
 void State_Jump::OnStateExit()
 {
-
+	Owner->AirControlVelocity = FVector(0, 0, 0);
 }
 
 #pragma endregion
@@ -523,25 +532,6 @@ void State_Bonk::OnStateEnter()
 
 void State_Bonk::StateTick()
 {
-	if (Owner->OnGround)
-	{
-		BonkTimerActive = true;
-	}
-	else
-	{
-		WallKickStopwatch += Owner->DeltaTime;
-		if (WallKickStopwatch <= WallKickWindow)
-		{
-			if (Owner->JumpButtonPressedThisFrame)
-			{
-				//Owner->Move();
-				StateMachine->ChangeState("WallKick");
-				return;
-			}
-		}
-		BonkTimerActive = false;
-		BonkStopwatch = 0;
-	}
 	if (BonkTimerActive)
 	{
 		BonkStopwatch += Owner->DeltaTime;
@@ -552,9 +542,32 @@ void State_Bonk::StateTick()
 		return;
 	}
 
-	Owner->VSpeed -= Owner->Gravity * Owner->DeltaTime;
-	Owner->Move();
-	Owner->GroundCheck();
+	if (Owner->OnGround)
+	{
+		BonkTimerActive = true;
+	}
+	else
+	{
+		BonkTimerActive = false;
+		BonkStopwatch = 0;
+
+		WallKickStopwatch += Owner->DeltaTime;
+		if (WallKickStopwatch <= WallKickWindow)
+		{
+			if (Owner->JumpButtonPressedThisFrame)
+			{
+				//Owner->Move();
+				StateMachine->ChangeState("WallKick");
+				return;
+			}
+		}
+		else
+		{
+			Owner->VSpeed -= Owner->Gravity * Owner->DeltaTime;
+			Owner->Move();
+			Owner->GroundCheck();
+		}
+	}
 }
 
 void State_Bonk::OnStateExit()
@@ -575,8 +588,10 @@ State_WallKick::State_WallKick(AMilkyWayPawn* owner)
 
 void State_WallKick::OnStateEnter()
 {
-	FVector forward = Owner->GetActorForwardVector();
-	
+	Owner->AirControlVelocity = FVector(0, 0, 0);
+
+
+	FVector forward = Owner->GetActorForwardVector();	
 	FVector newForward = FMath::GetReflectionVector(forward, Owner->LastHitWallVector);
 	FRotator rotator = UKismetMathLibrary::FindLookAtRotation(Owner->GetActorLocation(), Owner->GetActorLocation() + newForward);
 	rotator.Pitch = 0;
@@ -609,17 +624,22 @@ void State_WallKick::StateTick()
 		StateMachine->ChangeState("Dive");
 		return;
 	}
+	//Apply air control
+	Owner->AirControlVelocity += Owner->GetCameraRequestedMoveDirection() * Owner->AirControlAcceleration * Owner->DeltaTime;
 }
 
 void State_WallKick::OnStateExit()
 {
-	
+	Owner->AirControlVelocity = FVector(0, 0, 0);
 }
 #pragma endregion
 
+#pragma region Side flip
 State_SideFlip::State_SideFlip(AMilkyWayPawn* owner)
 	:MilkyWayPawnState(owner)
 {
+	Owner->AirControlVelocity = FVector(0, 0, 0);
+
 }
 
 void State_SideFlip::OnStateEnter()
@@ -631,6 +651,9 @@ void State_SideFlip::OnStateEnter()
 
 void State_SideFlip::StateTick()
 {
+	//Apply air control
+	Owner->AirControlVelocity += Owner->GetCameraRequestedMoveDirection() * Owner->AirControlAcceleration * Owner->DeltaTime;
+
 	Owner->VSpeed -= Owner->Gravity * Owner->DeltaTime;
 	Owner->Move();
 	Owner->GroundCheck();
@@ -657,4 +680,6 @@ void State_SideFlip::StateTick()
 
 void State_SideFlip::OnStateExit()
 {
+	Owner->AirControlVelocity = FVector(0, 0, 0);
 }
+#pragma endregion

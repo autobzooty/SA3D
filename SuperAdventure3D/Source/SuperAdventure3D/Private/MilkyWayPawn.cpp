@@ -162,7 +162,6 @@ void AMilkyWayPawn::OnJumpButtonHeld()
 {
 	if (PreviousFrameJumpButton == false)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Some debug message!"));
 		JumpButtonPressedThisFrame = true;
 	}
 	else
@@ -185,7 +184,6 @@ void AMilkyWayPawn::OnDiveButtonHeld()
 {
 	if (PreviousFrameDiveButton == false)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Some debug message!"));
 		DiveButtonPressedThisFrame = true;
 	}
 	else
@@ -202,7 +200,8 @@ void AMilkyWayPawn::OnDiveButtonReleased()
 void AMilkyWayPawn::Move()
 {
 	PreviousFrameLocation = GetActorLocation();
-	SetActorLocation(WallCollisionCheck());
+	FVector attemptedMoveLocation = GetActorLocation() + (AirControlVelocity * DeltaTime) + (GetActorForwardVector() * HSpeed * DeltaTime);
+	SetActorLocation(WallCollisionCheck(attemptedMoveLocation));
 	CeilingCheck();
 	FVector vVector = FVector(0, 0, 1) * VSpeed * DeltaTime;
 	AddActorLocalOffset(vVector);
@@ -213,7 +212,7 @@ FVector AMilkyWayPawn::GetCameraRequestedMoveDirection()
 	FVector leftStick = FVector(CurrentLeftStick.Y, CurrentLeftStick.X, 0);
 	if (leftStick.Length() == 0)
 	{
-		return GetActorForwardVector();
+		return FVector(0, 0, 0);
 	}
 	FVector cameraRequestedMoveDirection = UKismetMathLibrary::TransformDirection(Camera->GetComponentTransform(), leftStick);
 	cameraRequestedMoveDirection.Z = 0;
@@ -246,21 +245,22 @@ void AMilkyWayPawn::UpdateWallCollisionRayStartPoints()
 	WallCollisionRayStartPoints[8] = UKismetMathLibrary::TransformLocation(GetActorTransform(), FVector(0, smallPlayerRadius, PlayerHeight));
 }
 
-FVector AMilkyWayPawn::WallCollisionCheck()
+FVector AMilkyWayPawn::WallCollisionCheck(FVector attemptedMoveLocation)
 {
-	FVector lineTraceOffset = GetActorForwardVector() * HSpeed * DeltaTime;
+	FVector lineTraceOffset = attemptedMoveLocation * DeltaTime;
+	FVector differenceVector = attemptedMoveLocation - GetActorLocation();
 	UpdateWallCollisionRayStartPoints();
 
 	FVector hitNormal;
 	FVector hitPoint;
-	float shortestCollisionDistance = HSpeed * DeltaTime;
+	float shortestCollisionDistance = differenceVector.Length() * 2;
 	for (int i = 0; i < 9; ++i)
 	{
 		if (DebugDrawWallCollisionChecks)
-			DrawDebugDirectionalArrow(GetWorld(), WallCollisionRayStartPoints[i], WallCollisionRayStartPoints[i] + lineTraceOffset, 10, FColor::Red, false);
+			DrawDebugDirectionalArrow(GetWorld(), WallCollisionRayStartPoints[i], WallCollisionRayStartPoints[i] + differenceVector, 10, FColor::Red, false);
 
 		FHitResult hitResult;
-		if (GetWorld()->LineTraceSingleByChannel(hitResult, WallCollisionRayStartPoints[i], WallCollisionRayStartPoints[i] + lineTraceOffset, ECC_WorldStatic))
+		if (GetWorld()->LineTraceSingleByChannel(hitResult, WallCollisionRayStartPoints[i], WallCollisionRayStartPoints[i] + differenceVector, ECC_WorldStatic))
 		{
 			if (QuerySurfaceType(hitResult.ImpactNormal) == Wall)
 			{
@@ -273,10 +273,11 @@ FVector AMilkyWayPawn::WallCollisionCheck()
 			}
 		}
 	}
-	if (shortestCollisionDistance < HSpeed * DeltaTime)
+	if (shortestCollisionDistance < differenceVector.Length() * 2)
 	{
+		//if (GEngine)
+		//	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Some debug message!"));	
 		//eject from wall
-		FVector attemptedMoveLocation = GetActorLocation() + GetActorForwardVector() * HSpeed * DeltaTime;
 		FVector entryVector = attemptedMoveLocation - hitPoint;
 		FVector flippedNormalizedEntryVector = -entryVector;
 		flippedNormalizedEntryVector.Normalize();
@@ -297,18 +298,18 @@ FVector AMilkyWayPawn::WallCollisionCheck()
 				StateMachine->ChangeState("Bonk");
 			}
 		}
-		if (StateMachine->CurrentState == StateMachine->Walk)
+		else if (StateMachine->CurrentState == StateMachine->Walk)
 		{
 			if (HSpeed > BaseMaxGroundSpeed)
 			{
-				StateMachine->ChangeState("Bonk");
+				//StateMachine->ChangeState("Bonk");
 			}
 		}
 		return newPosition;
 	}
 	else
 	{
-		return GetActorLocation() + GetActorForwardVector() * HSpeed * DeltaTime;
+		return attemptedMoveLocation;
 	}	
 }
 
