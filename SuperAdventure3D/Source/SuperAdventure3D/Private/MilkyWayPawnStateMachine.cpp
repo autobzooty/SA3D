@@ -307,7 +307,6 @@ void State_Jump::StateTick()
 	Owner->AirControlVelocity += Owner->GetCameraRequestedMoveDirection() * Owner->AirControlAcceleration * Owner->DeltaTime;
 	
 	FVector attemptedMoveLocation = Owner->GetActorLocation() + Owner->AirControlVelocity * Owner->DeltaTime;
-	//Owner->SetActorLocation(Owner->WallCollisionCheck(attemptedMoveLocation));
 
 	if (Owner->DiveButtonPressedThisFrame)
 	{
@@ -545,6 +544,8 @@ void State_Bonk::StateTick()
 	if (Owner->OnGround)
 	{
 		BonkTimerActive = true;
+		Owner->Move();
+		Owner->GroundCheck();
 	}
 	else
 	{
@@ -556,7 +557,6 @@ void State_Bonk::StateTick()
 		{
 			if (Owner->JumpButtonPressedThisFrame)
 			{
-				//Owner->Move();
 				StateMachine->ChangeState("WallKick");
 				return;
 			}

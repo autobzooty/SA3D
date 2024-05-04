@@ -251,17 +251,17 @@ void AMilkyWayPawn::UpdateWallCollisionRayStartPoints()
 
 FVector AMilkyWayPawn::WallCollisionCheck(FVector attemptedMoveLocation)
 {
-	FVector lineTraceOffset = attemptedMoveLocation * DeltaTime;
 	FVector differenceVector = attemptedMoveLocation - GetActorLocation();
 	UpdateWallCollisionRayStartPoints();
 
 	FVector hitNormal;
 	FVector hitPoint;
-	float shortestCollisionDistance = differenceVector.Length() * 2;
+	float shortestCollisionDistance = differenceVector.Length();
+	bool wallHit = false;
 	for (int i = 0; i < 9; ++i)
 	{
 		if (DebugDrawWallCollisionChecks)
-			DrawDebugDirectionalArrow(GetWorld(), WallCollisionRayStartPoints[i], WallCollisionRayStartPoints[i] + differenceVector, 10, FColor::Red, false);
+			DrawDebugDirectionalArrow(GetWorld(), WallCollisionRayStartPoints[i], WallCollisionRayStartPoints[i] + differenceVector, 20, FColor::Red, false);
 
 		FHitResult hitResult;
 		if (GetWorld()->LineTraceSingleByChannel(hitResult, WallCollisionRayStartPoints[i], WallCollisionRayStartPoints[i] + differenceVector, ECC_WorldStatic))
@@ -270,6 +270,7 @@ FVector AMilkyWayPawn::WallCollisionCheck(FVector attemptedMoveLocation)
 			{
 				if (hitResult.Distance < shortestCollisionDistance)
 				{
+					wallHit = true;
 					shortestCollisionDistance = hitResult.Distance;
 					hitNormal = hitResult.ImpactNormal;
 					hitPoint = hitResult.ImpactPoint;
@@ -277,10 +278,8 @@ FVector AMilkyWayPawn::WallCollisionCheck(FVector attemptedMoveLocation)
 			}
 		}
 	}
-	if (shortestCollisionDistance < differenceVector.Length() * 2)
+	if (wallHit)
 	{
-		//if (GEngine)
-		//	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Some debug message!"));	
 		//eject from wall
 		FVector entryVector = attemptedMoveLocation - hitPoint;
 		FVector flippedNormalizedEntryVector = -entryVector;
@@ -304,15 +303,18 @@ FVector AMilkyWayPawn::WallCollisionCheck(FVector attemptedMoveLocation)
 		}
 		else if (StateMachine->CurrentState == StateMachine->Walk)
 		{
-			if (HSpeed > BaseMaxGroundSpeed)
+			if (HSpeed > BaseMaxGroundSpeed * 1.1)
 			{
-				//StateMachine->ChangeState("Bonk");
+				StateMachine->ChangeState("Bonk");
 			}
 		}
 		return newPosition;
 	}
 	else
 	{
+		//if (GEngine)
+		//	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Some debug message!"));
+
 		return attemptedMoveLocation;
 	}	
 }
