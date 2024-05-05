@@ -95,7 +95,13 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	float SideFlipJumpScalar = 1.5;
-	
+
+	UPROPERTY(EditAnywhere)
+	float MaxSlopeScalar = 2.0;
+
+	UPROPERTY(EditAnywhere)
+	float MinSlopeScalar = 0.5;
+
 
 	UPROPERTY(EditAnywhere)
 	float AirControlAcceleration = 600;
@@ -123,6 +129,7 @@ private:
 	bool PreviousFrameJumpButton = false;
 	bool PreviousFrameDiveButton = false;
 	bool OnGround = true;
+	FVector CurrentGroundNormal = FVector(0, 0, 1);
 
 protected:
 	enum PawnStates { Idle, Walk, Stop, Jump, Fall };
@@ -138,6 +145,7 @@ protected:
 	void OnDiveButtonPressed();
 	void OnDiveButtonHeld();
 	void OnDiveButtonReleased();
+	void ApplyGroundedMovementScalars();
 	void Move();
 	FVector GetCameraRequestedMoveDirection();
 	void UpdateWallCollisionRayStartPoints();

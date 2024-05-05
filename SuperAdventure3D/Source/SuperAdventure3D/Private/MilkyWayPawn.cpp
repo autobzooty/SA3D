@@ -10,8 +10,6 @@
 #include "DrawDebugHelpers.h"
 #include "MilkyWayPawnStateMachine.h"
 
-
-
 // Sets default values
 AMilkyWayPawn::AMilkyWayPawn()
 {
@@ -201,8 +199,38 @@ void AMilkyWayPawn::OnDiveButtonReleased()
 	CurrentDiveButton = false;
 }
 
+void AMilkyWayPawn::ApplyGroundedMovementScalars()
+{
+	FHitResult hitResult;
+	FVector startLocation = GetActorLocation() + FVector(0, 0, 1) * PlayerHeight;
+	FVector endLocation = GetActorLocation() + FVector(0, 0, 1) * -StepHeight;
+	if (GetWorld()->LineTraceSingleByChannel(hitResult, startLocation, endLocation, ECC_WorldStatic))
+	{
+		if (QuerySurfaceType(hitResult.ImpactNormal) == Ground)
+		{
+
+			//Scale acceleration and max ground speed based on the ground normal
+			float slopeScalar = 1.0f;
+			float dot = GetActorForwardVector().Dot(hitResult.ImpactNormal);
+
+			if (dot > 0.0f)
+				slopeScalar = (MaxSlopeScalar - 1.0f) * dot + 1.0f;
+			else if (dot < 0.0f)
+				slopeScalar = (1.0f - MinSlopeScalar) * (1.0f + dot) + MinSlopeScalar;
+
+			//FString debugText = FString::Printf(TEXT("slopeScalar: %f"), slopeScalar);
+			//if (GEngine)
+			//	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, debugText);
+
+			CurrentGroundAcceleration = BaseGroundAcceleration * slopeScalar;
+			CurrentMaxGroundSpeed = BaseMaxGroundSpeed * slopeScalar * CurrentLeftStick.Length();
+		}
+	}
+}
+
 void AMilkyWayPawn::Move()
 {
+	ApplyGroundedMovementScalars();
 	PreviousFrameLocation = GetActorLocation();
 	FVector attemptedMoveLocation = GetActorLocation() + (AirControlVelocity * DeltaTime) + (GetActorForwardVector() * HSpeed * DeltaTime);
 	SetActorLocation(WallCollisionCheck(attemptedMoveLocation));
@@ -281,6 +309,7 @@ FVector AMilkyWayPawn::WallCollisionCheck(FVector attemptedMoveLocation)
 	if (wallHit)
 	{
 		//eject from wall
+		//TO DO: do a min clamp so that a wall check ray can be no smaller than PlayerRadius
 		FVector entryVector = attemptedMoveLocation - hitPoint;
 		FVector flippedNormalizedEntryVector = -entryVector;
 		flippedNormalizedEntryVector.Normalize();
@@ -339,18 +368,15 @@ void AMilkyWayPawn::GroundCheck()
 	{
 		if (QuerySurfaceType(hitResult.ImpactNormal) == Ground)
 		{
+			CurrentGroundNormal = hitResult.ImpactNormal;
 			SetActorLocation(hitResult.ImpactPoint);
 			OnGround = true;
 			VSpeed = 0;
 
-			//Scale acceleration and max ground speed based on the ground normal
-			float dotScalar = hitResult.ImpactNormal.Dot(GetActorForwardVector()) * -1;
-			CurrentGroundAcceleration = BaseGroundAcceleration;
-			CurrentMaxGroundSpeed = BaseMaxGroundSpeed * CurrentLeftStick.Length();
-
 			return;
 		}
 	}
+	CurrentGroundNormal = FVector(0, 0, 1);
 	OnGround = false;
 }
 
