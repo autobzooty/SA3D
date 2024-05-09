@@ -154,12 +154,6 @@ void State_Walk::OnStateEnter()
 
 void State_Walk::StateTick()
 {
-	Owner->GroundCheck();
-	if (!Owner->OnGround)
-	{
-		StateMachine->ChangeState("Fall");
-		return;
-	}
 	if (Owner->JumpButtonPressedThisFrame)
 	{
 		StateMachine->ChangeState("Jump");
@@ -203,6 +197,14 @@ void State_Walk::StateTick()
 	Owner->AddActorLocalRotation(rotator);
 
 	Owner->Move();
+
+	Owner->GroundCheck();
+	if (!Owner->OnGround)
+	{
+		StateMachine->ChangeState("Fall");
+		return;
+	}
+
 }
 
 void State_Walk::OnStateExit()
@@ -225,6 +227,8 @@ void State_Stop::OnStateEnter()
 
 void State_Stop::StateTick()
 {
+	Owner->Move();
+
 	Owner->GroundCheck();
 	if (!Owner->OnGround)
 	{
@@ -259,7 +263,6 @@ void State_Stop::StateTick()
 	{
 		Owner->HSpeed = 0;
 	}
-	Owner->Move();
 }
 
 void State_Stop::OnStateExit()
@@ -285,6 +288,21 @@ void State_Jump::OnStateEnter()
 void State_Jump::StateTick()
 {
 	Owner->VSpeed -= Owner->Gravity * Owner->DeltaTime;
+
+	//Apply air control
+	Owner->AirControlVelocity += Owner->GetCameraRequestedMoveDirection() * Owner->AirControlAcceleration * Owner->DeltaTime;
+	
+	FVector attemptedMoveLocation = Owner->GetActorLocation() + Owner->AirControlVelocity * Owner->DeltaTime;
+
+	if (Owner->DiveButtonPressedThisFrame)
+	{
+		StateMachine->ChangeState("Dive");
+		return;
+	}
+
+	
+	Owner->Move();
+
 	if (Owner->VSpeed <= 0)
 	{
 		Owner->GroundCheck();
@@ -302,20 +320,6 @@ void State_Jump::StateTick()
 			return;
 		}
 	}
-
-	//Apply air control
-	Owner->AirControlVelocity += Owner->GetCameraRequestedMoveDirection() * Owner->AirControlAcceleration * Owner->DeltaTime;
-	
-	FVector attemptedMoveLocation = Owner->GetActorLocation() + Owner->AirControlVelocity * Owner->DeltaTime;
-
-	if (Owner->DiveButtonPressedThisFrame)
-	{
-		StateMachine->ChangeState("Dive");
-		return;
-	}
-
-	
-	Owner->Move();
 
 }
 
@@ -340,6 +344,14 @@ void State_Fall::OnStateEnter()
 void State_Fall::StateTick()
 {
 	Owner->VSpeed -= Owner->Gravity * Owner->DeltaTime;
+	if (Owner->DiveButtonPressedThisFrame)
+	{
+		StateMachine->ChangeState("Dive");
+		return;
+	}
+
+	Owner->Move();
+
 	Owner->GroundCheck();
 	if (Owner->OnGround)
 	{
@@ -354,13 +366,7 @@ void State_Fall::StateTick()
 		}
 		return;
 	}
-	if (Owner->DiveButtonPressedThisFrame)
-	{
-		StateMachine->ChangeState("Dive");
-		return;
-	}
 
-	Owner->Move();
 }
 
 void State_Fall::OnStateExit()
@@ -382,12 +388,6 @@ void State_TurnKick::OnStateEnter()
 }
 void State_TurnKick::StateTick()
 {
-	Owner->GroundCheck();
-	if (!Owner->OnGround)
-	{
-		StateMachine->ChangeState("Fall");
-		return;
-	}
 	if (Owner->HSpeed >= 0)
 	{
 		StateMachine->ChangeState("Walk");
@@ -400,6 +400,13 @@ void State_TurnKick::StateTick()
 	}
 	Owner->HSpeed += Owner->GroundDeceleration * Owner->DeltaTime;
 	Owner->Move();
+	Owner->GroundCheck();
+	if (!Owner->OnGround)
+	{
+		StateMachine->ChangeState("Fall");
+		return;
+	}
+
 }
 void State_TurnKick::OnStateExit()
 {
@@ -422,6 +429,7 @@ void State_Dive::OnStateEnter()
 		Owner->HSpeed += Owner->DiveHImpulse * 2;
 		Owner->VSpeed += Owner->DiveVImpulse;
 		Owner->OnGround = false;
+		Owner->CurrentGroundForward = Owner->GetActorForwardVector();
 	}
 	else
 	{
@@ -430,6 +438,7 @@ void State_Dive::OnStateEnter()
 }
 void State_Dive::StateTick()
 {
+	Owner->Move();
 	if (Owner->OnGround)
 	{
 		if (Owner->DiveButtonPressedThisFrame || Owner->JumpButtonPressedThisFrame)
@@ -455,7 +464,6 @@ void State_Dive::StateTick()
 	{
 		Owner->GroundCheck();
 	}
-	Owner->Move();
 	if (Owner->OnGround && Owner->HSpeed <= 0)
 	{
 		StateMachine->ChangeState("Idle");
@@ -479,11 +487,15 @@ void State_Rollout::OnStateEnter()
 {
 	Owner->VSpeed += Owner->DiveVImpulse;
 	Owner->OnGround = false;
+	Owner->CurrentGroundForward = Owner->GetActorForwardVector();
+
 }
 
 void State_Rollout::StateTick()
 {
 	Owner->VSpeed -= Owner->Gravity * Owner->DeltaTime;
+	Owner->Move();
+
 	if (Owner->VSpeed < 0)
 	{
 		Owner->GroundCheck();
@@ -496,7 +508,6 @@ void State_Rollout::StateTick()
 			return;
 		}
 	}
-	Owner->Move();
 
 	float spinSpeed = 1080;
 	FRotator rotator = FRotator(-1, 0, 0) * Owner->DeltaTime * spinSpeed;

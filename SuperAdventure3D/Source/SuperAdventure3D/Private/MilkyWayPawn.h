@@ -130,6 +130,7 @@ private:
 	bool PreviousFrameDiveButton = false;
 	bool OnGround = true;
 	FVector CurrentGroundNormal = FVector(0, 0, 1);
+	FVector CurrentGroundForward = GetActorForwardVector();
 
 protected:
 	enum PawnStates { Idle, Walk, Stop, Jump, Fall };

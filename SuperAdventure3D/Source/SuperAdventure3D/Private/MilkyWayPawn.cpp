@@ -232,7 +232,7 @@ void AMilkyWayPawn::Move()
 {
 	ApplyGroundedMovementScalars();
 	PreviousFrameLocation = GetActorLocation();
-	FVector attemptedMoveLocation = GetActorLocation() + (AirControlVelocity * DeltaTime) + (GetActorForwardVector() * HSpeed * DeltaTime);
+	FVector attemptedMoveLocation = GetActorLocation() + (AirControlVelocity * DeltaTime) + (CurrentGroundForward * HSpeed * DeltaTime);
 	SetActorLocation(WallCollisionCheck(attemptedMoveLocation));
 	CeilingCheck();
 	FVector vVector = FVector(0, 0, 1) * VSpeed * DeltaTime;
@@ -369,6 +369,11 @@ void AMilkyWayPawn::GroundCheck()
 		if (QuerySurfaceType(hitResult.ImpactNormal) == Ground)
 		{
 			CurrentGroundNormal = hitResult.ImpactNormal;
+			if (OnGround)
+				CurrentGroundForward = GetActorRightVector().Cross(CurrentGroundNormal);
+			else
+				CurrentGroundForward = GetActorForwardVector();
+
 			SetActorLocation(hitResult.ImpactPoint);
 			OnGround = true;
 			VSpeed = 0;
@@ -377,6 +382,7 @@ void AMilkyWayPawn::GroundCheck()
 		}
 	}
 	CurrentGroundNormal = FVector(0, 0, 1);
+	CurrentGroundForward = GetActorForwardVector();
 	OnGround = false;
 }
 
