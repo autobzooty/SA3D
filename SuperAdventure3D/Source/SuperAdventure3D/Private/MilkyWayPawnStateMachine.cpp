@@ -281,13 +281,31 @@ State_Jump::State_Jump(AMilkyWayPawn* owner)
 void State_Jump::OnStateEnter()
 {
 	Owner->AirControlVelocity = FVector(0, 0, 0);
-	Owner->VSpeed += Owner->InitialJumpStrength;
+	Owner->VSpeed += Owner->JumpImpulse;
 	Owner->OnGround = false;
+	JumpThrustWindowActive = true;
+	JumpThrustStopwatch = 0;
 }
 
 void State_Jump::StateTick()
 {
 	Owner->VSpeed -= Owner->Gravity * Owner->DeltaTime;
+	if (JumpThrustWindowActive)
+	{
+		JumpThrustStopwatch += Owner->DeltaTime;
+		if (JumpThrustStopwatch >= Owner->JumpThrustWindow)
+		{
+			JumpThrustWindowActive = false;
+		}
+		else
+		{
+			Owner->VSpeed += Owner->JumpThrust * Owner->DeltaTime;
+		}
+		if (Owner->CurrentJumpButton == false)
+		{
+			JumpThrustWindowActive = false;
+		}
+	}
 
 	//Apply air control
 	Owner->AirControlVelocity += Owner->GetCameraRequestedMoveDirection() * Owner->AirControlAcceleration * Owner->DeltaTime;
@@ -608,7 +626,7 @@ void State_WallKick::OnStateEnter()
 	rotator.Pitch = 0;
 	rotator.Roll = 0;
 	Owner->HSpeed = 800;
-	Owner->VSpeed = Owner->InitialJumpStrength;
+	Owner->VSpeed = Owner->JumpImpulse;
 	Owner->SetActorRotation(rotator);
 }
 
@@ -656,7 +674,7 @@ State_SideFlip::State_SideFlip(AMilkyWayPawn* owner)
 void State_SideFlip::OnStateEnter()
 {
 	Owner->HSpeed *= -1;
-	Owner->VSpeed = Owner->InitialJumpStrength * Owner->SideFlipJumpScalar;
+	Owner->VSpeed = Owner->JumpImpulse * Owner->SideFlipJumpScalar;
 	Owner->OnGround = false;
 }
 

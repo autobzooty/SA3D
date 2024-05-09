@@ -41,25 +41,25 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UPROPERTY(EditAnywhere)
-	float BaseGroundAcceleration = 500;
+	float BaseGroundAcceleration = 900;
 
 	UPROPERTY(EditAnywhere)
-	float GroundDeceleration = 1000;
+	float GroundDeceleration = 2000;
 
 	UPROPERTY(EditAnywhere)
-	float GroundSpeedDecay = 200;
+	float GroundSpeedDecay = 1200;
 
 	UPROPERTY(EditAnywhere)
 	float TurnSpeed = 540;
 
 	UPROPERTY(EditAnywhere)
-	float BaseMaxGroundSpeed = 500;
+	float BaseMaxGroundSpeed = 700;
 
 	UPROPERTY(EditAnywhere)
 	float CameraTurnSpeed = 180;
 
 	UPROPERTY(EditAnywhere)
-	float PlayerRadius = 50;
+	float PlayerRadius = 30;
 
 	UPROPERTY(EditAnywhere)
 	float PlayerHeight = 100;
@@ -68,10 +68,14 @@ public:
 	float StepHeight = 20;
 
 	UPROPERTY(EditAnywhere)
-	float Gravity = 10;
+	float Gravity = 5000;
 
 	UPROPERTY(EditAnywhere)
-	float InitialJumpStrength = 100;
+	float JumpImpulse = 500;
+	UPROPERTY(EditAnywhere)
+	float JumpThrust = 15000;
+	UPROPERTY(EditAnywhere)
+	float JumpThrustWindow = 0.11;
 
 	UPROPERTY(EditAnywhere)
 	float WallDotThreshold = 0.05;
@@ -86,25 +90,25 @@ public:
 	float BonkSpeedThreshold = 300;
 	
 	UPROPERTY(EditAnywhere)
-	float BonkDotThreshold = -0.7;
+	float BonkDotThreshold = -0.6;
 
 	UPROPERTY(EditAnywhere)
-	float DiveHImpulse = 500;
+	float DiveHImpulse = 300;
 	UPROPERTY(EditAnywhere)
-	float DiveVImpulse = 500;
+	float DiveVImpulse = 1000;
 
 	UPROPERTY(EditAnywhere)
 	float SideFlipJumpScalar = 1.5;
 
 	UPROPERTY(EditAnywhere)
-	float MaxSlopeScalar = 2.0;
+	float MaxSlopeScalar = 4.0;
 
 	UPROPERTY(EditAnywhere)
-	float MinSlopeScalar = 0.5;
+	float MinSlopeScalar = 0.1;
 
 
 	UPROPERTY(EditAnywhere)
-	float AirControlAcceleration = 600;
+	float AirControlAcceleration = 1200;
 	
 	UPROPERTY(EditAnywhere, Category = "Debug")
 	bool DebugDrawWallCollisionChecks = false;

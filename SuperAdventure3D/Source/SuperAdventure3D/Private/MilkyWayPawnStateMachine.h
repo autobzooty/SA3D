@@ -91,6 +91,9 @@ public:
 	virtual void StateTick() override;
 	virtual void OnStateExit() override;
 
+	bool JumpThrustWindowActive = true;
+	float JumpThrustStopwatch = 0;
+
 };
 
 class State_Fall : public MilkyWayPawnState
