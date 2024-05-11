@@ -115,6 +115,8 @@ public:
 	
 	UPROPERTY(EditAnywhere, Category = "Debug")
 	bool DebugDrawWallCollisionChecks = false;
+	UPROPERTY(EditAnywhere, Category = "Debug")
+	bool DebugDrawGroundCollisionCheck = false;
 
 	FVector LastHitWallVector;
 

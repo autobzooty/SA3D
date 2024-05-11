@@ -672,15 +672,17 @@ void State_WallKick::OnStateExit()
 State_SideFlip::State_SideFlip(AMilkyWayPawn* owner)
 	:MilkyWayPawnState(owner)
 {
-	Owner->AirControlVelocity = FVector(0, 0, 0);
 
 }
 
 void State_SideFlip::OnStateEnter()
 {
+	Owner->AirControlVelocity = FVector(0, 0, 0);
+
 	Owner->HSpeed *= -1;
 	Owner->VSpeed = Owner->JumpImpulse * Owner->SideFlipJumpScalar;
 	Owner->OnGround = false;
+	Owner->CurrentGroundForward = Owner->GetActorForwardVector();
 }
 
 void State_SideFlip::StateTick()

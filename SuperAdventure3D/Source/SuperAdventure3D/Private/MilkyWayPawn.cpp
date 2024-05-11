@@ -377,6 +377,10 @@ void AMilkyWayPawn::GroundCheck()
 	FHitResult hitResult;
 	FVector startLocation = GetActorLocation() + FVector(0, 0, 1) * PlayerHeight;
 	FVector endLocation = GetActorLocation() + FVector(0, 0, 1) * -StepHeight;
+
+	if(DebugDrawGroundCollisionCheck)
+		DrawDebugDirectionalArrow(GetWorld(), startLocation, endLocation, 20, FColor::Blue, false, -1, 1);
+
 	if (GetWorld()->LineTraceSingleByChannel(hitResult, startLocation, endLocation, ECC_WorldStatic))
 	{
 		if (QuerySurfaceType(hitResult.ImpactNormal) == Ground)
