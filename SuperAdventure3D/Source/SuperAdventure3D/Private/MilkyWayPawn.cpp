@@ -258,21 +258,21 @@ void AMilkyWayPawn::UpdateWallCollisionRayStartPoints()
 	//Bottom-left
 	WallCollisionRayStartPoints[0] = UKismetMathLibrary::TransformLocation(GetActorTransform(), FVector(0, -smallPlayerRadius, StepHeight));
 	//Bottom-middle
-	WallCollisionRayStartPoints[1] = UKismetMathLibrary::TransformLocation(GetActorTransform(), FVector(smallPlayerRadius, 0, StepHeight));
+	WallCollisionRayStartPoints[1] = UKismetMathLibrary::TransformLocation(GetActorTransform(), FVector(-smallPlayerRadius, 0, StepHeight));
 	//Bottom-right
 	WallCollisionRayStartPoints[2] = UKismetMathLibrary::TransformLocation(GetActorTransform(), FVector(0, smallPlayerRadius, StepHeight));
 
 	//Middle-left
 	WallCollisionRayStartPoints[3] = UKismetMathLibrary::TransformLocation(GetActorTransform(), FVector(0, -smallPlayerRadius, PlayerHeight * 0.5));
 	//Middle-middle
-	WallCollisionRayStartPoints[4] = UKismetMathLibrary::TransformLocation(GetActorTransform(), FVector(smallPlayerRadius, 0, PlayerHeight * 0.5));
+	WallCollisionRayStartPoints[4] = UKismetMathLibrary::TransformLocation(GetActorTransform(), FVector(-smallPlayerRadius, 0, PlayerHeight * 0.5));
 	//Middle-Right
 	WallCollisionRayStartPoints[5] = UKismetMathLibrary::TransformLocation(GetActorTransform(), FVector(0, smallPlayerRadius, PlayerHeight * 0.5));
 
 	//Top-left
 	WallCollisionRayStartPoints[6] = UKismetMathLibrary::TransformLocation(GetActorTransform(), FVector(0, -smallPlayerRadius, PlayerHeight));
 	//Top-middle
-	WallCollisionRayStartPoints[7] = UKismetMathLibrary::TransformLocation(GetActorTransform(), FVector(smallPlayerRadius, 0, PlayerHeight));
+	WallCollisionRayStartPoints[7] = UKismetMathLibrary::TransformLocation(GetActorTransform(), FVector(-smallPlayerRadius, 0, PlayerHeight));
 	//Top-right
 	WallCollisionRayStartPoints[8] = UKismetMathLibrary::TransformLocation(GetActorTransform(), FVector(0, smallPlayerRadius, PlayerHeight));
 }
@@ -289,8 +289,8 @@ FVector AMilkyWayPawn::WallCollisionCheck(FVector attemptedMoveLocation)
 	for (int i = 0; i < 9; ++i)
 	{
 		FVector endPoint = WallCollisionRayStartPoints[i] + differenceVector;
-		//if (i == 1 || i == 4 || i == 7)
-		//	endPoint += CurrentGroundForward * 2 * PlayerRadius;
+		if (i == 1 || i == 4 || i == 7)
+			endPoint += CurrentGroundForward * 2 * PlayerRadius;
 
 		if (DebugDrawWallCollisionChecks)
 			DrawDebugDirectionalArrow(GetWorld(), WallCollisionRayStartPoints[i], endPoint, 20, FColor::Red, false);
@@ -305,6 +305,9 @@ FVector AMilkyWayPawn::WallCollisionCheck(FVector attemptedMoveLocation)
 				{
 					wallHit = true;
 					shortestCollisionDistance = hitResult.Distance;
+					if (i == 1 || i == 4 || i == 7)
+						shortestCollisionDistance = shortestCollisionDistance / 2 / PlayerRadius;
+
 					hitNormal = hitResult.ImpactNormal;
 					hitPoint = hitResult.ImpactPoint;
 				}
