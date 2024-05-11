@@ -282,6 +282,7 @@ void State_Jump::OnStateEnter()
 {
 	Owner->AirControlVelocity = FVector(0, 0, 0);
 	Owner->VSpeed += Owner->JumpImpulse;
+	Owner->CurrentGroundForward = Owner->GetActorForwardVector();
 	Owner->OnGround = false;
 	JumpThrustWindowActive = true;
 	JumpThrustStopwatch = 0;
@@ -333,6 +334,7 @@ void State_Jump::StateTick()
 			}
 			else
 			{
+				//TO-DO: make HSpeed inherit momentum from air control velocity
 				StateMachine->ChangeState("Walk");
 			}
 			return;
@@ -357,7 +359,7 @@ State_Fall::State_Fall(AMilkyWayPawn* owner)
 
 void State_Fall::OnStateEnter()
 {
-
+	Owner->CurrentGroundForward = Owner->GetActorForwardVector();
 }
 void State_Fall::StateTick()
 {
@@ -446,6 +448,7 @@ void State_Dive::OnStateEnter()
 	{
 		Owner->HSpeed += Owner->DiveHImpulse * 2;
 		Owner->VSpeed += Owner->DiveVImpulse;
+		Owner->CurrentGroundForward = Owner->GetActorForwardVector();
 		Owner->OnGround = false;
 		Owner->CurrentGroundForward = Owner->GetActorForwardVector();
 	}
@@ -504,6 +507,7 @@ State_Rollout::State_Rollout(AMilkyWayPawn* owner)
 void State_Rollout::OnStateEnter()
 {
 	Owner->VSpeed += Owner->DiveVImpulse;
+	Owner->CurrentGroundForward = Owner->GetActorForwardVector();
 	Owner->OnGround = false;
 	Owner->CurrentGroundForward = Owner->GetActorForwardVector();
 
@@ -618,6 +622,7 @@ State_WallKick::State_WallKick(AMilkyWayPawn* owner)
 void State_WallKick::OnStateEnter()
 {
 	Owner->AirControlVelocity = FVector(0, 0, 0);
+	Owner->CurrentGroundForward = Owner->GetActorForwardVector();
 
 
 	FVector forward = Owner->GetActorForwardVector();	
@@ -626,7 +631,7 @@ void State_WallKick::OnStateEnter()
 	rotator.Pitch = 0;
 	rotator.Roll = 0;
 	Owner->HSpeed = 800;
-	Owner->VSpeed = Owner->JumpImpulse;
+	Owner->VSpeed = Owner->JumpImpulse * Owner->WallKickJumpScalar;
 	Owner->SetActorRotation(rotator);
 }
 

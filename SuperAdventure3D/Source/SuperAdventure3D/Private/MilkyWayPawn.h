@@ -98,7 +98,10 @@ public:
 	float DiveVImpulse = 1000;
 
 	UPROPERTY(EditAnywhere)
-	float SideFlipJumpScalar = 1.5;
+	float SideFlipJumpScalar = 3;
+
+	UPROPERTY(EditAnywhere)
+	float WallKickJumpScalar = 4;
 
 	UPROPERTY(EditAnywhere)
 	float MaxSlopeScalar = 4.0;

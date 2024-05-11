@@ -284,15 +284,20 @@ FVector AMilkyWayPawn::WallCollisionCheck(FVector attemptedMoveLocation)
 
 	FVector hitNormal;
 	FVector hitPoint;
-	float shortestCollisionDistance = differenceVector.Length();
+	float shortestCollisionDistance = differenceVector.Length() + 2 * PlayerRadius;
 	bool wallHit = false;
 	for (int i = 0; i < 9; ++i)
 	{
+		FVector endPoint = WallCollisionRayStartPoints[i] + differenceVector;
+		//if (i == 1 || i == 4 || i == 7)
+		//	endPoint += CurrentGroundForward * 2 * PlayerRadius;
+
 		if (DebugDrawWallCollisionChecks)
-			DrawDebugDirectionalArrow(GetWorld(), WallCollisionRayStartPoints[i], WallCollisionRayStartPoints[i] + differenceVector, 20, FColor::Red, false);
+			DrawDebugDirectionalArrow(GetWorld(), WallCollisionRayStartPoints[i], endPoint, 20, FColor::Red, false);
 
 		FHitResult hitResult;
-		if (GetWorld()->LineTraceSingleByChannel(hitResult, WallCollisionRayStartPoints[i], WallCollisionRayStartPoints[i] + differenceVector, ECC_WorldStatic))
+		
+		if (GetWorld()->LineTraceSingleByChannel(hitResult, WallCollisionRayStartPoints[i], endPoint, ECC_WorldStatic))
 		{
 			if (QuerySurfaceType(hitResult.ImpactNormal) == Wall)
 			{
@@ -303,6 +308,11 @@ FVector AMilkyWayPawn::WallCollisionCheck(FVector attemptedMoveLocation)
 					hitNormal = hitResult.ImpactNormal;
 					hitPoint = hitResult.ImpactPoint;
 				}
+			}
+			if (QuerySurfaceType(hitResult.ImpactNormal) == Ceiling)
+			{
+				HSpeed = 0;
+				return GetActorLocation();
 			}
 		}
 	}
