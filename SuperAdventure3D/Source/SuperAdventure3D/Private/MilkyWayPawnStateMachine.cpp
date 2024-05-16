@@ -333,7 +333,10 @@ void State_Jump::StateTick()
 			}
 			else
 			{
-				//TO-DO: make HSpeed inherit momentum from air control velocity
+				//Add forward momentum from air control to HSpeed
+				FVector localAirControlVelocity = UKismetMathLibrary::InverseTransformDirection(Owner->GetActorTransform(), Owner->AirControlVelocity);
+				Owner->HSpeed += localAirControlVelocity.X;
+
 				StateMachine->ChangeState("Walk");
 			}
 			return;
@@ -381,6 +384,10 @@ void State_Fall::StateTick()
 		}
 		else
 		{
+			//Add forward momentum from air control to HSpeed
+			FVector localAirControlVelocity = UKismetMathLibrary::InverseTransformDirection(Owner->GetActorTransform(), Owner->AirControlVelocity);
+			Owner->HSpeed += localAirControlVelocity.X;
+
 			StateMachine->ChangeState("Walk");
 		}
 		return;
@@ -648,6 +655,10 @@ void State_WallKick::StateTick()
 		}
 		else
 		{
+			//Add forward momentum from air control to HSpeed
+			FVector localAirControlVelocity = UKismetMathLibrary::InverseTransformDirection(Owner->GetActorTransform(), Owner->AirControlVelocity);
+			Owner->HSpeed += localAirControlVelocity.X;
+
 			StateMachine->ChangeState("Walk");
 		}
 		return;
@@ -701,6 +712,10 @@ void State_SideFlip::StateTick()
 		}
 		else
 		{
+			//Add forward momentum from air control to HSpeed
+			FVector localAirControlVelocity = UKismetMathLibrary::InverseTransformDirection(Owner->GetActorTransform(), Owner->AirControlVelocity);
+			Owner->HSpeed += localAirControlVelocity.X;
+
 			StateMachine->ChangeState("Walk");
 		}
 		return;
