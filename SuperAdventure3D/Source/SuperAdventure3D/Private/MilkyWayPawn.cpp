@@ -338,7 +338,7 @@ FVector AMilkyWayPawn::WallCollisionCheck(FVector attemptedMoveLocation)
 			StateMachine->CurrentState == StateMachine->WallKick ||
 			StateMachine->CurrentState == StateMachine->SideFlip)
 		{
-			if (HSpeed > BonkSpeedThreshold && hitNormal.Dot(GetActorForwardVector()) < BonkDotThreshold)
+			if (HSpeed + AirControlVelocity.Length() > BonkSpeedThreshold && hitNormal.Dot(GetActorForwardVector()) < BonkDotThreshold)
 			{
 				StateMachine->ChangeState("Bonk");
 			}
@@ -415,4 +415,15 @@ void AMilkyWayPawn::CeilingCheck()
 			VSpeed = 0;
 		}
 	}
+}
+
+void AMilkyWayPawn::UpdateAirControl()
+{
+	//Update air control
+	FVector localAirControlAcceleration = UKismetMathLibrary::InverseTransformDirection(GetActorTransform(), GetCameraRequestedMoveDirection() * AirControlAcceleration * DeltaTime);
+	//If we are above the base ground speed, eliminate the forward component of our air acceleration
+	if (HSpeed + AirControlVelocity.Length() + localAirControlAcceleration.Length() >= BaseMaxGroundSpeed)
+		localAirControlAcceleration.X = 0;
+
+	AirControlVelocity += UKismetMathLibrary::TransformDirection(GetActorTransform(), localAirControlAcceleration);
 }

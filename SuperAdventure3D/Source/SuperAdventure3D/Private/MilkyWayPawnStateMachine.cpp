@@ -308,8 +308,7 @@ void State_Jump::StateTick()
 		}
 	}
 
-	//Apply air control
-	Owner->AirControlVelocity += Owner->GetCameraRequestedMoveDirection() * Owner->AirControlAcceleration * Owner->DeltaTime;
+	Owner->UpdateAirControl();
 	
 	FVector attemptedMoveLocation = Owner->GetActorLocation() + Owner->AirControlVelocity * Owner->DeltaTime;
 
@@ -658,8 +657,8 @@ void State_WallKick::StateTick()
 		StateMachine->ChangeState("Dive");
 		return;
 	}
-	//Apply air control
-	Owner->AirControlVelocity += Owner->GetCameraRequestedMoveDirection() * Owner->AirControlAcceleration * Owner->DeltaTime;
+	
+	Owner->UpdateAirControl();
 }
 
 void State_WallKick::OnStateExit()
@@ -687,8 +686,8 @@ void State_SideFlip::OnStateEnter()
 
 void State_SideFlip::StateTick()
 {
-	//Apply air control
-	Owner->AirControlVelocity += Owner->GetCameraRequestedMoveDirection() * Owner->AirControlAcceleration * Owner->DeltaTime;
+	
+	Owner->UpdateAirControl();
 
 	Owner->VSpeed -= Owner->Gravity * Owner->DeltaTime;
 	Owner->Move();

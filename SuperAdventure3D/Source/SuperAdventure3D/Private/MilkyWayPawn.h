@@ -163,6 +163,7 @@ protected:
 	enum SurfaceTypes QuerySurfaceType(FVector surfaceNormal);
 	void GroundCheck();
 	void CeilingCheck();
+	void UpdateAirControl();
 	void PreInitializeComponents() override;
 
 	friend class State_Idle;
