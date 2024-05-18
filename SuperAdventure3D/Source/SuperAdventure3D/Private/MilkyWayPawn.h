@@ -77,6 +77,10 @@ public:
 	UPROPERTY(EditAnywhere)
 	float JumpThrust = 18000;
 	UPROPERTY(EditAnywhere)
+	float MinJumpThrustScalar = 0.5;
+	UPROPERTY(EditAnywhere)
+	float MaxJumpThrustScalar = 2;
+	UPROPERTY(EditAnywhere)
 	float JumpThrustWindow = 0.11;
 
 	UPROPERTY(EditAnywhere)
@@ -167,6 +171,8 @@ protected:
 	void CeilingCheck();
 	void UpdateAirControl();
 	float GetCurrentGravity();
+	float GetCurrentTurnSpeed();
+	float GetCurrentJumpThrust();
 	void PreInitializeComponents() override;
 
 	friend class State_Idle;

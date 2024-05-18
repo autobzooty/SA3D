@@ -191,7 +191,7 @@ void State_Walk::StateTick()
 
 	//Rotate toward camera's requested direction
 	float turnScalar = Owner->GetCameraRequestedMoveDirection().Dot(Owner->GetActorRightVector());
-	float turnAmount = Owner->TurnSpeed * turnScalar * Owner->DeltaTime;
+	float turnAmount = Owner->GetCurrentTurnSpeed() * turnScalar * Owner->DeltaTime;
 
 	FRotator rotator = FRotator(0, turnAmount, 0);
 	Owner->AddActorLocalRotation(rotator);
@@ -300,7 +300,7 @@ void State_Jump::StateTick()
 		}
 		else
 		{
-			Owner->VSpeed += Owner->JumpThrust * Owner->DeltaTime;
+			Owner->VSpeed += Owner->GetCurrentJumpThrust() * Owner->DeltaTime;
 		}
 		if (Owner->CurrentJumpButton == false)
 		{

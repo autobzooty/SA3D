@@ -421,8 +421,9 @@ void AMilkyWayPawn::UpdateAirControl()
 {
 	//Update air control
 	FVector localAirControlAcceleration = UKismetMathLibrary::InverseTransformDirection(GetActorTransform(), GetCameraRequestedMoveDirection() * AirControlAcceleration * DeltaTime);
-	//If we are above the base ground speed, eliminate the forward component of our air acceleration
-	if (HSpeed + AirControlVelocity.Length() + localAirControlAcceleration.Length() >= BaseMaxGroundSpeed)
+	//If we are above the base ground speed and the player is still pushing the stick forward, eliminate the forward component of our air acceleration
+	if (HSpeed + AirControlVelocity.Length() + localAirControlAcceleration.Length() >= BaseMaxGroundSpeed &&
+		GetCameraRequestedMoveDirection().Dot(GetActorForwardVector()) > 0)
 		localAirControlAcceleration.X = 0;
 
 	AirControlVelocity += UKismetMathLibrary::TransformDirection(GetActorTransform(), localAirControlAcceleration);
@@ -434,4 +435,20 @@ float AMilkyWayPawn::GetCurrentGravity()
 	currentGravity = FMath::Clamp(currentGravity, MinGravity, InitialGravity);
 
 	return currentGravity;
+}
+
+float AMilkyWayPawn::GetCurrentTurnSpeed()
+{
+	//TO-DO: Curve this value non-linearly
+	float turnSpeed = (BaseMaxGroundSpeed / HSpeed) * TurnSpeed;
+	turnSpeed = FMath::Clamp(turnSpeed, TurnSpeed * 0.5, TurnSpeed);
+	return turnSpeed;
+}
+
+float AMilkyWayPawn::GetCurrentJumpThrust()
+{
+	//TO-DO: Curve this value non-linearly
+	float jumpThrust = (HSpeed / BaseGroundAcceleration) * JumpThrust;
+	jumpThrust = FMath::Clamp(jumpThrust, JumpThrust * MinJumpThrustScalar, JumpThrust * MaxJumpThrustScalar);
+	return jumpThrust;
 }
