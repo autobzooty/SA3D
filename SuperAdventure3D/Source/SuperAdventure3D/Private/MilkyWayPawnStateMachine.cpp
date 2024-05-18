@@ -290,7 +290,7 @@ void State_Jump::OnStateEnter()
 
 void State_Jump::StateTick()
 {
-	Owner->VSpeed -= Owner->Gravity * Owner->DeltaTime;
+	Owner->VSpeed -= Owner->GetCurrentGravity() * Owner->DeltaTime;
 	if (JumpThrustWindowActive)
 	{
 		JumpThrustStopwatch += Owner->DeltaTime;
@@ -365,7 +365,7 @@ void State_Fall::OnStateEnter()
 }
 void State_Fall::StateTick()
 {
-	Owner->VSpeed -= Owner->Gravity * Owner->DeltaTime;
+	Owner->VSpeed -= Owner->GetCurrentGravity() * Owner->DeltaTime;
 	if (Owner->DiveButtonPressedThisFrame)
 	{
 		StateMachine->ChangeState("Dive");
@@ -485,7 +485,8 @@ void State_Dive::StateTick()
 	}
 	else
 	{
-		Owner->VSpeed -= Owner->Gravity * Owner->DeltaTime;
+
+		Owner->VSpeed -= Owner->GetCurrentGravity() * Owner->DeltaTime;
 	}
 	if (Owner->VSpeed < 0)
 	{
@@ -521,7 +522,7 @@ void State_Rollout::OnStateEnter()
 
 void State_Rollout::StateTick()
 {
-	Owner->VSpeed -= Owner->Gravity * Owner->DeltaTime;
+	Owner->VSpeed -= Owner->GetCurrentGravity() * Owner->DeltaTime;
 	Owner->Move();
 
 	if (Owner->VSpeed < 0)
@@ -602,7 +603,7 @@ void State_Bonk::StateTick()
 		}
 		else
 		{
-			Owner->VSpeed -= Owner->Gravity * Owner->DeltaTime;
+			Owner->VSpeed -= Owner->GetCurrentGravity() * Owner->DeltaTime;
 			Owner->Move();
 			Owner->GroundCheck();
 		}
@@ -643,7 +644,7 @@ void State_WallKick::OnStateEnter()
 
 void State_WallKick::StateTick()
 {
-	Owner->VSpeed -= Owner->Gravity * Owner->DeltaTime;
+	Owner->VSpeed -= Owner->GetCurrentGravity() * Owner->DeltaTime;
 	Owner->Move();
 	Owner->GroundCheck();
 	if (Owner->OnGround)
@@ -700,7 +701,7 @@ void State_SideFlip::StateTick()
 	
 	Owner->UpdateAirControl();
 
-	Owner->VSpeed -= Owner->Gravity * Owner->DeltaTime;
+	Owner->VSpeed -= Owner->GetCurrentGravity() * Owner->DeltaTime;
 	Owner->Move();
 	Owner->GroundCheck();
 	if (Owner->OnGround)

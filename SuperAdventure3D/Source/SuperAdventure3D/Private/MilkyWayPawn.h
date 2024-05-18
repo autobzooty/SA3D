@@ -68,12 +68,14 @@ public:
 	float StepHeight = 20;
 
 	UPROPERTY(EditAnywhere)
-	float Gravity = 5000;
+	float InitialGravity = 70000;
+	UPROPERTY(EditAnywhere)
+	float MinGravity = 4000;
 
 	UPROPERTY(EditAnywhere)
 	float JumpImpulse = 500;
 	UPROPERTY(EditAnywhere)
-	float JumpThrust = 15000;
+	float JumpThrust = 18000;
 	UPROPERTY(EditAnywhere)
 	float JumpThrustWindow = 0.11;
 
@@ -164,6 +166,7 @@ protected:
 	void GroundCheck();
 	void CeilingCheck();
 	void UpdateAirControl();
+	float GetCurrentGravity();
 	void PreInitializeComponents() override;
 
 	friend class State_Idle;

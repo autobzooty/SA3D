@@ -427,3 +427,11 @@ void AMilkyWayPawn::UpdateAirControl()
 
 	AirControlVelocity += UKismetMathLibrary::TransformDirection(GetActorTransform(), localAirControlAcceleration);
 }
+
+float AMilkyWayPawn::GetCurrentGravity()
+{
+	float currentGravity = abs(VSpeed) / JumpImpulse + MinGravity;
+	currentGravity = FMath::Clamp(currentGravity, MinGravity, InitialGravity);
+
+	return currentGravity;
+}
