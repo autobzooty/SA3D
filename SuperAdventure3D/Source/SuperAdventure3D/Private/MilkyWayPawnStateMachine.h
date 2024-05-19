@@ -92,6 +92,7 @@ public:
 	virtual void OnStateExit() override;
 
 	bool JumpThrustWindowActive = true;
+	bool StillHoldingJump = true;
 	float JumpThrustStopwatch = 0;
 
 };
@@ -104,6 +105,8 @@ public:
 	virtual void OnStateEnter() override;
 	virtual void StateTick() override;
 	virtual void OnStateExit() override;
+
+	bool StillHoldingJump = true;
 
 };
 
@@ -166,6 +169,9 @@ public:
 	virtual void OnStateEnter() override;
 	virtual void StateTick() override;
 	virtual void OnStateExit() override;
+
+	bool StillHoldingJump = true;
+
 };
 
 class State_SideFlip : public MilkyWayPawnState
@@ -176,4 +182,7 @@ public:
 	virtual void OnStateEnter() override;
 	virtual void StateTick() override;
 	virtual void OnStateExit() override;
+
+	bool StillHoldingJump = true;
+
 };

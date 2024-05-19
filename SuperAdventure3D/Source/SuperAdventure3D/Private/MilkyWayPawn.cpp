@@ -354,9 +354,6 @@ FVector AMilkyWayPawn::WallCollisionCheck(FVector attemptedMoveLocation)
 	}
 	else
 	{
-		//if (GEngine)
-		//	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Some debug message!"));
-
 		return attemptedMoveLocation;
 	}	
 }

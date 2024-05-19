@@ -82,6 +82,8 @@ public:
 	float MaxJumpThrustScalar = 2;
 	UPROPERTY(EditAnywhere)
 	float JumpThrustWindow = 0.11;
+	UPROPERTY(EditAnywhere)
+	float JumpReleaseGravityScalar = 2;
 
 	UPROPERTY(EditAnywhere)
 	float WallDotThreshold = 0.05;

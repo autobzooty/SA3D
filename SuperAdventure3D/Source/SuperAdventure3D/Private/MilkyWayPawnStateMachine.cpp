@@ -286,11 +286,17 @@ void State_Jump::OnStateEnter()
 	Owner->OnGround = false;
 	JumpThrustWindowActive = true;
 	JumpThrustStopwatch = 0;
+	StillHoldingJump = true;
 }
 
 void State_Jump::StateTick()
 {
-	Owner->VSpeed -= Owner->GetCurrentGravity() * Owner->DeltaTime;
+	if (!Owner->CurrentJumpButton)
+		StillHoldingJump = false;
+	float gravityAcceleration = Owner->GetCurrentGravity() * Owner->DeltaTime;
+	if (!StillHoldingJump)
+		gravityAcceleration *= Owner->JumpReleaseGravityScalar;
+	Owner->VSpeed -= gravityAcceleration;
 	if (JumpThrustWindowActive)
 	{
 		JumpThrustStopwatch += Owner->DeltaTime;
@@ -362,10 +368,16 @@ State_Fall::State_Fall(AMilkyWayPawn* owner)
 void State_Fall::OnStateEnter()
 {
 	Owner->CurrentGroundForward = Owner->GetActorForwardVector();
+	StillHoldingJump = true;
 }
 void State_Fall::StateTick()
 {
-	Owner->VSpeed -= Owner->GetCurrentGravity() * Owner->DeltaTime;
+	if (!Owner->CurrentJumpButton)
+		StillHoldingJump = false;
+	float gravityAcceleration = Owner->GetCurrentGravity() * Owner->DeltaTime;
+	if (!StillHoldingJump)
+		gravityAcceleration *= Owner->JumpReleaseGravityScalar;
+	Owner->VSpeed -= gravityAcceleration;
 	if (Owner->DiveButtonPressedThisFrame)
 	{
 		StateMachine->ChangeState("Dive");
@@ -628,6 +640,7 @@ State_WallKick::State_WallKick(AMilkyWayPawn* owner)
 
 void State_WallKick::OnStateEnter()
 {
+	StillHoldingJump = true;
 	Owner->AirControlVelocity = FVector(0, 0, 0);
 	Owner->CurrentGroundForward = Owner->GetActorForwardVector();
 
@@ -644,7 +657,13 @@ void State_WallKick::OnStateEnter()
 
 void State_WallKick::StateTick()
 {
-	Owner->VSpeed -= Owner->GetCurrentGravity() * Owner->DeltaTime;
+
+	if (!Owner->CurrentJumpButton)
+		StillHoldingJump = false;
+	float gravityAcceleration = Owner->GetCurrentGravity() * Owner->DeltaTime;
+	if (!StillHoldingJump)
+		gravityAcceleration *= Owner->JumpReleaseGravityScalar;
+	Owner->VSpeed -= gravityAcceleration;
 	Owner->Move();
 	Owner->GroundCheck();
 	if (Owner->OnGround)
@@ -688,6 +707,7 @@ State_SideFlip::State_SideFlip(AMilkyWayPawn* owner)
 
 void State_SideFlip::OnStateEnter()
 {
+	StillHoldingJump = true;
 	Owner->AirControlVelocity = FVector(0, 0, 0);
 
 	Owner->HSpeed *= -1;
@@ -701,7 +721,12 @@ void State_SideFlip::StateTick()
 	
 	Owner->UpdateAirControl();
 
-	Owner->VSpeed -= Owner->GetCurrentGravity() * Owner->DeltaTime;
+	if (!Owner->CurrentJumpButton)
+		StillHoldingJump = false;
+	float gravityAcceleration = Owner->GetCurrentGravity() * Owner->DeltaTime;
+	if (!StillHoldingJump)
+		gravityAcceleration *= Owner->JumpReleaseGravityScalar;
+	Owner->VSpeed -= gravityAcceleration;
 	Owner->Move();
 	Owner->GroundCheck();
 	if (Owner->OnGround)
