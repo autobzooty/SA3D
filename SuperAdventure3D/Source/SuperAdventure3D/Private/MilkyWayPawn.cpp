@@ -142,19 +142,19 @@ void AMilkyWayPawn::OnJumpButtonPressed()
 	//	StateMachine->CurrentState == StateMachine->Walk ||
 	//	StateMachine->CurrentState == StateMachine->Stop)
 	//{
-	//	StateMachine->ChangeState("Jump");
+	//	StateMachine->RequestStateChange("Jump");
 	//	return;
 	//}
 	//else if (StateMachine->CurrentState == StateMachine->TurnKick)
 	//{
-	//	StateMachine->ChangeState("SideFlip");
+	//	StateMachine->RequestStateChange("SideFlip");
 	//	return;
 	//}
 	//else if (StateMachine->CurrentState == StateMachine->Dive)
 	//{
 	//	if (OnGround)
 	//	{
-	//		StateMachine->ChangeState("Rollout");
+	//		StateMachine->RequestStateChange("Rollout");
 	//		return;
 	//	}
 	//}
@@ -277,85 +277,123 @@ void AMilkyWayPawn::UpdateWallCollisionRayStartPoints()
 	WallCollisionRayStartPoints[8] = UKismetMathLibrary::TransformLocation(GetActorTransform(), FVector(0, smallPlayerRadius, PlayerHeight));
 }
 
-FVector AMilkyWayPawn::WallCollisionCheck(FVector attemptedMoveLocation)
+void AMilkyWayPawn::MoveWallCollisionRayStartPoints(FVector offset)
 {
-	FVector differenceVector = attemptedMoveLocation - GetActorLocation();
-	UpdateWallCollisionRayStartPoints();
-
-	FVector hitNormal;
-	FVector hitPoint;
-	float shortestCollisionDistance = differenceVector.Length() + 2 * PlayerRadius;
-	bool wallHit = false;
+	//TO-DO: Dynamically determine number of rays
 	for (int i = 0; i < 9; ++i)
 	{
-		FVector endPoint = WallCollisionRayStartPoints[i] + differenceVector;
-		if (i == 1 || i == 4 || i == 7)
-			endPoint += CurrentGroundForward * 2 * PlayerRadius;
+		WallCollisionRayStartPoints[i] += offset;
+	}
+}
 
-		if (DebugDrawWallCollisionChecks)
-			DrawDebugDirectionalArrow(GetWorld(), WallCollisionRayStartPoints[i], endPoint, 20, FColor::Red, false);
+FVector AMilkyWayPawn::WallCollisionCheck(FVector attemptedMoveLocation)
+{
+	UpdateWallCollisionRayStartPoints();
+	FVector destination = attemptedMoveLocation;
+	FVector startProxy = GetActorLocation();
+	int numberOfIterations = 20;
+	int iterationIndex = 0;
 
-		FHitResult hitResult;
-		
-		if (GetWorld()->LineTraceSingleByChannel(hitResult, WallCollisionRayStartPoints[i], endPoint, ECC_WorldStatic))
+	if (DebugDrawWallCollisionChecks)
+	{
+		FVector differenceVector = destination - startProxy;
+		for (int i = 0; i < 9; ++i)
 		{
-			if (QuerySurfaceType(hitResult.ImpactNormal) == Wall)
-			{
-				if (hitResult.Distance < shortestCollisionDistance)
-				{
-					wallHit = true;
-					shortestCollisionDistance = hitResult.Distance;
-					if (i == 1 || i == 4 || i == 7)
-						shortestCollisionDistance = shortestCollisionDistance / 2 / PlayerRadius;
+			FVector endPoint = WallCollisionRayStartPoints[i] + differenceVector;
+			if (i == 1 || i == 4 || i == 7)
+				endPoint += CurrentGroundForward * 2 * PlayerRadius;
 
-					hitNormal = hitResult.ImpactNormal;
-					hitPoint = hitResult.ImpactPoint;
+			DrawDebugDirectionalArrow(GetWorld(), WallCollisionRayStartPoints[i], endPoint, 20, FColor::Red, false);
+		}
+	}
+	
+
+
+	for (; iterationIndex < numberOfIterations; ++iterationIndex)
+	{
+		FVector differenceVector = destination - startProxy;
+		FVector hitNormal;
+		FVector hitPoint;
+		float shortestCollisionDistance = differenceVector.Length() + 2 * PlayerRadius;
+		bool wallHit = false;
+		for (int i = 0; i < 9; ++i)
+		{
+			FVector endPoint = WallCollisionRayStartPoints[i] + differenceVector;
+			if (i == 1 || i == 4 || i == 7)
+				endPoint += CurrentGroundForward * 2 * PlayerRadius;
+
+
+			FHitResult hitResult;
+
+			if (GetWorld()->LineTraceSingleByChannel(hitResult, WallCollisionRayStartPoints[i], endPoint, ECC_WorldStatic))
+			{
+				if (QuerySurfaceType(hitResult.ImpactNormal) == Wall)
+				{
+					if (hitResult.Distance < shortestCollisionDistance)
+					{
+						wallHit = true;
+						shortestCollisionDistance = hitResult.Distance;
+						if (i == 1 || i == 4 || i == 7)
+							shortestCollisionDistance = shortestCollisionDistance / 2 / PlayerRadius;
+
+						hitNormal = hitResult.ImpactNormal;
+						hitPoint = hitResult.ImpactPoint;
+					}
+				}
+				if (QuerySurfaceType(hitResult.ImpactNormal) == Ceiling)
+				{
+					HSpeed = 0;
+					return GetActorLocation();
 				}
 			}
-			if (QuerySurfaceType(hitResult.ImpactNormal) == Ceiling)
-			{
-				HSpeed = 0;
-				return GetActorLocation();
-			}
 		}
-	}
-	if (wallHit)
-	{
-		//eject from wall
-		//TO DO: do a min clamp so that a wall check ray can be no smaller than PlayerRadius
-		FVector entryVector = attemptedMoveLocation - hitPoint;
-		FVector flippedNormalizedEntryVector = -entryVector;
-		flippedNormalizedEntryVector.Normalize();
-		float cosine = hitNormal.Dot(flippedNormalizedEntryVector);
-		float ejectionDistance = cosine * entryVector.Length() + PlayerRadius;
-		FVector ejectionVector = ejectionDistance * hitNormal;
-		LastHitWallVector = hitNormal;
-		FVector newPosition = attemptedMoveLocation + ejectionVector;
+		if (wallHit)
+		{
+			//eject from wall
+			//TO DO: do a min clamp so that a wall check ray can be no smaller than PlayerRadius
+			FVector entryVector = destination - hitPoint;
+			FVector flippedNormalizedEntryVector = -entryVector;
+			flippedNormalizedEntryVector.Normalize();
+			float cosine = hitNormal.Dot(flippedNormalizedEntryVector);
+			float ejectionDistance = cosine * entryVector.Length() + PlayerRadius;
+			FVector ejectionVector = ejectionDistance * hitNormal;
+			LastHitWallVector = hitNormal;
+			startProxy = destination;
+			destination += ejectionVector;
+			//TO-DO: Air control velocity should be reduced by a vector, not a float
+			float airControlVelocityScalar = 1 + cosine;
+			AirControlVelocity *= airControlVelocityScalar;
 
-		if (StateMachine->CurrentState == StateMachine->Jump ||
-			StateMachine->CurrentState == StateMachine->Fall ||
-			StateMachine->CurrentState == StateMachine->Dive ||
-			StateMachine->CurrentState == StateMachine->WallKick ||
-			StateMachine->CurrentState == StateMachine->SideFlip)
-		{
-			if (HSpeed + AirControlVelocity.Length() > BonkSpeedThreshold && hitNormal.Dot(GetActorForwardVector()) < BonkDotThreshold)
+			if (StateMachine->CurrentState == StateMachine->Jump ||
+				StateMachine->CurrentState == StateMachine->Fall ||
+				StateMachine->CurrentState == StateMachine->Dive ||
+				StateMachine->CurrentState == StateMachine->WallKick ||
+				StateMachine->CurrentState == StateMachine->SideFlip)
 			{
-				StateMachine->ChangeState("Bonk");
+				//FString debugText = FString::Printf(TEXT("airControlVelocityScalar: %f"), airControlVelocityScalar);
+				//if (GEngine)
+				//	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, debugText);
+
+				if (HSpeed + AirControlVelocity.Length() > BonkSpeedThreshold && hitNormal.Dot(GetActorForwardVector()) < BonkDotThreshold)
+				{
+					StateMachine->BonkedThisFrame = true;
+				}
+			}
+			else if (StateMachine->CurrentState == StateMachine->Walk)
+			{
+				if (HSpeed > BaseMaxGroundSpeed * 1.1)
+				{
+					StateMachine->BonkedThisFrame = true;
+				}
 			}
 		}
-		else if (StateMachine->CurrentState == StateMachine->Walk)
+		else
 		{
-			if (HSpeed > BaseMaxGroundSpeed * 1.1)
-			{
-				StateMachine->ChangeState("Bonk");
-			}
+			break;
 		}
-		return newPosition;
 	}
-	else
-	{
-		return attemptedMoveLocation;
-	}	
+
+	return destination;
 }
 
 enum AMilkyWayPawn::SurfaceTypes AMilkyWayPawn::QuerySurfaceType(FVector surfaceNormal)

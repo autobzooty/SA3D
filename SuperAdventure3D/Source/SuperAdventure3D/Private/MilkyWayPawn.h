@@ -167,6 +167,7 @@ protected:
 	void Move();
 	FVector GetCameraRequestedMoveDirection();
 	void UpdateWallCollisionRayStartPoints();
+	void MoveWallCollisionRayStartPoints(FVector offset);
 	FVector WallCollisionCheck(FVector attemptedMoveLocation);
 	enum SurfaceTypes QuerySurfaceType(FVector surfaceNormal);
 	void GroundCheck();

@@ -37,6 +37,12 @@ public:
 	MilkyWayPawnState* WallKick;
 	MilkyWayPawnState* SideFlip;
 
+	bool BonkedThisFrame = false;
+	FName RequestedState = "";
+
+	UPROPERTY(EditAnywhere, Category = "Debug")
+	bool PrintStateChanges = false;
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -46,7 +52,8 @@ protected:
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	void ChangeState(FName newState);
+	void RequestStateChange(FName newState);
+	void ChangeState();
 };
 
 class State_Idle : public MilkyWayPawnState

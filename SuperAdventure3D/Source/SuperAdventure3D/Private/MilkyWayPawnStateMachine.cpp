@@ -61,41 +61,61 @@ void UMilkyWayPawnStateMachine::TickComponent(float DeltaTime, ELevelTick TickTy
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	CurrentState->StateTick();	
+	CurrentState->StateTick();
+	if (BonkedThisFrame)
+	{
+		RequestStateChange("Bonk");
+		BonkedThisFrame = false;
+	}
+	if (RequestedState != "")
+	{
+		ChangeState();
+	}
 }
 
-void UMilkyWayPawnStateMachine::ChangeState(FName newStateName)
+void UMilkyWayPawnStateMachine::RequestStateChange(FName newStateName)
 {
-	//TO-DO: Add debug flag that shows info when states change
-	if (newStateName == CurrentState->StateName)
+	RequestedState = newStateName;
+}
+
+void UMilkyWayPawnStateMachine::ChangeState()
+{
+	if (PrintStateChanges)
+	{
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, RequestedState.ToString());
+	}
+
+	if (RequestedState == CurrentState->StateName)
 		return;
 
 	MilkyWayPawnState* newState = Idle;
-	
-	if (newStateName == "Walk")
+
+	if (RequestedState == "Walk")
 		newState = Walk;
-	else if (newStateName == "Stop")
+	else if (RequestedState == "Stop")
 		newState = Stop;
-	else if (newStateName == "Jump")
+	else if (RequestedState == "Jump")
 		newState = Jump;
-	else if (newStateName == "Fall")
+	else if (RequestedState == "Fall")
 		newState = Fall;
-	else if (newStateName == "TurnKick")
+	else if (RequestedState == "TurnKick")
 		newState = TurnKick;
-	else if (newStateName == "Dive")
+	else if (RequestedState == "Dive")
 		newState = Dive;
-	else if (newStateName == "Rollout")
+	else if (RequestedState == "Rollout")
 		newState = Rollout;
-	else if (newStateName == "Bonk")
+	else if (RequestedState == "Bonk")
 		newState = Bonk;
-	else if (newStateName == "WallKick")
+	else if (RequestedState == "WallKick")
 		newState = WallKick;
-	else if (newStateName == "SideFlip")
+	else if (RequestedState == "SideFlip")
 		newState = SideFlip;
 
 	CurrentState->OnStateExit();
 	newState->OnStateEnter();
 	CurrentState = newState;
+	RequestedState = "";
 }
 
 #pragma region Idle
@@ -115,12 +135,12 @@ void State_Idle::StateTick()
 	Owner->GroundCheck();
 	if (!Owner->OnGround)
 	{
-		StateMachine->ChangeState("Fall");
+		StateMachine->RequestStateChange("Fall");
 		return;
 	}
 	if (Owner->JumpButtonPressedThisFrame)
 	{
-		StateMachine->ChangeState("Jump");
+		StateMachine->RequestStateChange("Jump");
 		return;
 	}
 	if (Owner->CurrentLeftStick.Length() > 0)
@@ -128,7 +148,7 @@ void State_Idle::StateTick()
 		//Snap rotation to camera's requested move direction
 		FRotator rotation = UKismetMathLibrary::FindLookAtRotation(Owner->GetActorLocation(), Owner->GetActorLocation() + Owner->GetCameraRequestedMoveDirection());
 		Owner->SetActorRotation(rotation);
-		StateMachine->ChangeState("Walk");
+		StateMachine->RequestStateChange("Walk");
 		return;
 	}
 }
@@ -156,22 +176,22 @@ void State_Walk::StateTick()
 {
 	if (Owner->JumpButtonPressedThisFrame)
 	{
-		StateMachine->ChangeState("Jump");
+		StateMachine->RequestStateChange("Jump");
 		return;
 	}
 	if (Owner->DiveButtonPressedThisFrame)
 	{
-		StateMachine->ChangeState("Dive");
+		StateMachine->RequestStateChange("Dive");
 		return;
 	}
 	if (Owner->CurrentLeftStick.Length() == 0)
 	{
-		StateMachine->ChangeState("Stop");
+		StateMachine->RequestStateChange("Stop");
 		return;
 	}
 	if (Owner->GetCameraRequestedMoveDirection().Dot(Owner->GetActorForwardVector()) < Owner->TurnKickDotThreshold)
 	{
-		StateMachine->ChangeState("TurnKick");
+		StateMachine->RequestStateChange("TurnKick");
 		return;
 	}
 
@@ -201,7 +221,7 @@ void State_Walk::StateTick()
 	Owner->GroundCheck();
 	if (!Owner->OnGround)
 	{
-		StateMachine->ChangeState("Fall");
+		StateMachine->RequestStateChange("Fall");
 		return;
 	}
 
@@ -232,22 +252,22 @@ void State_Stop::StateTick()
 	Owner->GroundCheck();
 	if (!Owner->OnGround)
 	{
-		StateMachine->ChangeState("Fall");
+		StateMachine->RequestStateChange("Fall");
 		return;
 	}
 	else if (Owner->CurrentLeftStick.Length() > 0)
 	{
-		StateMachine->ChangeState("Walk");
+		StateMachine->RequestStateChange("Walk");
 		return;
 	}
 	else if (Owner->HSpeed == 0)
 	{
-		StateMachine->ChangeState("Idle");
+		StateMachine->RequestStateChange("Idle");
 		return;
 	}
 	else if (Owner->JumpButtonPressedThisFrame)
 	{
-		StateMachine->ChangeState("Jump");
+		StateMachine->RequestStateChange("Jump");
 		return;
 	}
 	
@@ -313,18 +333,14 @@ void State_Jump::StateTick()
 			JumpThrustWindowActive = false;
 		}
 	}
-
-	Owner->UpdateAirControl();
 	
-	FVector attemptedMoveLocation = Owner->GetActorLocation() + Owner->AirControlVelocity * Owner->DeltaTime;
-
 	if (Owner->DiveButtonPressedThisFrame)
 	{
-		StateMachine->ChangeState("Dive");
+		StateMachine->RequestStateChange("Dive");
 		return;
 	}
 
-	
+	Owner->UpdateAirControl();
 	Owner->Move();
 
 	if (Owner->VSpeed <= 0)
@@ -335,7 +351,7 @@ void State_Jump::StateTick()
 			if (Owner->CurrentLeftStick.Length() == 0)
 			{
 				Owner->HSpeed = 0;
-				StateMachine->ChangeState("Idle");
+				StateMachine->RequestStateChange("Idle");
 			}
 			else
 			{
@@ -343,7 +359,7 @@ void State_Jump::StateTick()
 				FVector localAirControlVelocity = UKismetMathLibrary::InverseTransformDirection(Owner->GetActorTransform(), Owner->AirControlVelocity);
 				Owner->HSpeed += localAirControlVelocity.X;
 
-				StateMachine->ChangeState("Walk");
+				StateMachine->RequestStateChange("Walk");
 			}
 			return;
 		}
@@ -380,7 +396,7 @@ void State_Fall::StateTick()
 	Owner->VSpeed -= gravityAcceleration;
 	if (Owner->DiveButtonPressedThisFrame)
 	{
-		StateMachine->ChangeState("Dive");
+		StateMachine->RequestStateChange("Dive");
 		return;
 	}
 
@@ -392,7 +408,7 @@ void State_Fall::StateTick()
 		if (Owner->CurrentLeftStick.Length() == 0)
 		{
 			Owner->HSpeed = 0;
-			StateMachine->ChangeState("Idle");
+			StateMachine->RequestStateChange("Idle");
 		}
 		else
 		{
@@ -400,7 +416,7 @@ void State_Fall::StateTick()
 			FVector localAirControlVelocity = UKismetMathLibrary::InverseTransformDirection(Owner->GetActorTransform(), Owner->AirControlVelocity);
 			Owner->HSpeed += localAirControlVelocity.X;
 
-			StateMachine->ChangeState("Walk");
+			StateMachine->RequestStateChange("Walk");
 		}
 		return;
 	}
@@ -428,12 +444,12 @@ void State_TurnKick::StateTick()
 {
 	if (Owner->HSpeed >= 0)
 	{
-		StateMachine->ChangeState("Walk");
+		StateMachine->RequestStateChange("Walk");
 		return;
 	}
 	if (Owner->JumpButtonPressedThisFrame)
 	{
-		StateMachine->ChangeState("SideFlip");
+		StateMachine->RequestStateChange("SideFlip");
 		return;
 	}
 	Owner->HSpeed += Owner->GroundDeceleration * Owner->DeltaTime;
@@ -441,7 +457,7 @@ void State_TurnKick::StateTick()
 	Owner->GroundCheck();
 	if (!Owner->OnGround)
 	{
-		StateMachine->ChangeState("Fall");
+		StateMachine->RequestStateChange("Fall");
 		return;
 	}
 
@@ -482,7 +498,7 @@ void State_Dive::StateTick()
 	{
 		if (Owner->DiveButtonPressedThisFrame || Owner->JumpButtonPressedThisFrame)
 		{
-			StateMachine->ChangeState("Rollout");
+			StateMachine->RequestStateChange("Rollout");
 			return;
 		}
 		float deltaDeceleration = Owner->GroundDeceleration * Owner->DeltaTime;
@@ -506,7 +522,7 @@ void State_Dive::StateTick()
 	}
 	if (Owner->OnGround && Owner->HSpeed <= 0)
 	{
-		StateMachine->ChangeState("Idle");
+		StateMachine->RequestStateChange("Idle");
 		return;
 	}
 }
@@ -543,9 +559,9 @@ void State_Rollout::StateTick()
 		if (Owner->OnGround)
 		{
 			if (Owner->GetCameraRequestedMoveDirection().Length() > 0)
-				StateMachine->ChangeState("Walk");
+				StateMachine->RequestStateChange("Walk");
 			else
-				StateMachine->ChangeState("Idle");
+				StateMachine->RequestStateChange("Idle");
 			return;
 		}
 	}
@@ -589,7 +605,7 @@ void State_Bonk::StateTick()
 	}
 	if (BonkStopwatch >= BonkTime)
 	{
-		StateMachine->ChangeState("Idle");
+		StateMachine->RequestStateChange("Idle");
 		return;
 	}
 
@@ -609,7 +625,7 @@ void State_Bonk::StateTick()
 		{
 			if (Owner->JumpButtonPressedThisFrame)
 			{
-				StateMachine->ChangeState("WallKick");
+				StateMachine->RequestStateChange("WallKick");
 				return;
 			}
 		}
@@ -671,7 +687,7 @@ void State_WallKick::StateTick()
 		if (Owner->CurrentLeftStick.Length() == 0)
 		{
 			Owner->HSpeed = 0;
-			StateMachine->ChangeState("Idle");
+			StateMachine->RequestStateChange("Idle");
 		}
 		else
 		{
@@ -679,13 +695,13 @@ void State_WallKick::StateTick()
 			FVector localAirControlVelocity = UKismetMathLibrary::InverseTransformDirection(Owner->GetActorTransform(), Owner->AirControlVelocity);
 			Owner->HSpeed += localAirControlVelocity.X;
 
-			StateMachine->ChangeState("Walk");
+			StateMachine->RequestStateChange("Walk");
 		}
 		return;
 	}
 	if (Owner->DiveButtonPressedThisFrame)
 	{
-		StateMachine->ChangeState("Dive");
+		StateMachine->RequestStateChange("Dive");
 		return;
 	}
 	
@@ -734,7 +750,7 @@ void State_SideFlip::StateTick()
 		if (Owner->CurrentLeftStick.Length() == 0)
 		{
 			Owner->HSpeed = 0;
-			StateMachine->ChangeState("Idle");
+			StateMachine->RequestStateChange("Idle");
 		}
 		else
 		{
@@ -742,13 +758,13 @@ void State_SideFlip::StateTick()
 			FVector localAirControlVelocity = UKismetMathLibrary::InverseTransformDirection(Owner->GetActorTransform(), Owner->AirControlVelocity);
 			Owner->HSpeed += localAirControlVelocity.X;
 
-			StateMachine->ChangeState("Walk");
+			StateMachine->RequestStateChange("Walk");
 		}
 		return;
 	}
 	if (Owner->DiveButtonPressedThisFrame)
 	{
-		StateMachine->ChangeState("Dive");
+		StateMachine->RequestStateChange("Dive");
 		return;
 	}
 
