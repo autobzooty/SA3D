@@ -126,7 +126,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Debug")
 	bool DebugDrawGroundCollisionCheck = false;
 
-	FVector LastHitWallVector;
+	
 
 private:
 	float DeltaTime;
@@ -142,6 +142,7 @@ private:
 	float VSpeed;
 	FVector AirControlVelocity;
 	FVector WallCollisionRayStartPoints[9];
+	FVector LastHitWallVector;
 	FVector PreviousFrameLocation;
 	bool PreviousFrameJumpButton = false;
 	bool PreviousFrameDiveButton = false;
@@ -176,6 +177,7 @@ protected:
 	float GetCurrentGravity();
 	float GetCurrentTurnSpeed();
 	float GetCurrentJumpThrust();
+	void RotateTowardCameraRequestedMoveDirection();
 	void PreInitializeComponents() override;
 
 	friend class State_Idle;
@@ -189,5 +191,6 @@ protected:
 	friend class State_Bonk;
 	friend class State_WallKick;
 	friend class State_SideFlip;
+	friend class State_Push;
 };
 

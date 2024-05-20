@@ -39,6 +39,7 @@ void UMilkyWayPawnStateMachine::Setup(AMilkyWayPawn* owner)
 	Bonk = new State_Bonk(Owner);
 	WallKick = new State_WallKick(Owner);
 	SideFlip = new State_SideFlip(Owner);
+	Push = new State_Push(Owner);
 }
 
 
@@ -111,6 +112,8 @@ void UMilkyWayPawnStateMachine::ChangeState()
 		newState = WallKick;
 	else if (RequestedState == "SideFlip")
 		newState = SideFlip;
+	else if (RequestedState == "Push")
+		newState = Push;
 
 	CurrentState->OnStateExit();
 	newState->OnStateEnter();
@@ -209,13 +212,7 @@ void State_Walk::StateTick()
 		}
 	}
 
-	//Rotate toward camera's requested direction
-	float turnScalar = Owner->GetCameraRequestedMoveDirection().Dot(Owner->GetActorRightVector());
-	float turnAmount = Owner->GetCurrentTurnSpeed() * turnScalar * Owner->DeltaTime;
-
-	FRotator rotator = FRotator(0, turnAmount, 0);
-	Owner->AddActorLocalRotation(rotator);
-
+	Owner->RotateTowardCameraRequestedMoveDirection();
 	Owner->Move();
 
 	Owner->GroundCheck();
@@ -773,5 +770,40 @@ void State_SideFlip::StateTick()
 void State_SideFlip::OnStateExit()
 {
 	Owner->AirControlVelocity = FVector(0, 0, 0);
+}
+#pragma endregion
+
+#pragma region Push
+State_Push::State_Push(AMilkyWayPawn* owner)
+	:MilkyWayPawnState(owner)
+{
+
+}
+
+void State_Push::OnStateEnter()
+{
+	Owner->HSpeed = 0;
+	Owner->GraphicalsTransform->AddLocalRotation(FRotator(-10, 0, 0));
+}
+
+void State_Push::StateTick()
+{
+	Owner->RotateTowardCameraRequestedMoveDirection();
+
+	if (Owner->JumpButtonPressedThisFrame)
+	{
+		StateMachine->RequestStateChange("Jump");
+		return;
+	}
+	if (Owner->GetCameraRequestedMoveDirection().Dot(Owner->LastHitWallVector) > Owner->BonkDotThreshold)
+	{
+		StateMachine->RequestStateChange("Walk");
+		return;
+	}
+}
+
+void State_Push::OnStateExit()
+{
+	Owner->GraphicalsTransform->AddLocalRotation(FRotator(10, 0, 0));
 }
 #pragma endregion

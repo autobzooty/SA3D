@@ -350,7 +350,6 @@ FVector AMilkyWayPawn::WallCollisionCheck(FVector attemptedMoveLocation)
 		if (wallHit)
 		{
 			//eject from wall
-			//TO DO: do a min clamp so that a wall check ray can be no smaller than PlayerRadius
 			FVector entryVector = destination - hitPoint;
 			FVector flippedNormalizedEntryVector = -entryVector;
 			flippedNormalizedEntryVector.Normalize();
@@ -384,6 +383,11 @@ FVector AMilkyWayPawn::WallCollisionCheck(FVector attemptedMoveLocation)
 				if (HSpeed > BaseMaxGroundSpeed * 1.1)
 				{
 					StateMachine->BonkedThisFrame = true;
+				}
+				else
+				{
+					if(hitNormal.Dot(GetActorForwardVector()) < BonkDotThreshold)
+						StateMachine->RequestStateChange("Push");
 				}
 			}
 		}
@@ -486,4 +490,14 @@ float AMilkyWayPawn::GetCurrentJumpThrust()
 	float jumpThrust = (HSpeed / BaseGroundAcceleration) * JumpThrust;
 	jumpThrust = FMath::Clamp(jumpThrust, JumpThrust * MinJumpThrustScalar, JumpThrust * MaxJumpThrustScalar);
 	return jumpThrust;
+}
+
+void AMilkyWayPawn::RotateTowardCameraRequestedMoveDirection()
+{
+	//Rotate toward camera's requested direction
+	float turnScalar = GetCameraRequestedMoveDirection().Dot(GetActorRightVector());
+	float turnAmount = GetCurrentTurnSpeed() * turnScalar * DeltaTime;
+
+	FRotator rotator = FRotator(0, turnAmount, 0);
+	AddActorLocalRotation(rotator);
 }

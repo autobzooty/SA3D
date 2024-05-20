@@ -36,12 +36,13 @@ public:
 	MilkyWayPawnState* Bonk;
 	MilkyWayPawnState* WallKick;
 	MilkyWayPawnState* SideFlip;
+	MilkyWayPawnState* Push;
 
 	bool BonkedThisFrame = false;
 	FName RequestedState = "";
 
 	UPROPERTY(EditAnywhere, Category = "Debug")
-	bool PrintStateChanges = false;
+	bool PrintStateChanges = true;
 
 protected:
 	// Called when the game starts
@@ -191,5 +192,16 @@ public:
 	virtual void OnStateExit() override;
 
 	bool StillHoldingJump = true;
+
+};
+
+class State_Push : public MilkyWayPawnState
+{
+public:
+	State_Push(AMilkyWayPawn* owner);
+
+	virtual void OnStateEnter() override;
+	virtual void StateTick() override;
+	virtual void OnStateExit() override;
 
 };
