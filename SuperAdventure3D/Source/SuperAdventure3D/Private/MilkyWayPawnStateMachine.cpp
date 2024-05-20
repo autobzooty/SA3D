@@ -212,7 +212,7 @@ void State_Walk::StateTick()
 		}
 	}
 
-	Owner->RotateTowardCameraRequestedMoveDirection();
+	Owner->RotateTowardCameraRequestedMoveDirection(Owner->GetCurrentTurnSpeed());
 	Owner->Move();
 
 	Owner->GroundCheck();
@@ -477,16 +477,12 @@ void State_Dive::OnStateEnter()
 	Owner->GraphicalsTransform->AddLocalRotation(FRotator(-50, 0, 0));
 	if (Owner->OnGround)
 	{
-		Owner->HSpeed += Owner->DiveHImpulse * 2;
 		Owner->VSpeed += Owner->DiveVImpulse;
 		Owner->CurrentGroundForward = Owner->GetActorForwardVector();
 		Owner->OnGround = false;
 		Owner->CurrentGroundForward = Owner->GetActorForwardVector();
 	}
-	else
-	{
-		Owner->HSpeed += Owner->DiveHImpulse;
-	}
+	Owner->HSpeed += Owner->DiveHImpulse;
 }
 void State_Dive::StateTick()
 {
@@ -498,7 +494,7 @@ void State_Dive::StateTick()
 			StateMachine->RequestStateChange("Rollout");
 			return;
 		}
-		float deltaDeceleration = Owner->GroundDeceleration * Owner->DeltaTime;
+		float deltaDeceleration = Owner->GroundDiveDeceleration * Owner->DeltaTime;
 		if (abs(Owner->HSpeed) <= deltaDeceleration)
 			Owner->HSpeed = 0;
 		else if (Owner->HSpeed > 0)
@@ -506,7 +502,7 @@ void State_Dive::StateTick()
 		else
 			Owner->HSpeed += deltaDeceleration;
 		Owner->GroundCheck();
-
+		Owner->RotateTowardCameraRequestedMoveDirection(Owner->GetCurrentTurnSpeed() * Owner->DiveTurnSpeedScalar);
 	}
 	else
 	{
@@ -789,7 +785,7 @@ void State_Push::OnStateEnter()
 
 void State_Push::StateTick()
 {
-	Owner->RotateTowardCameraRequestedMoveDirection();
+	Owner->RotateTowardCameraRequestedMoveDirection(Owner->GetCurrentTurnSpeed());
 
 	if (Owner->JumpButtonPressedThisFrame)
 	{

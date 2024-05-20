@@ -492,11 +492,11 @@ float AMilkyWayPawn::GetCurrentJumpThrust()
 	return jumpThrust;
 }
 
-void AMilkyWayPawn::RotateTowardCameraRequestedMoveDirection()
+void AMilkyWayPawn::RotateTowardCameraRequestedMoveDirection(float turnSpeed)
 {
 	//Rotate toward camera's requested direction
 	float turnScalar = GetCameraRequestedMoveDirection().Dot(GetActorRightVector());
-	float turnAmount = GetCurrentTurnSpeed() * turnScalar * DeltaTime;
+	float turnAmount = turnSpeed * turnScalar * DeltaTime;
 
 	FRotator rotator = FRotator(0, turnAmount, 0);
 	AddActorLocalRotation(rotator);

@@ -47,10 +47,16 @@ public:
 	float GroundDeceleration = 2000;
 
 	UPROPERTY(EditAnywhere)
+	float GroundDiveDeceleration = 500;
+
+	UPROPERTY(EditAnywhere)
 	float GroundSpeedDecay = 1200;
 
 	UPROPERTY(EditAnywhere)
 	float TurnSpeed = 540;
+
+	UPROPERTY(EditAnywhere)
+	float DiveTurnSpeedScalar = 0.5;
 
 	UPROPERTY(EditAnywhere)
 	float BaseMaxGroundSpeed = 700;
@@ -177,7 +183,7 @@ protected:
 	float GetCurrentGravity();
 	float GetCurrentTurnSpeed();
 	float GetCurrentJumpThrust();
-	void RotateTowardCameraRequestedMoveDirection();
+	void RotateTowardCameraRequestedMoveDirection(float turnSpeed);
 	void PreInitializeComponents() override;
 
 	friend class State_Idle;
