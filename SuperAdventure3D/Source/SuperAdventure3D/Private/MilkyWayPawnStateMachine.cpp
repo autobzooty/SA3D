@@ -340,7 +340,7 @@ void State_Jump::StateTick()
 	Owner->UpdateAirControl();
 	Owner->Move();
 
-	if (Owner->VSpeed <= 0)
+	if (!JumpThrustWindowActive)
 	{
 		Owner->GroundCheck();
 		if (Owner->OnGround)
@@ -513,6 +513,7 @@ void State_Dive::StateTick()
 
 		Owner->VSpeed -= Owner->GetCurrentGravity() * Owner->DeltaTime;
 	}
+
 	if (Owner->VSpeed < 0)
 	{
 		Owner->GroundCheck();
