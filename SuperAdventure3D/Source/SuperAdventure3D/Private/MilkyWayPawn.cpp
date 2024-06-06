@@ -308,7 +308,7 @@ FVector AMilkyWayPawn::WallCollisionCheck(FVector attemptedMoveLocation)
 	}
 	
 
-
+	bool headCollision = false;
 	for (; iterationIndex < numberOfIterations; ++iterationIndex)
 	{
 		FVector differenceVector = destination - startProxy;
@@ -327,8 +327,12 @@ FVector AMilkyWayPawn::WallCollisionCheck(FVector attemptedMoveLocation)
 
 			if (GetWorld()->LineTraceSingleByChannel(hitResult, WallCollisionRayStartPoints[i], endPoint, ECC_WorldStatic))
 			{
+
 				if (QuerySurfaceType(hitResult.ImpactNormal) == Wall)
 				{
+					if (i == 6 || i == 7 || i == 8)
+						headCollision = true;
+
 					if (hitResult.Distance < shortestCollisionDistance)
 					{
 						wallHit = true;
@@ -375,14 +379,16 @@ FVector AMilkyWayPawn::WallCollisionCheck(FVector attemptedMoveLocation)
 
 				if (HSpeed + AirControlVelocity.Length() > BonkSpeedThreshold && hitNormal.Dot(GetActorForwardVector()) < BonkDotThreshold)
 				{
-					StateMachine->BonkedThisFrame = true;
+					if(headCollision)
+						StateMachine->BonkedThisFrame = true;
 				}
 			}
 			else if (StateMachine->CurrentState == StateMachine->Walk)
 			{
 				if (HSpeed > BaseMaxGroundSpeed * 1.1)
 				{
-					StateMachine->BonkedThisFrame = true;
+					if(headCollision)
+						StateMachine->BonkedThisFrame = true;
 				}
 				else
 				{
