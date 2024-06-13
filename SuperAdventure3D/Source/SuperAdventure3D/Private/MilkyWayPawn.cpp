@@ -28,6 +28,9 @@ AMilkyWayPawn::AMilkyWayPawn()
 	GraphicalsTransform->SetupAttachment(Root);
 
 	//Attach the Spring Arm to the root
+	//FRotator newRotation = FRotator(0, -20, 0);
+	//SpringArm->SetRelativeRotation(newRotation);
+
 	//SpringArm->AttachToComponent(Root, FAttachmentTransformRules::KeepRelativeTransform);
 	SpringArm->SetupAttachment(Root);
 
@@ -41,7 +44,9 @@ AMilkyWayPawn::AMilkyWayPawn()
 	SpringArm->bInheritYaw = false;
 	SpringArm->bInheritRoll = false;
 	SpringArm->bEnableCameraLag = true;
-	SpringArm->TargetArmLength = 1000.0f;	
+	SpringArm->TargetArmLength = 1000.0f;
+	FRotator newRotation = FRotator(0, -20, 0);
+	SpringArm->SetRelativeRotation(newRotation);
 }
 
 void AMilkyWayPawn::PreInitializeComponents()
@@ -53,7 +58,11 @@ void AMilkyWayPawn::PreInitializeComponents()
 void AMilkyWayPawn::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	FRotator newRotation = FRotator(-20, GetActorRotation().Yaw, 0);
+	SpringArm->SetRelativeRotation(newRotation);
+	//FString debugText = FString::Printf(TEXT("actor yaw: %f"), GetActorRotation().Yaw);
+	//if (GEngine)
+	//	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, debugText);
 }
 
 // Called every frame
