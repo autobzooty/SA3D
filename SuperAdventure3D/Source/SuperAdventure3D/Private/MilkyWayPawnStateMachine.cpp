@@ -28,6 +28,7 @@ void UMilkyWayPawnStateMachine::Setup(AMilkyWayPawn* owner)
 {
 	Owner = owner;
 
+	Load = new State_Load(Owner);
 	Idle = new State_Idle(Owner);
 	Walk = new State_Walk(Owner);
 	Stop = new State_Stop(Owner);
@@ -47,7 +48,7 @@ void UMilkyWayPawnStateMachine::Setup(AMilkyWayPawn* owner)
 void UMilkyWayPawnStateMachine::BeginPlay()
 {
 	Super::BeginPlay();
-	CurrentState = Idle;
+	CurrentState = Load;
 	CurrentState->OnStateEnter();
 }
 
@@ -90,9 +91,13 @@ void UMilkyWayPawnStateMachine::ChangeState()
 	if (RequestedState == CurrentState->StateName)
 		return;
 
-	MilkyWayPawnState* newState = Idle;
+	MilkyWayPawnState* newState = Load;
 
-	if (RequestedState == "Walk")
+	if (RequestedState == "Load")
+		newState = Load;
+	else if (RequestedState == "Idle")
+		newState = Idle;
+	else if (RequestedState == "Walk")
 		newState = Walk;
 	else if (RequestedState == "Stop")
 		newState = Stop;
@@ -120,6 +125,33 @@ void UMilkyWayPawnStateMachine::ChangeState()
 	CurrentState = newState;
 	RequestedState = "";
 }
+
+#pragma region Load
+State_Load::State_Load(AMilkyWayPawn* owner)
+	:MilkyWayPawnState(owner)
+{
+
+}
+
+void State_Load::OnStateEnter()
+{
+
+}
+
+void State_Load::StateTick()
+{
+	LoadStopwatch += Owner->DeltaTime;
+	if (LoadStopwatch >= Owner->LoadTime)
+	{
+		StateMachine->RequestStateChange("Idle");
+	}
+}
+
+void State_Load::OnStateExit()
+{
+
+}
+#pragma endregion
 
 #pragma region Idle
 State_Idle::State_Idle(AMilkyWayPawn* owner)

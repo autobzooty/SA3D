@@ -25,6 +25,7 @@ public:
 	MilkyWayPawnState* CurrentState;
 	AMilkyWayPawn* Owner;
 
+	MilkyWayPawnState* Load;
 	MilkyWayPawnState* Idle;
 	MilkyWayPawnState* Walk;
 	MilkyWayPawnState* Stop;
@@ -42,7 +43,7 @@ public:
 	FName RequestedState = "";
 
 	UPROPERTY(EditAnywhere, Category = "Debug")
-	bool PrintStateChanges = true;
+	bool PrintStateChanges = false;
 
 protected:
 	// Called when the game starts
@@ -55,6 +56,19 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void RequestStateChange(FName newState);
 	void ChangeState();
+};
+
+class State_Load : public MilkyWayPawnState
+{
+public:
+	State_Load(AMilkyWayPawn* owner);
+
+	virtual void OnStateEnter() override;
+	virtual void StateTick() override;
+	virtual void OnStateExit() override;
+
+	float LoadStopwatch = 0;
+
 };
 
 class State_Idle : public MilkyWayPawnState

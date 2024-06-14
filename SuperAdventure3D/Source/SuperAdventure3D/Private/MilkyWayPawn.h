@@ -41,6 +41,9 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UPROPERTY(EditAnywhere)
+	float LoadTime = 2;
+
+	UPROPERTY(EditAnywhere)
 	float BaseGroundAcceleration = 900;
 
 	UPROPERTY(EditAnywhere)
@@ -186,6 +189,7 @@ protected:
 	void RotateTowardCameraRequestedMoveDirection(float turnSpeed);
 	void PreInitializeComponents() override;
 
+	friend class State_Load;
 	friend class State_Idle;
 	friend class State_Walk;
 	friend class State_Stop;
