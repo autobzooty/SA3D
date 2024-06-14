@@ -96,7 +96,7 @@ public:
 private:
 	float MinFootTime = 0.05;
 	float MaxFootTime = 0.3;
-	float StepRotation = 5;
+	float StepRotation = 3;
 	float MaxSpeedTilt = 30;
 	float TurnRoll = 45;
 };
