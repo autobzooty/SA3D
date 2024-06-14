@@ -89,6 +89,16 @@ public:
 	virtual void StateTick() override;
 	virtual void OnStateExit() override;
 
+	//Used to create a left/right alternating footstep effect on GraphicalsTransform
+	bool CurrentFoot = 0;
+	float FootStopwatch = 0;
+
+private:
+	float MinFootTime = 0.05;
+	float MaxFootTime = 0.3;
+	float StepRotation = 5;
+	float MaxSpeedTilt = 30;
+	float TurnRoll = 45;
 };
 
 class State_Stop : public MilkyWayPawnState

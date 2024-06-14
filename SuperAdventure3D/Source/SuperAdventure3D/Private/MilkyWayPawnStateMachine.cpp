@@ -212,7 +212,7 @@ State_Walk::State_Walk(AMilkyWayPawn* owner)
 
 void State_Walk::OnStateEnter()
 {
-
+	FootStopwatch = 0;
 }
 
 void State_Walk::StateTick()
@@ -251,6 +251,33 @@ void State_Walk::StateTick()
 			Owner->HSpeed -= Owner->GroundSpeedDecay * Owner->DeltaTime;
 		}
 	}
+#pragma region Graphicals Effects
+	//Graphicals effects
+	FootStopwatch += Owner->DeltaTime;
+	float currentFootTime = FMath::Lerp(MaxFootTime, MinFootTime, Owner->HSpeed / (Owner->BaseMaxGroundSpeed * 2));
+	currentFootTime = FMath::Clamp(currentFootTime, MinFootTime, MaxFootTime);
+
+	if (FootStopwatch >= currentFootTime)
+	{
+		CurrentFoot = !CurrentFoot;
+		FootStopwatch = 0;
+	}
+
+	
+	float turnRollAlpha = Owner->GetCameraRequestedMoveDirection().Dot(Owner->GetActorRightVector());
+	float currentTurnRoll = FMath::Lerp(0, TurnRoll, turnRollAlpha);
+	FRotator turnRotation = FRotator(0, 0, currentTurnRoll);
+	FRotator stepRotation;
+	if(CurrentFoot == 0)
+		stepRotation = FRotator(0, 0, StepRotation);
+	else if(CurrentFoot == 1)
+		stepRotation = FRotator(0, 0, -StepRotation);
+	float pitchAlpha = (Owner->HSpeed - (Owner->BaseMaxGroundSpeed * 0.9)) / ((Owner->BaseMaxGroundSpeed * 2.0) - (Owner->BaseMaxGroundSpeed * 0.9));
+	float currentPitch = FMath::Lerp(0, MaxSpeedTilt, pitchAlpha);
+	FRotator speedRotation = FRotator(currentPitch, 0, 0);
+
+	Owner->GraphicalsTransform->SetRelativeRotation(turnRotation + stepRotation + speedRotation);
+#pragma endregion
 
 	Owner->RotateTowardCameraRequestedMoveDirection(Owner->GetCurrentTurnSpeed());
 	Owner->Move();
@@ -266,7 +293,7 @@ void State_Walk::StateTick()
 
 void State_Walk::OnStateExit()
 {
-
+	Owner->GraphicalsTransform->SetRelativeRotation(FRotator(0, 0, 0));
 }
 #pragma endregion
 
