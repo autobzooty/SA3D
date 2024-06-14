@@ -41,6 +41,7 @@ void UMilkyWayPawnStateMachine::Setup(AMilkyWayPawn* owner)
 	WallKick = new State_WallKick(Owner);
 	SideFlip = new State_SideFlip(Owner);
 	Push = new State_Push(Owner);
+	StarDance = new State_StarDance(Owner);
 }
 
 
@@ -77,12 +78,17 @@ void UMilkyWayPawnStateMachine::TickComponent(float DeltaTime, ELevelTick TickTy
 
 void UMilkyWayPawnStateMachine::RequestStateChange(FName newStateName)
 {
+	if (RequestedState != "")
+	{
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, "WARNING: Multiple state changes requested this frame!");
+	}
 	RequestedState = newStateName;
 }
 
 void UMilkyWayPawnStateMachine::ChangeState()
 {
-	if (PrintStateChanges)
+	if (Owner->PrintStateChanges)
 	{
 		if (GEngine)
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, RequestedState.ToString());
@@ -119,6 +125,8 @@ void UMilkyWayPawnStateMachine::ChangeState()
 		newState = SideFlip;
 	else if (RequestedState == "Push")
 		newState = Push;
+	else if (RequestedState == "StarDance")
+		newState = StarDance;
 
 	CurrentState->OnStateExit();
 	newState->OnStateEnter();
@@ -834,5 +842,82 @@ void State_Push::StateTick()
 void State_Push::OnStateExit()
 {
 	Owner->GraphicalsTransform->AddLocalRotation(FRotator(10, 0, 0));
+}
+#pragma endregion
+
+#pragma region Star Dance
+State_StarDance::State_StarDance(AMilkyWayPawn* owner)
+	:MilkyWayPawnState(owner)
+
+{
+}
+
+void State_StarDance::OnStateEnter()
+{
+	StarDancePhase = 0;
+	StarDanceStopwatch = 0;
+	Owner->HSpeed = 0;
+	Owner->AirControlVelocity = FVector(0, 0, 0);
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, "Entering Phase 0");
+
+}
+
+void State_StarDance::StateTick()
+{
+	Owner->Move();
+	Owner->GroundCheck();
+	if (StarDancePhase == 0)
+	{
+		if (Owner->OnGround)
+		{
+			StarDancePhase = 1;
+			if (GEngine)
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, "Entering Phase 1");
+		}
+		else
+		{
+			Owner->VSpeed -= Owner->GetCurrentGravity() * Owner->DeltaTime;
+		}
+	}
+	else if (StarDancePhase == 1)
+	{
+		StarDanceStopwatch += Owner->DeltaTime;
+		//Backflip
+		float flipSpeed = 720 * Owner->DeltaTime;
+		FRotator deltaRotator = FRotator(flipSpeed, 0, 0);
+		Owner->GraphicalsTransform->AddLocalRotation(deltaRotator);
+		
+		if (StarDanceStopwatch >= 1.0f)
+		{
+			StarDancePhase = 2;
+			if (GEngine)
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, "Entering Phase 2");
+
+		}
+	}
+	else if (StarDancePhase == 2)
+	{
+		StarDanceStopwatch += Owner->DeltaTime;
+
+		//Speen
+		float spinSpeed = 1080 * Owner->DeltaTime;
+		FRotator deltaRotator = FRotator(0, spinSpeed, 0);
+		Owner->GraphicalsTransform->AddLocalRotation(deltaRotator);
+
+		//When speen completes, change to idle state
+		if (StarDanceStopwatch >= 2.0)
+		{
+			StateMachine->RequestStateChange("Idle");
+			if (GEngine)
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, "Entering Idle");
+
+		}
+	}
+}
+
+void State_StarDance::OnStateExit()
+{
+	Owner->GraphicalsTransform->SetRelativeRotation(FRotator(0, 0, 0));
 }
 #pragma endregion

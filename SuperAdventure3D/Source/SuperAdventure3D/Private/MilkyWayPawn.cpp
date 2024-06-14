@@ -105,6 +105,16 @@ void AMilkyWayPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 }
 
+void AMilkyWayPawn::RequestStateChange(FName newState)
+{
+	StateMachine->RequestStateChange(newState);
+}
+
+bool AMilkyWayPawn::GetOnGround()
+{
+	return OnGround;
+}
+
 void AMilkyWayPawn::OnLeftStickVertical(float axisValue)
 {
 	CurrentLeftStick.Y = axisValue;

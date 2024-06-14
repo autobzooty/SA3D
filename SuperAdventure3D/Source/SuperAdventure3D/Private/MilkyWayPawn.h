@@ -40,6 +40,11 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UFUNCTION(BlueprintCallable, Category = "Milky Way Pawn Functions")
+	void RequestStateChange(FName newState);
+	UFUNCTION(BlueprintCallable, Category = "Milky Way Pawn Functions")
+	bool GetOnGround();
+
 	UPROPERTY(EditAnywhere)
 	float LoadTime = 2;
 
@@ -134,6 +139,8 @@ public:
 	bool DebugDrawWallCollisionChecks = false;
 	UPROPERTY(EditAnywhere, Category = "Debug")
 	bool DebugDrawGroundCollisionCheck = false;
+	UPROPERTY(EditAnywhere, Category = "Debug")
+	bool PrintStateChanges = false;
 
 	
 
@@ -202,5 +209,6 @@ protected:
 	friend class State_WallKick;
 	friend class State_SideFlip;
 	friend class State_Push;
+	friend class State_StarDance;
 };
 

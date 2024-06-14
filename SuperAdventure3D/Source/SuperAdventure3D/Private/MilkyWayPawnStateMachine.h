@@ -38,12 +38,10 @@ public:
 	MilkyWayPawnState* WallKick;
 	MilkyWayPawnState* SideFlip;
 	MilkyWayPawnState* Push;
+	MilkyWayPawnState* StarDance;
 
 	bool BonkedThisFrame = false;
 	FName RequestedState = "";
-
-	UPROPERTY(EditAnywhere, Category = "Debug")
-	bool PrintStateChanges = false;
 
 protected:
 	// Called when the game starts
@@ -218,4 +216,17 @@ public:
 	virtual void StateTick() override;
 	virtual void OnStateExit() override;
 
+};
+
+class State_StarDance : public MilkyWayPawnState
+{
+public:
+	State_StarDance(AMilkyWayPawn* owner);
+
+	virtual void OnStateEnter() override;
+	virtual void StateTick() override;
+	virtual void OnStateExit() override;
+
+	int StarDancePhase = 0;
+	float StarDanceStopwatch = 0;
 };
