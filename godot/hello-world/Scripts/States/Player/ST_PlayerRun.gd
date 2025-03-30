@@ -9,7 +9,6 @@ func Enter():
 func Physics_Update(delta):
 	if !player.is_on_ground():
 		Transitioned.emit(self, "ST_PlayerDrop")
-		return
 	
 	var requested_move_direction = player.get_requested_move_direction()
 	if requested_move_direction != Vector3.ZERO:
@@ -36,7 +35,7 @@ func Physics_Update(delta):
 			player.ground_snap()
 			var drawPoints : PackedVector3Array
 			drawPoints.append(modifiedEndPosition)
-			DebugDraw3D.draw_points(drawPoints,DebugDraw3D.POINT_TYPE_SPHERE, 0.02, Color.CRIMSON, 10)
+			#DebugDraw3D.draw_points(drawPoints,DebugDraw3D.POINT_TYPE_SPHERE, 0.02, Color.CRIMSON, 10)
 		else:
 			#move and snap to gruond
 			player.global_position += moveVec * delta
