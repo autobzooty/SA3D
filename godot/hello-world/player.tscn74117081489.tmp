@@ -1,0 +1,76 @@
+[gd_scene load_steps=10 format=3 uid="uid://bd0yvoyuiud3f"]
+
+[ext_resource type="Script" uid="uid://b6nyafyih4qor" path="res://player.gd" id="1_4flbx"]
+[ext_resource type="Script" uid="uid://hpc82a8ris2b" path="res://player_camera.gd" id="2_onrkg"]
+[ext_resource type="Script" uid="uid://dvo4dcxotn1t4" path="res://Scripts/States/ST_PlayerIdle.gd" id="3_hqtel"]
+[ext_resource type="Script" uid="uid://dqi8etkgah4ax" path="res://State Machine.gd" id="3_i3pqv"]
+[ext_resource type="Script" uid="uid://vmv0g0e3r8c3" path="res://Scripts/States/ST_PlayerRun.gd" id="4_sweqy"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_sh265"]
+top_radius = 0.2
+bottom_radius = 0.1
+height = 0.5
+
+[sub_resource type="SphereMesh" id="SphereMesh_4flbx"]
+radius = 0.25
+height = 0.5
+
+[sub_resource type="BoxMesh" id="BoxMesh_onrkg"]
+size = Vector3(0.4, 0.025, 0.4)
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_i3pqv"]
+height = 1.0
+radius = 0.25
+
+[node name="Root" type="Node"]
+
+[node name="PlayerCharacter" type="CharacterBody3D" parent="."]
+collision_layer = 2
+script = ExtResource("1_4flbx")
+base_ground_max_speed = null
+base_acceleration = null
+fall_acceleration = null
+turn_speed = null
+
+[node name="Pivot" type="Node3D" parent="PlayerCharacter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+
+[node name="Body" type="MeshInstance3D" parent="PlayerCharacter/Pivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
+mesh = SubResource("CylinderMesh_sh265")
+
+[node name="Head" type="MeshInstance3D" parent="PlayerCharacter/Pivot"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0.25, 0)
+mesh = SubResource("SphereMesh_4flbx")
+
+[node name="Hat" type="MeshInstance3D" parent="PlayerCharacter/Pivot/Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0147917, 0.0340629, 0)
+mesh = SubResource("SphereMesh_4flbx")
+
+[node name="Brim" type="MeshInstance3D" parent="PlayerCharacter/Pivot/Head/Hat"]
+transform = Transform3D(0.947624, -0.319389, 0, 0.319389, 0.947624, 0, 0, 0, 1, 0.148785, 0.0382196, 0)
+mesh = SubResource("BoxMesh_onrkg")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PlayerCharacter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+shape = SubResource("CylinderShape3D_i3pqv")
+
+[node name="State Machine" type="Node" parent="PlayerCharacter" node_paths=PackedStringArray("initial_state")]
+script = ExtResource("3_i3pqv")
+initial_state = NodePath("ST_PlayerIdle")
+
+[node name="ST_PlayerIdle" type="Node" parent="PlayerCharacter/State Machine"]
+script = ExtResource("3_hqtel")
+metadata/_custom_type_script = "uid://dvo4dcxotn1t4"
+
+[node name="ST_PlayerRun" type="Node" parent="PlayerCharacter/State Machine"]
+script = ExtResource("4_sweqy")
+metadata/_custom_type_script = "uid://vmv0g0e3r8c3"
+
+[node name="PlayerCamera" type="SpringArm3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.766044, 0.642788, 0, -0.642788, 0.766044, 0, 0.75, 0)
+collision_mask = 0
+spring_length = 6.0
+script = ExtResource("2_onrkg")
+
+[node name="Camera3D" type="Camera3D" parent="PlayerCamera"]
